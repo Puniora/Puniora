@@ -13,6 +13,7 @@ import { ProductSection, OlfactoryNote } from "@/lib/products";
 import AdminReviewManager from "./AdminReviewManager";
 import { Switch } from "@/components/ui/switch";
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from "@/components/ui/accordion";
+import { getDirectUrl } from "@/lib/utils/imageUtils";
 import {
     Select,
     SelectContent,
@@ -230,7 +231,7 @@ const GiftSetBuilder = ({ products, onRefresh }: GiftSetBuilderProps) => {
                                             className="mr-4"
                                         />
                                         <div className="h-10 w-10 rounded bg-muted overflow-hidden flex-shrink-0 mr-3">
-                                            <img src={product.images[0]} alt={product.name} className="w-full h-full object-cover" />
+                                            <img src={getDirectUrl(product.images[0])} alt={product.name} className="w-full h-full object-cover" />
                                         </div>
                                         <div className="flex-1">
                                             <p className="font-medium text-sm">{product.name}</p>
@@ -324,7 +325,7 @@ const GiftSetBuilder = ({ products, onRefresh }: GiftSetBuilderProps) => {
                                     {/* Image Preview */}
                                     {imageUrl && (
                                         <div className="relative aspect-video rounded-lg overflow-hidden border border-border bg-muted">
-                                            <img src={imageUrl} alt="Preview" className="w-full h-full object-cover" />
+                                            <img src={getDirectUrl(imageUrl)} alt="Preview" className="w-full h-full object-cover" />
                                             <div className="absolute inset-0 bg-black/40 flex items-center justify-center opacity-0 hover:opacity-100 transition-opacity">
                                                 <span className="text-white text-xs font-bold">Image Preview</span>
                                             </div>
@@ -386,7 +387,7 @@ const GiftSetBuilder = ({ products, onRefresh }: GiftSetBuilderProps) => {
                         <div key={gs.id} className="group bg-white border border-border rounded-xl p-4 shadow-sm hover:shadow-md transition-all flex gap-4 relative">
                             <div className="w-20 h-20 bg-muted rounded-lg overflow-hidden flex-shrink-0">
                                 {gs.images.length > 0 ? (
-                                    <img src={gs.images[0]} alt={gs.name} className="w-full h-full object-cover" />
+                                    <img src={getDirectUrl(gs.images[0])} alt={gs.name} className="w-full h-full object-cover" />
                                 ) : (
                                     <div className="w-full h-full flex items-center justify-center bg-gold/10">
                                         <Gift className="text-gold w-8 h-8" />

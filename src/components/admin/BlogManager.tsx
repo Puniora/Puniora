@@ -7,13 +7,14 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Loader2, Trash2, Plus, Image as ImageIcon, Video } from "lucide-react";
 import { blogService, Blog } from "@/lib/services/blogService";
 import { toast } from "sonner";
+import { getDirectUrl } from "@/lib/utils/imageUtils";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 
 const BlogManager = () => {
     const [blogs, setBlogs] = useState<Blog[]>([]);
     const [loading, setLoading] = useState(true);
     const [isCreating, setIsCreating] = useState(false);
-    
+
     // Form State
     const [newBlog, setNewBlog] = useState<{
         title: string;
@@ -46,15 +47,6 @@ const BlogManager = () => {
         }
     };
 
-    const getDirectUrl = (url: string) => {
-        if (!url) return url;
-        // Handle Dropbox links
-        if (url.includes("dropbox.com")) {
-            return url.replace("dl=0", "raw=1");
-        }
-        return url;
-    };
-
     const handleCreate = async (e: React.FormEvent) => {
         e.preventDefault();
         setIsCreating(true);
@@ -64,7 +56,7 @@ const BlogManager = () => {
                 ...newBlog,
                 cover_image: getDirectUrl(newBlog.cover_image)
             };
-            
+
             await blogService.createBlog(processedBlog);
             toast.success("Blog published successfully!");
             setNewBlog({
@@ -107,10 +99,10 @@ const BlogManager = () => {
                     <form onSubmit={handleCreate} className="space-y-4">
                         <div className="space-y-2">
                             <Label>Title</Label>
-                            <Input 
-                                required 
-                                value={newBlog.title} 
-                                onChange={e => setNewBlog({...newBlog, title: e.target.value})} 
+                            <Input
+                                required
+                                value={newBlog.title}
+                                onChange={e => setNewBlog({ ...newBlog, title: e.target.value })}
                                 placeholder="Enter blog title"
                             />
                         </div>
@@ -118,7 +110,7 @@ const BlogManager = () => {
                         <div className="grid grid-cols-2 gap-4">
                             <div className="space-y-2">
                                 <Label>Media Type</Label>
-                                <Select value={newBlog.media_type} onValueChange={(v: 'image' | 'video') => setNewBlog({...newBlog, media_type: v})}>
+                                <Select value={newBlog.media_type} onValueChange={(v: 'image' | 'video') => setNewBlog({ ...newBlog, media_type: v })}>
                                     <SelectTrigger>
                                         <SelectValue />
                                     </SelectTrigger>
@@ -130,19 +122,19 @@ const BlogManager = () => {
                             </div>
                             <div className="space-y-2">
                                 <Label>Author Name</Label>
-                                <Input 
-                                    value={newBlog.author_name} 
-                                    onChange={e => setNewBlog({...newBlog, author_name: e.target.value})} 
+                                <Input
+                                    value={newBlog.author_name}
+                                    onChange={e => setNewBlog({ ...newBlog, author_name: e.target.value })}
                                 />
                             </div>
                         </div>
 
                         <div className="space-y-2">
                             <Label>Cover Media URL {newBlog.media_type === 'video' ? '(Video Link)' : '(Image Link)'}</Label>
-                            <Input 
-                                required 
-                                value={newBlog.cover_image} 
-                                onChange={e => setNewBlog({...newBlog, cover_image: e.target.value})} 
+                            <Input
+                                required
+                                value={newBlog.cover_image}
+                                onChange={e => setNewBlog({ ...newBlog, cover_image: e.target.value })}
                                 placeholder="Paste link (ImgBB, etc)..."
                             />
                             {newBlog.cover_image && (
@@ -150,7 +142,7 @@ const BlogManager = () => {
                                     {newBlog.media_type === 'video' ? (
                                         <video src={newBlog.cover_image} className="w-full h-full object-cover" controls />
                                     ) : (
-                                        <img src={newBlog.cover_image} className="w-full h-full object-cover" alt="Preview" />
+                                        <img src={getDirectUrl(newBlog.cover_image)} className="w-full h-full object-cover" alt="Preview" />
                                     )}
                                 </div>
                             )}
@@ -158,9 +150,9 @@ const BlogManager = () => {
 
                         <div className="space-y-2">
                             <Label>Excerpt (Short Summary)</Label>
-                            <Textarea 
-                                value={newBlog.excerpt} 
-                                onChange={e => setNewBlog({...newBlog, excerpt: e.target.value})} 
+                            <Textarea
+                                value={newBlog.excerpt}
+                                onChange={e => setNewBlog({ ...newBlog, excerpt: e.target.value })}
                                 placeholder="A brief preview of the post..."
                                 className="h-20"
                             />
@@ -168,10 +160,10 @@ const BlogManager = () => {
 
                         <div className="space-y-2">
                             <Label>Full Content</Label>
-                            <Textarea 
-                                required 
-                                value={newBlog.content} 
-                                onChange={e => setNewBlog({...newBlog, content: e.target.value})} 
+                            <Textarea
+                                required
+                                value={newBlog.content}
+                                onChange={e => setNewBlog({ ...newBlog, content: e.target.value })}
                                 placeholder="Write your story here..."
                                 className="h-60 font-mono text-sm"
                             />
@@ -204,7 +196,7 @@ const BlogManager = () => {
                                         {blog.media_type === 'video' ? (
                                             <video src={blog.cover_image} className="w-full h-full object-cover" />
                                         ) : (
-                                            <img src={blog.cover_image} alt={blog.title} className="w-full h-full object-cover" />
+                                            <img src={getDirectUrl(blog.cover_image)} alt={blog.title} className="w-full h-full object-cover" />
                                         )}
                                     </div>
                                     <div className="flex-1 min-w-0">
@@ -216,9 +208,9 @@ const BlogManager = () => {
                                             <span>{blog.author_name}</span>
                                         </div>
                                     </div>
-                                    <Button 
-                                        variant="ghost" 
-                                        size="icon" 
+                                    <Button
+                                        variant="ghost"
+                                        size="icon"
                                         className="absolute top-2 right-2 text-muted-foreground hover:text-destructive hover:bg-destructive/10 opacity-0 group-hover:opacity-100 transition-opacity"
                                         onClick={() => handleDelete(blog.id)}
                                     >

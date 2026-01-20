@@ -34,6 +34,7 @@ import { toast } from "sonner";
 import { Loader2, ImagePlus, Upload, X, Plus } from "lucide-react";
 import { Label } from "@/components/ui/label";
 import AdminReviewManager from "./AdminReviewManager";
+import { getDirectUrl } from "@/lib/utils/imageUtils";
 
 const productSchema = z.object({
   name: z.string().min(2, "Name must be at least 2 characters"),
@@ -148,7 +149,7 @@ const ProductForm = ({ isOpen, onClose, onSuccess, product }: ProductFormProps) 
       } else {
         setSelectedBundleItems([]);
       }
-      
+
       if (product.extraSections) {
         setExtraSections(product.extraSections);
       } else {
@@ -268,7 +269,7 @@ const ProductForm = ({ isOpen, onClose, onSuccess, product }: ProductFormProps) 
     if (!cleanUrl) return;
 
     cleanUrl = getDirectUrl(cleanUrl); // Auto-convert Drive/Dropbox
-    
+
     setVariants(prev => prev.map(v => v.id === id ? {
       ...v,
       existingImage: cleanUrl // Treat as existing image (no upload needed)
@@ -337,15 +338,15 @@ const ProductForm = ({ isOpen, onClose, onSuccess, product }: ProductFormProps) 
         setLoading(false);
         return;
       }
-      
+
       // Derive simple notes from Rich Olfactory Notes
       const validOlfactoryNotes = olfactoryNotes.filter(n => n.name.trim() !== "");
       const derivedNotes = validOlfactoryNotes.map(n => n.name.trim());
 
       if (derivedNotes.length === 0) {
-          toast.error("Please add at least one Olfactory Note");
-          setLoading(false);
-          return;
+        toast.error("Please add at least one Olfactory Note");
+        setLoading(false);
+        return;
       }
 
       const formattedValues = {
@@ -431,66 +432,66 @@ const ProductForm = ({ isOpen, onClose, onSuccess, product }: ProductFormProps) 
 
             {/* Rich Olfactory Notes Section - MOVED UP & PRIMARY */}
             <div className="space-y-4 bg-gold/5 p-4 rounded-xl border border-gold/30">
-                <div className="flex items-center justify-between">
-                  <div>
-                      <Label className="text-gold font-bold uppercase tracking-wider text-xs">Olfactory Notes (Key Ingredients)</Label>
-                      <p className="text-[10px] text-muted-foreground">These will be used for both the "Notes" list and visual display.</p>
-                  </div>
-                  <Button type="button" size="sm" variant="outline" onClick={addOlfactoryNote} className="h-7 text-xs gap-1 border-gold/50 text-gold hover:bg-gold hover:text-white">
-                    <Plus className="h-3 w-3" /> Add Note
-                  </Button>
+              <div className="flex items-center justify-between">
+                <div>
+                  <Label className="text-gold font-bold uppercase tracking-wider text-xs">Olfactory Notes (Key Ingredients)</Label>
+                  <p className="text-[10px] text-muted-foreground">These will be used for both the "Notes" list and visual display.</p>
                 </div>
+                <Button type="button" size="sm" variant="outline" onClick={addOlfactoryNote} className="h-7 text-xs gap-1 border-gold/50 text-gold hover:bg-gold hover:text-white">
+                  <Plus className="h-3 w-3" /> Add Note
+                </Button>
+              </div>
 
-                {olfactoryNotes.length === 0 ? (
-                  <p className="text-xs text-muted-foreground italic text-center py-4 border-2 border-dashed border-gold/20 rounded-lg">
-                      Add key ingredients like "Jasmine", "Oud", "Rose" with images.
-                  </p>
-                ) : (
-                  <div className="space-y-3">
-                    {olfactoryNotes.map((note, idx) => (
-                      <div key={idx} className="grid grid-cols-12 gap-3 items-start bg-background p-3 rounded-lg border border-border">
-                        <div className="col-span-3">
-                          <Label className="text-[10px]">Note Name</Label>
+              {olfactoryNotes.length === 0 ? (
+                <p className="text-xs text-muted-foreground italic text-center py-4 border-2 border-dashed border-gold/20 rounded-lg">
+                  Add key ingredients like "Jasmine", "Oud", "Rose" with images.
+                </p>
+              ) : (
+                <div className="space-y-3">
+                  {olfactoryNotes.map((note, idx) => (
+                    <div key={idx} className="grid grid-cols-12 gap-3 items-start bg-background p-3 rounded-lg border border-border">
+                      <div className="col-span-3">
+                        <Label className="text-[10px]">Note Name</Label>
+                        <Input
+                          value={note.name}
+                          onChange={(e) => updateOlfactoryNote(idx, 'name', e.target.value)}
+                          placeholder="e.g. Jasmine"
+                          className="h-8 text-sm"
+                        />
+                      </div>
+                      <div className="col-span-4">
+                        <Label className="text-[10px]">Image URL</Label>
+                        <div className="flex gap-2">
                           <Input
-                            value={note.name}
-                            onChange={(e) => updateOlfactoryNote(idx, 'name', e.target.value)}
-                            placeholder="e.g. Jasmine"
-                            className="h-8 text-sm"
+                            value={note.image}
+                            onChange={(e) => updateOlfactoryNote(idx, 'image', e.target.value)}
+                            // Auto-convert on blur
+                            onBlur={(e) => updateOlfactoryNote(idx, 'image', getDirectUrl(e.target.value))}
+                            placeholder="Image Link"
+                            className="h-8 text-xs"
                           />
-                        </div>
-                        <div className="col-span-4">
-                          <Label className="text-[10px]">Image URL</Label>
-                          <div className="flex gap-2">
-                              <Input
-                                value={note.image}
-                                onChange={(e) => updateOlfactoryNote(idx, 'image', e.target.value)}
-                                // Auto-convert on blur
-                                onBlur={(e) => updateOlfactoryNote(idx, 'image', getDirectUrl(e.target.value))}
-                                placeholder="Image Link"
-                                className="h-8 text-xs"
-                              />
-                              {note.image && <img src={note.image} className="w-8 h-8 rounded object-cover border" />}
-                          </div>
-                        </div>
-                         <div className="col-span-4">
-                          <Label className="text-[10px]">Description</Label>
-                          <Textarea
-                            value={note.description}
-                            onChange={(e) => updateOlfactoryNote(idx, 'description', e.target.value)}
-                            placeholder="Brief description..."
-                            className="h-8 min-h-[32px] text-xs py-1"
-                          />
-                        </div>
-                        <div className="col-span-1 flex justify-end pt-5">
-                          <Button type="button" variant="ghost" size="icon" className="h-8 w-8 text-destructive hover:bg-destructive/10" onClick={() => removeOlfactoryNote(idx)}>
-                            <X className="h-4 w-4" />
-                          </Button>
+                          {note.image && <img src={note.image} className="w-8 h-8 rounded object-cover border" />}
                         </div>
                       </div>
-                    ))}
-                  </div>
-                )}
-             </div>
+                      <div className="col-span-4">
+                        <Label className="text-[10px]">Description</Label>
+                        <Textarea
+                          value={note.description}
+                          onChange={(e) => updateOlfactoryNote(idx, 'description', e.target.value)}
+                          placeholder="Brief description..."
+                          className="h-8 min-h-[32px] text-xs py-1"
+                        />
+                      </div>
+                      <div className="col-span-1 flex justify-end pt-5">
+                        <Button type="button" variant="ghost" size="icon" className="h-8 w-8 text-destructive hover:bg-destructive/10" onClick={() => removeOlfactoryNote(idx)}>
+                          <X className="h-4 w-4" />
+                        </Button>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              )}
+            </div>
 
             {/* Variants Section */}
             <div className="space-y-3 bg-muted/20 p-4 rounded-xl border border-dashed border-gold/30">
@@ -529,20 +530,20 @@ const ProductForm = ({ isOpen, onClose, onSuccess, product }: ProductFormProps) 
                       <div className="col-span-5">
                         <Label className="text-[10px]">Variant Image (URL or Upload)</Label>
                         <div className="space-y-2">
-                           {/* Row 1: Preview & URL Input */}
-                           <div className="flex gap-2 items-center">
-                              {v.existingImage ? (
-                                <img src={v.existingImage} className="h-8 w-8 object-cover rounded border" />
-                              ) : <div className="h-8 w-8 bg-muted rounded border shrink-0" />}
-                              
-                              <Input
-                                placeholder="Paste image link..."
-                                defaultValue={v.existingImage || ""}
-                                onBlur={(e) => updateVariantUrl(v.id, e.target.value)}
-                                onKeyDown={(e) => e.key === 'Enter' && (e.preventDefault(), updateVariantUrl(v.id, e.currentTarget.value))}
-                                className="h-8 text-xs"
-                              />
-                           </div>
+                          {/* Row 1: Preview & URL Input */}
+                          <div className="flex gap-2 items-center">
+                            {v.existingImage ? (
+                              <img src={v.existingImage} className="h-8 w-8 object-cover rounded border" />
+                            ) : <div className="h-8 w-8 bg-muted rounded border shrink-0" />}
+
+                            <Input
+                              placeholder="Paste image link..."
+                              defaultValue={v.existingImage || ""}
+                              onBlur={(e) => updateVariantUrl(v.id, e.target.value)}
+                              onKeyDown={(e) => e.key === 'Enter' && (e.preventDefault(), updateVariantUrl(v.id, e.currentTarget.value))}
+                              className="h-8 text-xs"
+                            />
+                          </div>
                         </div>
                       </div>
                       <div className="col-span-1 flex justify-end pt-5">
@@ -588,189 +589,187 @@ const ProductForm = ({ isOpen, onClose, onSuccess, product }: ProductFormProps) 
 
             <div className="space-y-2">
               <Label>Main Gallery Images (Shared)</Label>
-                <div className="flex flex-col gap-3">
-                   <div className="flex gap-2">
-                     <Input 
-                       placeholder="Paste image link (ImgBB, etc.)" 
-                       value={imageUrlInput}
-                       onChange={(e) => setImageUrlInput(e.target.value)}
-                       onKeyDown={(e) => e.key === 'Enter' && (e.preventDefault(), handleAddImageUrl())}
-                       className="flex-1"
-                     />
-                     <Button type="button" onClick={handleAddImageUrl} variant="secondary">
-                       Add URL
-                     </Button>
-                   </div>
-                   
-                   <p className="text-[10px] text-muted-foreground">
-                     Use direct links (ImgBB, Dropbox) to save database space. Or upload below:
-                   </p>
-                </div>
-
-                <div className="grid grid-cols-4 gap-4 pt-2">
-                  {/* Existing Images (URLs) */}
-                  {existingImages.map((preview, index) => (
-                    <div key={`existing-${index}`} className="relative aspect-square rounded-md overflow-hidden border border-border group">
-                      <img src={preview} alt={`Existing ${index}`} className="w-full h-full object-cover" />
-                      <button
-                        type="button"
-                        onClick={() => removeExistingImage(index)}
-                        className="absolute top-1 right-1 bg-destructive text-white rounded-full p-1 opacity-0 group-hover:opacity-100 transition-opacity"
-                      >
-                        <X className="h-3 w-3" />
-                      </button>
-                      {index === 0 && (
-                        <div className="absolute bottom-0 inset-x-0 bg-gold/80 text-white text-[8px] py-0.5 text-center uppercase tracking-tighter">
-                          Main
-                        </div>
-                      )}
-                    </div>
-                  ))}
-
-
-
-                  <label className="flex flex-col items-center justify-center aspect-square border-2 border-dashed border-muted-foreground/25 rounded-md bg-muted/50 cursor-not-allowed">
-                    <div className="flex flex-col items-center justify-center text-muted-foreground/50">
-                      <ImagePlus className="h-5 w-5 mb-1" />
-                      <p className="text-[10px] text-center px-1">Upload Disabled</p>
-                    </div>
-                  </label>
-                </div>
-            </div>
-
-              {/* Product Gallery Section */}
-            <div className="space-y-4 bg-muted/20 p-4 rounded-xl border border-dashed border-gold/30">
-                 <Label className="text-gold font-bold uppercase tracking-wider text-xs">Product Gallery (Masonry Layout)</Label>
-                 
-                  <div className="flex flex-col gap-3">
-                     <Label className="text-[10px] text-muted-foreground uppercase tracking-widest">Add from Main Images</Label>
-                     {existingImages.length === 0 ? (
-                        <p className="text-[10px] text-muted-foreground italic">No main images available to select.</p>
-                     ) : (
-                        <div className="flex gap-2 overflow-x-auto pb-2 no-scrollbar">
-                           {/* Existing Main Images */}
-                           {existingImages.map((img, idx) => {
-                             const isAlreadyInGallery = existingGalleryImages.includes(img);
-                             return (
-                               <div 
-                                 key={`select-main-${idx}`} 
-                                 className={`relative w-12 h-12 shrink-0 rounded border cursor-pointer transition-all ${
-                                   isAlreadyInGallery ? 'border-gold opacity-50' : 'border-border hover:border-gold'
-                                 }`}
-                                 onClick={() => {
-                                   if (!isAlreadyInGallery) {
-                                     setExistingGalleryImages(prev => [...prev, img]);
-                                     toast.success("Image added to gallery");
-                                   }
-                                 }}
-                               >
-                                 <img src={img} className="w-full h-full object-cover rounded-[3px]" />
-                                 {isAlreadyInGallery && (
-                                   <div className="absolute inset-0 flex items-center justify-center bg-black/20">
-                                     <div className="w-1.5 h-1.5 bg-gold rounded-full" />
-                                   </div>
-                                 )}
-                               </div>
-                             );
-                           })}
-
-                        </div>
-                     )}
-
-                     <div className="flex gap-2 pt-2">
-                       <Input 
-                         placeholder="Or paste external image link..." 
-                         value={galleryUrlInput}
-                         onChange={(e) => setGalleryUrlInput(e.target.value)}
-                         onKeyDown={(e) => e.key === 'Enter' && (e.preventDefault(), handleAddGalleryUrl())}
-                         className="flex-1"
-                       />
-                       <Button type="button" onClick={handleAddGalleryUrl} variant="secondary">
-                         Add URL
-                       </Button>
-                     </div>
-                  </div>
-
-                 {/* Custom Grid Layout for Gallery Preview */}
-                 <div className="grid grid-cols-4 gap-2 auto-rows-[100px]">
-                    {/* Render Existing Gallery Images */}
-                    {existingGalleryImages.map((preview, index) => (
-                      <div 
-                        key={`exist-gal-${index}`} 
-                        className={`relative rounded-md overflow-hidden border border-border group ${
-                          index % 5 === 0 ? "col-span-2 row-span-2" : "col-span-1 row-span-1"
-                        }`}
-                      >
-                         <img src={preview} alt={`Gallery ${index}`} className="w-full h-full object-cover" />
-                         <button
-                            type="button"
-                            onClick={() => removeGalleryImage(index)}
-                            className="absolute top-1 right-1 bg-destructive text-white rounded-full p-1 opacity-0 group-hover:opacity-100 transition-opacity"
-                          >
-                            <X className="h-3 w-3" />
-                         </button>
-                      </div>
-                    ))}
-
-
-
-                    <label className="flex flex-col items-center justify-center col-span-1 row-span-1 border-2 border-dashed border-muted-foreground/25 rounded-md bg-muted/50 cursor-not-allowed">
-                        <ImagePlus className="h-5 w-5 text-muted-foreground/50 mb-1" />
-                        <span className="text-[9px] text-muted-foreground/50 text-center">No Upload</span>
-                    </label>
-                 </div>
-            </div>
-
-              {/* Extra Sections (Accordion Data) */}
-              <div className="space-y-3 bg-muted/20 p-4 rounded-xl border border-dashed border-gold/30">
-                <div className="flex items-center justify-between">
-                  <Label className="text-gold font-bold uppercase tracking-wider text-xs">Additional Information (Accordion)</Label>
-                  <Button type="button" size="sm" variant="outline" onClick={addSection} className="h-7 text-xs gap-1 border-gold/50 text-gold hover:bg-gold hover:text-white">
-                    <Plus className="h-3 w-3" /> Add Section
+              <div className="flex flex-col gap-3">
+                <div className="flex gap-2">
+                  <Input
+                    placeholder="Paste image link (ImgBB, etc.)"
+                    value={imageUrlInput}
+                    onChange={(e) => setImageUrlInput(e.target.value)}
+                    onKeyDown={(e) => e.key === 'Enter' && (e.preventDefault(), handleAddImageUrl())}
+                    className="flex-1"
+                  />
+                  <Button type="button" onClick={handleAddImageUrl} variant="secondary">
+                    Add URL
                   </Button>
                 </div>
-                
-                {extraSections.length === 0 ? (
-                  <p className="text-xs text-muted-foreground italic text-center py-2">
-                    Add "How to Use", "Ingredients", or "Benefits" sections here.
-                  </p>
-                ) : (
-                  <div className="space-y-3">
-                    {extraSections.map((section, idx) => (
-                      <div key={idx} className="bg-background p-3 rounded-lg border border-border space-y-2 relative group">
-                        <Button
-                          type="button"
-                          variant="ghost" 
-                          size="icon"
-                          className="absolute top-2 right-2 h-6 w-6 text-destructive hover:bg-destructive/10 opacity-0 group-hover:opacity-100 transition-opacity"
-                          onClick={() => removeSection(idx)}
-                        >
-                          <X className="h-3 w-3" />
-                        </Button>
-                        
-                        <div className="space-y-1">
-                          <Label className="text-[10px] text-muted-foreground">Section Title</Label>
-                          <Input
-                            value={section.title}
-                            onChange={(e) => updateSection(idx, 'title', e.target.value)}
-                            placeholder="e.g. How to Use"
-                            className="h-8 font-bold"
-                          />
-                        </div>
-                        <div className="space-y-1">
-                          <Label className="text-[10px] text-muted-foreground">Content</Label>
-                          <Textarea
-                            value={section.content}
-                            onChange={(e) => updateSection(idx, 'content', e.target.value)}
-                            placeholder="Details about this section..."
-                            className="min-h-[60px] text-sm"
-                          />
-                        </div>
+
+                <p className="text-[10px] text-muted-foreground">
+                  Use direct links (ImgBB, Dropbox) to save database space. Or upload below:
+                </p>
+              </div>
+
+              <div className="grid grid-cols-4 gap-4 pt-2">
+                {/* Existing Images (URLs) */}
+                {existingImages.map((preview, index) => (
+                  <div key={`existing-${index}`} className="relative aspect-square rounded-md overflow-hidden border border-border group">
+                    <img src={getDirectUrl(preview)} alt={`Existing ${index}`} className="w-full h-full object-cover" />
+                    <button
+                      type="button"
+                      onClick={() => removeExistingImage(index)}
+                      className="absolute top-1 right-1 bg-destructive text-white rounded-full p-1 opacity-0 group-hover:opacity-100 transition-opacity"
+                    >
+                      <X className="h-3 w-3" />
+                    </button>
+                    {index === 0 && (
+                      <div className="absolute bottom-0 inset-x-0 bg-gold/80 text-white text-[8px] py-0.5 text-center uppercase tracking-tighter">
+                        Main
                       </div>
-                    ))}
+                    )}
+                  </div>
+                ))}
+
+
+
+                <label className="flex flex-col items-center justify-center aspect-square border-2 border-dashed border-muted-foreground/25 rounded-md bg-muted/50 cursor-not-allowed">
+                  <div className="flex flex-col items-center justify-center text-muted-foreground/50">
+                    <ImagePlus className="h-5 w-5 mb-1" />
+                    <p className="text-[10px] text-center px-1">Upload Disabled</p>
+                  </div>
+                </label>
+              </div>
+            </div>
+
+            {/* Product Gallery Section */}
+            <div className="space-y-4 bg-muted/20 p-4 rounded-xl border border-dashed border-gold/30">
+              <Label className="text-gold font-bold uppercase tracking-wider text-xs">Product Gallery (Masonry Layout)</Label>
+
+              <div className="flex flex-col gap-3">
+                <Label className="text-[10px] text-muted-foreground uppercase tracking-widest">Add from Main Images</Label>
+                {existingImages.length === 0 ? (
+                  <p className="text-[10px] text-muted-foreground italic">No main images available to select.</p>
+                ) : (
+                  <div className="flex gap-2 overflow-x-auto pb-2 no-scrollbar">
+                    {/* Existing Main Images */}
+                    {existingImages.map((img, idx) => {
+                      const isAlreadyInGallery = existingGalleryImages.includes(img);
+                      return (
+                        <div
+                          key={`select-main-${idx}`}
+                          className={`relative w-12 h-12 shrink-0 rounded border cursor-pointer transition-all ${isAlreadyInGallery ? 'border-gold opacity-50' : 'border-border hover:border-gold'
+                            }`}
+                          onClick={() => {
+                            if (!isAlreadyInGallery) {
+                              setExistingGalleryImages(prev => [...prev, img]);
+                              toast.success("Image added to gallery");
+                            }
+                          }}
+                        >
+                          <img src={getDirectUrl(img)} className="w-full h-full object-cover rounded-[3px]" />
+                          {isAlreadyInGallery && (
+                            <div className="absolute inset-0 flex items-center justify-center bg-black/20">
+                              <div className="w-1.5 h-1.5 bg-gold rounded-full" />
+                            </div>
+                          )}
+                        </div>
+                      );
+                    })}
+
                   </div>
                 )}
+
+                <div className="flex gap-2 pt-2">
+                  <Input
+                    placeholder="Or paste external image link..."
+                    value={galleryUrlInput}
+                    onChange={(e) => setGalleryUrlInput(e.target.value)}
+                    onKeyDown={(e) => e.key === 'Enter' && (e.preventDefault(), handleAddGalleryUrl())}
+                    className="flex-1"
+                  />
+                  <Button type="button" onClick={handleAddGalleryUrl} variant="secondary">
+                    Add URL
+                  </Button>
+                </div>
               </div>
+
+              {/* Custom Grid Layout for Gallery Preview */}
+              <div className="grid grid-cols-4 gap-2 auto-rows-[100px]">
+                {/* Render Existing Gallery Images */}
+                {existingGalleryImages.map((preview, index) => (
+                  <div
+                    key={`exist-gal-${index}`}
+                    className={`relative rounded-md overflow-hidden border border-border group ${index % 5 === 0 ? "col-span-2 row-span-2" : "col-span-1 row-span-1"
+                      }`}
+                  >
+                    <img src={getDirectUrl(preview)} alt={`Gallery ${index}`} className="w-full h-full object-cover" />
+                    <button
+                      type="button"
+                      onClick={() => removeGalleryImage(index)}
+                      className="absolute top-1 right-1 bg-destructive text-white rounded-full p-1 opacity-0 group-hover:opacity-100 transition-opacity"
+                    >
+                      <X className="h-3 w-3" />
+                    </button>
+                  </div>
+                ))}
+
+
+
+                <label className="flex flex-col items-center justify-center col-span-1 row-span-1 border-2 border-dashed border-muted-foreground/25 rounded-md bg-muted/50 cursor-not-allowed">
+                  <ImagePlus className="h-5 w-5 text-muted-foreground/50 mb-1" />
+                  <span className="text-[9px] text-muted-foreground/50 text-center">No Upload</span>
+                </label>
+              </div>
+            </div>
+
+            {/* Extra Sections (Accordion Data) */}
+            <div className="space-y-3 bg-muted/20 p-4 rounded-xl border border-dashed border-gold/30">
+              <div className="flex items-center justify-between">
+                <Label className="text-gold font-bold uppercase tracking-wider text-xs">Additional Information (Accordion)</Label>
+                <Button type="button" size="sm" variant="outline" onClick={addSection} className="h-7 text-xs gap-1 border-gold/50 text-gold hover:bg-gold hover:text-white">
+                  <Plus className="h-3 w-3" /> Add Section
+                </Button>
+              </div>
+
+              {extraSections.length === 0 ? (
+                <p className="text-xs text-muted-foreground italic text-center py-2">
+                  Add "How to Use", "Ingredients", or "Benefits" sections here.
+                </p>
+              ) : (
+                <div className="space-y-3">
+                  {extraSections.map((section, idx) => (
+                    <div key={idx} className="bg-background p-3 rounded-lg border border-border space-y-2 relative group">
+                      <Button
+                        type="button"
+                        variant="ghost"
+                        size="icon"
+                        className="absolute top-2 right-2 h-6 w-6 text-destructive hover:bg-destructive/10 opacity-0 group-hover:opacity-100 transition-opacity"
+                        onClick={() => removeSection(idx)}
+                      >
+                        <X className="h-3 w-3" />
+                      </Button>
+
+                      <div className="space-y-1">
+                        <Label className="text-[10px] text-muted-foreground">Section Title</Label>
+                        <Input
+                          value={section.title}
+                          onChange={(e) => updateSection(idx, 'title', e.target.value)}
+                          placeholder="e.g. How to Use"
+                          className="h-8 font-bold"
+                        />
+                      </div>
+                      <div className="space-y-1">
+                        <Label className="text-[10px] text-muted-foreground">Content</Label>
+                        <Textarea
+                          value={section.content}
+                          onChange={(e) => updateSection(idx, 'content', e.target.value)}
+                          placeholder="Details about this section..."
+                          className="min-h-[60px] text-sm"
+                        />
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              )}
+            </div>
 
             <div className="space-y-3">
               <Label>Product Videos <span className="text-muted-foreground font-normal ml-1 text-xs">(Optional)</span></Label>
@@ -899,9 +898,9 @@ const ProductForm = ({ isOpen, onClose, onSuccess, product }: ProductFormProps) 
 
             {/* Admin Review Manager (Only in Edit Mode) */}
             {product?.id && (
-               <div className="space-y-3 pt-6 border-t border-gold/20">
-                 <AdminReviewManager productId={product.id} />
-               </div>
+              <div className="space-y-3 pt-6 border-t border-gold/20">
+                <AdminReviewManager productId={product.id} />
+              </div>
             )}
 
             <DialogFooter className="pt-4">
