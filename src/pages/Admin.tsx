@@ -206,9 +206,12 @@ const Admin = () => {
           </TabsContent>
           <TabsContent value="orders" className="mt-6">
             <Card>
-              <CardHeader>
-                <CardTitle>Orders</CardTitle>
-                <CardDescription>View and manage customer orders.</CardDescription>
+              <CardHeader className="flex flex-row items-center justify-between">
+                <div>
+                  <CardTitle>Orders</CardTitle>
+                  <CardDescription>View and manage customer orders.</CardDescription>
+                </div>
+                <NewOrderForm onSuccess={fetchData} />
               </CardHeader>
               <CardContent>
                 <OrderList orders={orders} loading={loading} onRefresh={fetchData} />
