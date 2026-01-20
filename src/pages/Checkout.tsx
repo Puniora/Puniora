@@ -5,7 +5,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Separator } from "@/components/ui/separator";
-import { MapPin, ArrowLeft, Loader2, ShieldCheck, CreditCard, Wallet } from "lucide-react";
+import { MapPin, ArrowLeft, Loader2, ShieldCheck, CreditCard, Wallet, CheckCircle2, Package } from "lucide-react";
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 import { formatPrice } from "@/lib/products";
 import { orderService } from "@/lib/services/orderService";
@@ -23,6 +23,7 @@ import {
 import { toast } from "sonner";
 import Header from "@/components/Header";
 import Footer from "@/components/Footer";
+import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 
 
 const Checkout = () => {
@@ -33,6 +34,8 @@ const Checkout = () => {
   const [geoLoading, setGeoLoading] = useState(false);
   const [savedAddresses, setSavedAddresses] = useState<Address[]>([]);
   const [selectedAddressId, setSelectedAddressId] = useState("new");
+  const [showConfirmation, setShowConfirmation] = useState(false);
+  const [confirmedOrderId, setConfirmedOrderId] = useState("");
 
   const [formData, setFormData] = useState(() => {
     const saved = localStorage.getItem("checkoutFormData");
@@ -66,7 +69,7 @@ const Checkout = () => {
       state: addr.state,
       district: "", // Address object from DB might not strictly split district/place the same way or it might be needed to map differently. 
       // For now, mapping best effort. 
-      place: addr.city, 
+      place: addr.city,
       houseAddress: addr.address_line1,
       landmark: addr.address_line2 || "" // Using address_line2 as landmark/area for simplicity
     });
@@ -76,7 +79,7 @@ const Checkout = () => {
     setSelectedAddressId(value);
     if (value === "new") {
       setFormData({
-         name: "", mobile: "", state: "", district: "", place: "", houseAddress: "", landmark: ""
+        name: "", mobile: "", state: "", district: "", place: "", houseAddress: "", landmark: ""
       });
     } else {
       const addr = savedAddresses.find(a => a.id === value);
@@ -155,47 +158,47 @@ const Checkout = () => {
 
       if (paymentMethod === "online") {
         try {
-           const options = {
-             key: import.meta.env.VITE_RAZORPAY_KEY_ID || "", 
-             amount: Math.round(totalPrice * 100), // Amount in paise
-             currency: "INR",
-             name: "Puniora",
-             description: "Luxury Fragrance Purchase",
-             image: "/logo.png", // Optional, ensure path is correct or omit
-             handler: function (response: any) {
-                // Payment Success!
-                // Trigger the actual order creation
-                razorpayPaymentId = response.razorpay_payment_id;
-                finalPaymentStatus = 'paid';
-                completeOrderCreation(finalPaymentStatus, razorpayPaymentId);
-             },
-             prefill: {
-               name: formData.name,
-               email: user?.email, // Or request email in form
-               contact: formData.mobile
-             },
-             theme: {
-               color: "#D4AF37" // Gold color
-             },
-             modal: {
-               ondismiss: function() {
-                 setLoading(false);
-                 toast.info("Payment Cancelled");
-               }
-             }
-           };
-           
-           await razorpayService.openPaymentModal(options);
-           // execution halts here until modal handles it, but typically handler is callback-based. 
-           // The service wrapper returns a promise that resolves on open, not on complete.
-           // So we return here and let the handler call completeOrderCreation.
-           return; 
+          const options = {
+            key: import.meta.env.VITE_RAZORPAY_KEY_ID || "",
+            amount: Math.round(totalPrice * 100), // Amount in paise
+            currency: "INR",
+            name: "Puniora",
+            description: "Luxury Fragrance Purchase",
+            image: "/logo.png", // Optional, ensure path is correct or omit
+            handler: function (response: any) {
+              // Payment Success!
+              // Trigger the actual order creation
+              razorpayPaymentId = response.razorpay_payment_id;
+              finalPaymentStatus = 'paid';
+              completeOrderCreation(finalPaymentStatus, razorpayPaymentId);
+            },
+            prefill: {
+              name: formData.name,
+              email: user?.email, // Or request email in form
+              contact: formData.mobile
+            },
+            theme: {
+              color: "#D4AF37" // Gold color
+            },
+            modal: {
+              ondismiss: function () {
+                setLoading(false);
+                toast.info("Payment Cancelled");
+              }
+            }
+          };
+
+          await razorpayService.openPaymentModal(options);
+          // execution halts here until modal handles it, but typically handler is callback-based. 
+          // The service wrapper returns a promise that resolves on open, not on complete.
+          // So we return here and let the handler call completeOrderCreation.
+          return;
 
         } catch (pzError: any) {
-           console.error("Razorpay Error:", pzError);
-           toast.error(pzError.message || "Payment initiation failed");
-           setLoading(false);
-           return;
+          console.error("Razorpay Error:", pzError);
+          toast.error(pzError.message || "Payment initiation failed");
+          setLoading(false);
+          return;
         }
       }
 
@@ -210,79 +213,80 @@ const Checkout = () => {
   };
 
   const completeOrderCreation = async (pStatus: 'pending' | 'paid', pId: string) => {
+    try {
+      // 1. Create order in our database
+      const orderData = {
+        customer_name: formData.name,
+        customer_mobile: formData.mobile,
+        address_json: {
+          state: formData.state,
+          district: formData.district,
+          place: formData.place,
+          houseAddress: formData.houseAddress,
+          landmark: formData.landmark
+        },
+
+        total_amount: totalPrice,
+        payment_status: pStatus,
+        razorpay_payment_id: pId || undefined,
+        user_id: user?.id,
+        items: items.map(i => ({
+          id: i.product.id,
+          name: i.product.name,
+          price: i.product.price,
+          quantity: i.quantity,
+          image: i.product.images[0],
+          size: i.product.size,
+          note: i.product.selectedNote
+        }))
+      };
+
+      const order = await orderService.createOrder(orderData);
+
+      // 2. Trigger Shiprocket Order Creation
       try {
-        // 1. Create order in our database
-        const orderData = {
-          customer_name: formData.name,
-          customer_mobile: formData.mobile,
-          address_json: {
-            state: formData.state,
-            district: formData.district,
-            place: formData.place,
-            houseAddress: formData.houseAddress,
-            landmark: formData.landmark
-          },
-  
-          total_amount: totalPrice,
-          payment_status: pStatus,
-          razorpay_payment_id: pId || undefined,
-          user_id: user?.id,
-          items: items.map(i => ({
-            id: i.product.id,
-            name: i.product.name,
-            price: i.product.price,
-            quantity: i.quantity,
-            image: i.product.images[0],
-            size: i.product.size,
-            note: i.product.selectedNote
-          }))
-        };
-  
-        const order = await orderService.createOrder(orderData);
-  
-        // 2. Trigger Shiprocket Order Creation
-        try {
-          console.log("Creating Shiprocket Order...");
-          // Only create shiprocket order if COD or Paid. (Pending online orders shouldn't ship yet)
-          // Since we only reach here if Paid (Online) or Pending (COD), we are good.
-          
-          const shiprocketRes = await shiprocketService.createOrder(order);
-          
-          if (shiprocketRes && shiprocketRes.order_id) {
-             console.log("Shiprocket Order Created:", shiprocketRes.order_id);
-             
-             await orderService.updateShiprocketDetails(order.id, {
-               shiprocket_order_id: shiprocketRes.order_id.toString(),
-               shiprocket_shipment_id: shiprocketRes.shipment_id.toString(),
-               awb_code: shiprocketRes.awb_code || ""
-             });
-             
-             await orderService.updateTracking(
-                order.id, 
-                'Order Placed', 
-                shiprocketRes.shipment_id ? shiprocketRes.shipment_id.toString() : undefined
-             );
-          }
-        } catch (srError) {
-           console.error("Shiprocket Integration Error:", srError);
+        console.log("Creating Shiprocket Order...");
+        // Only create shiprocket order if COD or Paid. (Pending online orders shouldn't ship yet)
+        // Since we only reach here if Paid (Online) or Pending (COD), we are good.
+
+        const shiprocketRes = await shiprocketService.createOrder(order);
+
+        if (shiprocketRes && shiprocketRes.order_id) {
+          console.log("Shiprocket Order Created:", shiprocketRes.order_id);
+
+          await orderService.updateShiprocketDetails(order.id, {
+            shiprocket_order_id: shiprocketRes.order_id.toString(),
+            shiprocket_shipment_id: shiprocketRes.shipment_id.toString(),
+            awb_code: shiprocketRes.awb_code || ""
+          });
+
+          await orderService.updateTracking(
+            order.id,
+            'Order Placed',
+            shiprocketRes.shipment_id ? shiprocketRes.shipment_id.toString() : undefined
+          );
         }
-  
-        // Cache order ID for tracking
-        localStorage.setItem("puniora_last_order", order.id);
-  
-        // Clear form data on successful order
-        localStorage.removeItem("checkoutFormData");
-  
-        toast.success(pStatus === 'paid' ? "Payment Successful! Order Placed." : "Order Placed Successfully!");
-        clearCart();
-        navigate("/");
-        
-      } catch (error) {
-         console.error("Order completion error:", error);
-         toast.error("Failed to finalize order. Please contact support if payment was deducted.");
-      } finally {
-         setLoading(false);
+      } catch (srError) {
+        console.error("Shiprocket Integration Error:", srError);
       }
+
+      // Cache order ID for tracking
+      localStorage.setItem("puniora_last_order", order.id);
+
+      // Clear form data on successful order
+      localStorage.removeItem("checkoutFormData");
+
+      // Show confirmation dialog
+      setConfirmedOrderId(order.id);
+      setShowConfirmation(true);
+      clearCart();
+
+    } catch (error) {
+      console.error("Order completion error:", error);
+      toast.error("Failed to finalize order. Please contact support if payment was deducted.");
+    } finally {
+      setLoading(false);
+    }
   };
 
   return (
@@ -310,7 +314,7 @@ const Checkout = () => {
                 </div>
 
                 <form id="checkout-form" onSubmit={handlePayment} className="space-y-6">
-                  
+
                   {/* Saved Addresses Dropdown */}
                   {user && savedAddresses.length > 0 && (
                     <div className="space-y-2 pb-4 border-b border-border/50">
@@ -489,6 +493,55 @@ const Checkout = () => {
       </main>
 
       <Footer />
+
+      {/* Order Confirmation Dialog */}
+      <Dialog open={showConfirmation} onOpenChange={(open) => {
+        setShowConfirmation(open);
+        if (!open) navigate("/");
+      }}>
+        <DialogContent className="max-w-md">
+          <DialogHeader>
+            <div className="flex flex-col items-center text-center space-y-4 py-6">
+              <div className="h-20 w-20 bg-green-500/10 rounded-full flex items-center justify-center">
+                <CheckCircle2 className="h-12 w-12 text-green-500" />
+              </div>
+              <DialogTitle className="text-3xl font-heading">Order Confirmed!</DialogTitle>
+            </div>
+          </DialogHeader>
+
+          <div className="space-y-6 py-4">
+            <div className="text-center space-y-2">
+              <p className="text-muted-foreground">
+                Thank you for your purchase! Your order has been successfully placed.
+              </p>
+              <div className="bg-muted/30 p-4 rounded-xl border border-border/50">
+                <p className="text-xs uppercase tracking-widest font-bold text-muted-foreground mb-1">Order ID</p>
+                <p className="font-mono text-sm break-all">{confirmedOrderId}</p>
+              </div>
+            </div>
+
+            <div className="flex items-start gap-3 bg-gold/5 p-4 rounded-xl border border-gold/20">
+              <Package className="h-5 w-5 text-gold shrink-0 mt-0.5" />
+              <div className="text-sm space-y-1">
+                <p className="font-bold text-gold">What's Next?</p>
+                <p className="text-muted-foreground text-xs leading-relaxed">
+                  We'll send you order updates via SMS. You can track your order anytime from your account.
+                </p>
+              </div>
+            </div>
+
+            <Button
+              onClick={() => {
+                setShowConfirmation(false);
+                navigate("/");
+              }}
+              className="w-full bg-gold hover:bg-gold/90 text-white h-12"
+            >
+              Continue Shopping
+            </Button>
+          </div>
+        </DialogContent>
+      </Dialog>
     </div>
   );
 };
