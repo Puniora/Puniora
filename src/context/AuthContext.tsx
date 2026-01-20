@@ -53,6 +53,7 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
         email,
         options: {
           shouldCreateUser: true,
+          // Don't include emailRedirectTo - this forces OTP token instead of magic link
         },
       });
 
