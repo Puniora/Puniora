@@ -100,7 +100,7 @@ const RefundPolicy = () => {
                                     <div>
                                         <h3 className="font-bold mb-1">Contact Us Within 24 Hours</h3>
                                         <p className="text-sm text-muted-foreground m-0">
-                                            Email us at <a href="mailto:returns@puniora.com" className="text-gold hover:underline">returns@puniora.com</a> or call <strong>+91 XXXX XXX XXX</strong>
+                                            Email us at <a href="mailto:help@puniora.com" className="text-gold hover:underline">help@puniora.com</a> or call <strong>+91 7010418285</strong>
                                         </p>
                                         <p className="text-sm text-muted-foreground mt-2 m-0">
                                             Include: Order ID, photos/videos, and description of damage
@@ -190,11 +190,11 @@ const RefundPolicy = () => {
                             <div className="space-y-3">
                                 <div className="flex items-center gap-3">
                                     <Mail className="h-5 w-5 text-gold" />
-                                    <a href="mailto:returns@puniora.com" className="text-gold hover:underline">returns@puniora.com</a>
+                                    <a href="mailto:help@puniora.com" className="text-gold hover:underline">help@puniora.com</a>
                                 </div>
                                 <div className="flex items-center gap-3">
                                     <Phone className="h-5 w-5 text-gold" />
-                                    <span className="text-muted-foreground">+91 XXXX XXX XXX</span>
+                                    <span className="text-muted-foreground">+91 7010418285</span>
                                 </div>
                             </div>
                             <div className="bg-white/50 p-4 rounded-xl mt-4">

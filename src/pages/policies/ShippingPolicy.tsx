@@ -155,8 +155,8 @@ const ShippingPolicy = () => {
                                 For shipping-related queries, contact us:
                             </p>
                             <div className="space-y-2 text-muted-foreground">
-                                <p><strong>Email:</strong> <a href="mailto:support@puniora.com" className="text-gold hover:underline">support@puniora.com</a></p>
-                                <p><strong>Phone:</strong> +91 XXXX XXX XXX</p>
+                                <p><strong>Email:</strong> <a href="mailto:help@puniora.com" className="text-gold hover:underline">help@puniora.com</a></p>
+                                <p><strong>Phone:</strong> +91 7010418285</p>
                             </div>
                         </section>
                     </div>

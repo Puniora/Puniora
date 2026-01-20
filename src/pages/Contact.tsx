@@ -123,8 +123,8 @@ const Contact = () => {
                                         </div>
                                         <div>
                                             <p className="font-bold mb-1">Email</p>
-                                            <a href="mailto:support@puniora.com" className="text-muted-foreground hover:text-gold transition-colors">
-                                                support@puniora.com
+                                            <a href="mailto:help@puniora.com" className="text-muted-foreground hover:text-gold transition-colors">
+                                                help@puniora.com
                                             </a>
                                         </div>
                                     </div>
@@ -135,7 +135,9 @@ const Contact = () => {
                                         </div>
                                         <div>
                                             <p className="font-bold mb-1">Phone</p>
-                                            <p className="text-muted-foreground">+91 XXXX XXX XXX</p>
+                                            <a href="tel:+917010418285" className="text-muted-foreground hover:text-gold transition-colors">
+                                                +91 7010418285
+                                            </a>
                                         </div>
                                     </div>
 
@@ -146,8 +148,10 @@ const Contact = () => {
                                         <div>
                                             <p className="font-bold mb-1">Address</p>
                                             <p className="text-muted-foreground">
-                                                Mumbai, Maharashtra<br />
-                                                India
+                                                213/9, Plot 1 Part,<br />
+                                                Melma Nagar Main Road,<br />
+                                                Mangadu, Chennai 600122<br />
+                                                Tamil Nadu, India
                                             </p>
                                         </div>
                                     </div>
