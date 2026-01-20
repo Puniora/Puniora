@@ -1,7 +1,13 @@
 import { useState, useEffect } from "react";
 import { Link, useLocation } from "react-router-dom";
-import { Menu, X, ShoppingBag, User, Search } from "lucide-react";
+import { Menu, X, ShoppingBag, User, Search, ChevronDown } from "lucide-react";
 import { Button } from "@/components/ui/button";
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
 import SearchDialog from "./SearchDialog";
 
 import { useCart } from "@/context/CartContext";
@@ -45,11 +51,11 @@ const Header = () => {
   const isTransparent = isHome && !isScrolled;
 
   const navLinks = [
-    { label: "Collection", href: "/#collection" },
-    { label: "About", href: "/#about" },
-    { label: "Contact", href: "/#contact" },
+    { label: "Home", href: "/" },
+    { label: "About", href: "/about" },
+    { label: "Contact", href: "/contact" },
+    { label: "Track Order", href: "/track" },
     { label: "Blog", href: "/blog" },
-    { label: "Policies", href: "/privacy-policy" },
   ];
 
   return (
@@ -85,7 +91,7 @@ const Header = () => {
             </a>
 
             {/* Desktop Navigation */}
-            <nav className="hidden md:flex items-center space-x-10">
+            <nav className="hidden md:flex items-center space-x-8">
               {navLinks.map((link) => (
                 <a
                   key={link.label}
@@ -96,6 +102,32 @@ const Header = () => {
                   <span className="absolute -bottom-1 left-0 w-0 h-px bg-gold transition-all duration-300 group-hover:w-full"></span>
                 </a>
               ))}
+
+              {/* Policy Pages Dropdown */}
+              <DropdownMenu>
+                <DropdownMenuTrigger className={`text-xs uppercase tracking-[0.2em] transition-colors duration-300 relative group flex items-center gap-1 ${!isTransparent ? 'text-bronze-dark' : 'text-bronze-dark'} hover:text-gold outline-none`}>
+                  Policies
+                  <ChevronDown className="h-3 w-3" />
+                  <span className="absolute -bottom-1 left-0 w-0 h-px bg-gold transition-all duration-300 group-hover:w-full"></span>
+                </DropdownMenuTrigger>
+                <DropdownMenuContent className="bg-white border border-gold/20 shadow-xl">
+                  <DropdownMenuItem asChild>
+                    <Link to="/privacy-policy" className="cursor-pointer text-xs uppercase tracking-wider">
+                      Privacy Policy
+                    </Link>
+                  </DropdownMenuItem>
+                  <DropdownMenuItem asChild>
+                    <Link to="/shipping-policy" className="cursor-pointer text-xs uppercase tracking-wider">
+                      Shipping Policy
+                    </Link>
+                  </DropdownMenuItem>
+                  <DropdownMenuItem asChild>
+                    <Link to="/refund-policy" className="cursor-pointer text-xs uppercase tracking-wider">
+                      Refund & Return
+                    </Link>
+                  </DropdownMenuItem>
+                </DropdownMenuContent>
+              </DropdownMenu>
             </nav>
 
             {/* Actions */}
@@ -180,6 +212,32 @@ const Header = () => {
                     {link.label}
                   </a>
                 ))}
+
+                {/* Policy Pages Submenu */}
+                <div className="pt-4 border-t border-white/10 space-y-4 animate-fade-in-up" style={{ animationDelay: `${navLinks.length * 100}ms` }}>
+                  <p className="text-xs uppercase tracking-widest text-gold/60 font-bold">Policies</p>
+                  <Link
+                    to="/privacy-policy"
+                    className="text-xl font-heading text-foreground/80 hover:text-gold transition-colors block"
+                    onClick={() => setIsMobileMenuOpen(false)}
+                  >
+                    Privacy Policy
+                  </Link>
+                  <Link
+                    to="/shipping-policy"
+                    className="text-xl font-heading text-foreground/80 hover:text-gold transition-colors block"
+                    onClick={() => setIsMobileMenuOpen(false)}
+                  >
+                    Shipping Policy
+                  </Link>
+                  <Link
+                    to="/refund-policy"
+                    className="text-xl font-heading text-foreground/80 hover:text-gold transition-colors block"
+                    onClick={() => setIsMobileMenuOpen(false)}
+                  >
+                    Refund & Return
+                  </Link>
+                </div>
               </nav>
 
               <div className="mt-auto pt-8 border-t border-white/10 animate-fade-in" style={{ animationDelay: '500ms' }}>
