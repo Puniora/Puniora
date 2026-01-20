@@ -54,6 +54,25 @@ const GiftSetBuilder = ({ products, onRefresh }: GiftSetBuilderProps) => {
 
     const getDirectUrl = (url: string) => {
         if (!url) return url;
+        
+        // Handle Google Drive links
+        if (url.includes('drive.google.com')) {
+            // Extract file ID
+            // Supports formats:
+            // 1. https://drive.google.com/file/d/FILE_ID/view
+            // 2. https://drive.google.com/open?id=FILE_ID
+            let fileId = '';
+            const match1 = url.match(/\/d\/([a-zA-Z0-9_-]+)/);
+            const match2 = url.match(/id=([a-zA-Z0-9_-]+)/);
+            
+            if (match1) fileId = match1[1];
+            else if (match2) fileId = match2[1];
+            
+            if (fileId) {
+                return `https://drive.google.com/uc?export=view&id=${fileId}`;
+            }
+        }
+        
         return url;
     };
 
