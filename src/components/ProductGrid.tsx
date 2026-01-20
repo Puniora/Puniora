@@ -7,8 +7,10 @@ import { useCart } from "@/context/CartContext";
 import { Loader2 } from "lucide-react";
 import { productService } from "@/lib/services/productService";
 import { Product } from "@/lib/products";
+import { useScrollReveal } from "@/hooks/useScrollReveal";
 
 const ProductGrid = () => {
+  useScrollReveal();
   const { addToCart } = useCart();
   const [products, setProducts] = useState<Product[]>([]);
   const [loading, setLoading] = useState(true);
@@ -47,7 +49,7 @@ const ProductGrid = () => {
     <section id="collection" className="py-24 bg-background">
       <div className="container mx-auto px-6">
         {/* Section Header */}
-        <div className="text-center mb-16 animate-slide-up">
+        <div className="text-center mb-16 animate-on-scroll reveal opacity-0">
           <span className="text-xs uppercase tracking-[0.4em] text-gold mb-4 block">
             Our Fragrances
           </span>

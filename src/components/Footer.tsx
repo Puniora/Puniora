@@ -6,19 +6,19 @@ const Footer = () => {
 
   return (
     <footer id="contact" className="bg-foreground text-background">
-      <div className="container mx-auto px-6 py-16">
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-10">
+      <div className="container mx-auto px-6 py-16 md:py-24">
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-12 md:gap-10">
           {/* Brand */}
-          <div className="lg:col-span-1">
-            <div className="mb-6">
-              <span className="font-heading text-2xl tracking-wide">
-                Puniora<sup className="text-[10px] ml-0.5">™</sup>
+          <div className="lg:col-span-1 space-y-4">
+            <div>
+              <span className="font-heading text-3xl tracking-wide bg-gradient-gold bg-clip-text text-transparent">
+                Puniora<sup className="text-[10px] ml-0.5 text-gold">™</sup>
               </span>
-              <p className="text-xs tracking-[0.2em] uppercase text-background/60 mt-1">
+              <p className="text-xs tracking-[0.2em] uppercase text-background/60 mt-2">
                 Luxury in every breath
               </p>
             </div>
-            <p className="text-sm text-background/70 leading-relaxed">
+            <p className="text-sm text-background/70 leading-relaxed max-w-xs">
               Discover the art of fine fragrance. Each scent is a journey,
               crafted to evoke emotion and create lasting memories.
             </p>
