@@ -5,6 +5,7 @@ import { Product, formatPrice } from "@/lib/products";
 import { useCart } from "@/context/CartContext";
 import { Plus } from "lucide-react";
 import { useScrollReveal } from "@/hooks/useScrollReveal";
+import { getDirectUrl } from "@/lib/utils/imageUtils";
 
 interface ProductCardProps {
   product: Product;
@@ -28,94 +29,78 @@ const ProductCard = ({ product, index, overrideImages }: ProductCardProps) => {
   return (
     <article
       ref={cardRef}
-      className="group relative opacity-0 reveal bg-white rounded-3xl overflow-hidden transition-all duration-700 hover:shadow-2xl hover:shadow-gold/20 border border-transparent hover:border-gold/30 flex flex-col h-full"
+      className="group relative opacity-0 reveal bg-[#050505] rounded-[1.5rem] overflow-hidden flex flex-col h-full border border-gold/20 shadow-lg hover:shadow-[0_20px_40px_-10px_rgba(0,0,0,0.5)] hover:border-gold/50 transition-all duration-500"
       style={{ animationDelay: `${index * 0.1}s` }}
     >
       <Link to={`/product/${product.id}`} className="block h-full relative">
-        {/* Image Container */}
-        {/* Image Container */}
-        <div className="relative aspect-[4/5] bg-secondary overflow-hidden">
-          <div className="absolute inset-0 bg-gold/5 mix-blend-overlay group-hover:opacity-0 transition-opacity duration-500" />
+        {/* Shine Element */}
+        <div className="absolute inset-0 bg-gradient-to-tr from-transparent via-white/10 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-700 pointer-events-none z-20" />
+
+        {/* Image Container - Black background to merge with dark product images */}
+        <div className="relative aspect-[4/5] bg-[#050505] overflow-hidden">
 
           {overrideImages && overrideImages.length > 0 ? (
-            // Grid Layout
             <div className={`w-full h-full grid ${overrideImages.length === 2 ? 'grid-cols-2' : 'grid-cols-2 grid-rows-2'}`}>
               {overrideImages.slice(0, 4).map((img, idx) => (
                 <img
                   key={idx}
-                  src={img}
+                  src={getDirectUrl(img)}
                   alt=""
-                  className={`w-full h-full object-cover border-white/50
-                           ${overrideImages.length === 2 && idx === 0 ? 'border-r' : ''}
-                           ${overrideImages.length > 2 && idx === 0 ? 'border-r border-b' : ''}
-                           ${overrideImages.length > 2 && idx === 1 ? 'border-l border-b' : ''}
-                           ${overrideImages.length > 2 && idx === 2 ? 'border-r border-t' : ''}
-                           ${overrideImages.length > 2 && idx === 3 ? 'border-l border-t' : ''}
-                           ${overrideImages.length === 3 && idx === 2 ? 'col-span-2 border-r-0' : ''} 
-                         `}
+                  className={`w-full h-full object-cover opacity-90 group-hover:opacity-100 transition-opacity duration-500`}
                 />
               ))}
             </div>
           ) : (
             <img
-              src={product.images[0]}
+              src={getDirectUrl(product.images[0])}
               alt={`${product.name} - ${product.category}`}
-              className="w-full h-full object-cover transition-transform duration-[1.5s] ease-out group-hover:scale-110 group-hover:rotate-1"
+              className="w-full h-full object-cover opacity-95 group-hover:opacity-100 transition-all duration-[1.5s] ease-out group-hover:scale-105"
             />
           )}
 
-          {/* Glass Overlay Price (Desktop) */}
-          <div className="hidden md:block absolute top-4 right-4 glass px-4 py-2 rounded-full shadow-lg z-10 transition-all duration-500 group-hover:-translate-y-1 group-hover:bg-white group-hover:text-gold border border-white/20">
-            <span className="text-foreground group-hover:text-gold font-bold text-xs uppercase tracking-widest">
+          {/* Vignette to blend edges if image isn't perfect black */}
+          <div className="absolute inset-x-0 bottom-0 h-1/3 bg-gradient-to-t from-[#050505] to-transparent opacity-60" />
+
+          {/* Floating Price Tag */}
+          <div className="hidden md:block absolute top-4 right-4 bg-black/40 backdrop-blur-md px-4 py-1.5 rounded-full z-10 border border-gold/30 shadow-sm group-hover:bg-gold group-hover:text-black transition-colors duration-500">
+            <span className="text-white group-hover:text-black font-medium text-xs tracking-widest font-heading">
               {formatPrice(product.price)}
             </span>
           </div>
 
-          {/* Quick Add Button (Desktop) */}
-          <div className="hidden md:block absolute inset-x-6 bottom-6 opacity-0 translate-y-4 group-hover:opacity-100 group-hover:translate-y-0 transition-all duration-500 z-20">
+          {/* Quick Add Button (Floating) */}
+          <div className="hidden md:block absolute bottom-6 left-1/2 -translate-x-1/2 translate-y-8 opacity-0 group-hover:opacity-100 group-hover:translate-y-0 transition-all duration-500 z-20 w-[85%]">
             <Button
-              variant="gold"
-              className="w-full shadow-lg shadow-gold/30 font-heading tracking-widest text-xs h-12 uppercase"
+              className="w-full bg-white text-black hover:bg-gold hover:text-black font-body tracking-[0.2em] text-[10px] uppercase h-10 rounded-full shadow-lg"
               onClick={handleAddToCart}
             >
-              <Plus className="h-4 w-4 mr-2" />
-              Add to Collection
+              Add to Cart
             </Button>
           </div>
 
           {/* Category Badge */}
-          <div className="absolute top-4 left-4 glass-dark px-3 py-1.5 shadow-lg rounded-full backdrop-blur-md border border-white/10">
-            <span className="text-[10px] uppercase tracking-[0.25em] font-medium text-white/90">
+          <div className="absolute top-4 left-4 bg-black/40 backdrop-blur-sm px-3 py-1 rounded-full border border-white/10">
+            <span className="text-[9px] uppercase tracking-[0.2em] text-white/70">
               {product.category}
             </span>
           </div>
         </div>
 
-        {/* Product Info */}
-        <div className="p-5 md:p-6 space-y-3 bg-white flex-1 flex flex-col justify-between relative z-10">
-          <div className="space-y-1.5">
-            <h3 className="font-heading text-xl md:text-2xl text-foreground group-hover:text-gold transition-colors duration-500 line-clamp-1">
-              {product.name}
-            </h3>
-            <div className="h-px w-10 bg-gold/30 group-hover:w-full transition-all duration-700 ease-out" />
-            <p className="text-[10px] md:text-xs text-muted-foreground tracking-widest uppercase line-clamp-1 italic pt-1">
-              {product.notes.join(" • ")}
-            </p>
-          </div>
+        {/* Minimalist Info (Below Image) */}
+        <div className="pt-6 pb-6 px-6 text-center relative z-10 space-y-2 bg-[#050505] flex-1 border-t border-white/5">
+          <h3 className="font-heading text-2xl text-white group-hover:text-gold transition-colors duration-500">
+            {product.name}
+          </h3>
+          <div className="w-8 h-px bg-white/20 mx-auto group-hover:w-16 group-hover:bg-gold transition-all duration-500" />
+          <p className="text-[10px] text-white/40 tracking-[0.3em] uppercase group-hover:text-white/60 transition-colors">
+            {product.notes.join(" • ")}
+          </p>
 
-          {/* Mobile-only layout refinement */}
-          <div className="flex md:hidden items-center justify-between pt-3 border-t border-muted/50 mt-2">
-            <span className="text-gold font-bold text-lg">
+          {/* Mobile Price/Add */}
+          <div className="md:hidden flex items-center justify-center gap-4 pt-3">
+            <span className="text-gold font-heading text-lg font-bold">
               {formatPrice(product.price)}
             </span>
-            <Button
-              variant="gold"
-              size="icon"
-              className="h-10 w-10 rounded-full shadow-lg shadow-gold/20 active:scale-95 transition-transform"
-              onClick={handleAddToCart}
-            >
-              <Plus className="h-5 w-5" />
-            </Button>
           </div>
         </div>
       </Link>

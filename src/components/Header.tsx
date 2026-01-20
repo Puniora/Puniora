@@ -56,16 +56,10 @@ const Header = () => {
     <>
       <AnnouncementBanner enabled={bannerEnabled} text={bannerText} />
       <header
-        className={`fixed left-0 right-0 z-50 transition-all duration-500 top-0 ${bannerEnabled && bannerText ? 'mt-8' : 'mt-0'} ${!isTransparent
-          // Note: If banner is enabled, we push header down. 
-          // BUT if we are at top of page (isTransparent true), does it still look right?
-          // If banner is present, it pushes page content down (it is relative). 
-          // Header is fixed. 
-          // If Header has mt-8, it moves down 32px.
-          // Perfect.
-          ? "glass shadow-sm py-2"
-          : "bg-transparent py-4"
-          } ${isHome ? 'mt-0' : ''}`}
+        className={`fixed left-0 right-0 z-50 transition-all duration-700 top-0 px-4 md:px-0 ${bannerEnabled && bannerText ? 'mt-8' : 'mt-0'} ${!isTransparent
+          ? "glass shadow-[0_4px_20px_-5px_rgba(212,175,55,0.1)] py-3 mt-4 mx-4 md:mx-8 rounded-full border-white/40"
+          : "bg-transparent py-6"
+          } ${isHome ? '' : ''}`}
       // Note: The margin-top logic might need adjustment depending on how the banner is positioned (sticky vs fixed).
       // If banner is simply rendered above header, header needs to be relative or sticky. 
       // Actually, if Header is fixed, Banner should also be fixed or push it down. 
@@ -81,11 +75,11 @@ const Header = () => {
           <div className="flex items-center justify-between h-16 md:h-20">
             {/* Logo */}
             <a href="/" className="flex flex-col items-start group">
-              <span className={`font-heading text-2xl md:text-3xl tracking-wide transition-colors duration-300 ${!isTransparent ? 'text-foreground' : 'text-white'} group-hover:text-gold`}>
+              <span className={`font-heading text-2xl md:text-3xl tracking-wide transition-colors duration-300 ${!isTransparent ? 'text-bronze-dark' : 'text-bronze-dark'} group-hover:text-gold`}>
                 Puniora
                 <sup className="text-[10px] ml-0.5">™</sup>
               </span>
-              <span className={`text-[8px] md:text-[10px] tracking-[0.3em] uppercase transition-colors duration-500 -mt-1 group-hover:tracking-[0.4em] ${!isTransparent ? 'text-muted-foreground' : 'text-white/70'}`}>
+              <span className={`text-[8px] md:text-[10px] tracking-[0.3em] uppercase transition-colors duration-500 -mt-1 group-hover:tracking-[0.4em] ${!isTransparent ? 'text-bronze/60' : 'text-bronze/80'}`}>
                 Luxury in every breath
               </span>
             </a>
@@ -96,7 +90,7 @@ const Header = () => {
                 <a
                   key={link.label}
                   href={link.href}
-                  className={`text-xs uppercase tracking-[0.2em] transition-colors duration-300 relative group ${!isTransparent ? 'text-foreground/80' : 'text-white/90'} hover:text-gold`}
+                  className={`text-xs uppercase tracking-[0.2em] transition-colors duration-300 relative group ${!isTransparent ? 'text-bronze-dark' : 'text-bronze-dark'} hover:text-gold`}
                 >
                   {link.label}
                   <span className="absolute -bottom-1 left-0 w-0 h-px bg-gold transition-all duration-300 group-hover:w-full"></span>
@@ -109,7 +103,7 @@ const Header = () => {
               <Button
                 variant="ghost"
                 size="icon"
-                className={`hover:text-gold transition-colors ${!isTransparent ? 'text-foreground' : 'text-white'}`}
+                className={`hover:text-gold transition-colors ${!isTransparent ? 'text-bronze-dark' : 'text-bronze-dark'}`}
                 onClick={() => setIsSearchOpen(true)}
               >
                 <Search className="h-7 w-7" />
@@ -118,7 +112,7 @@ const Header = () => {
               <Button
                 variant="ghost"
                 size="icon"
-                className={`relative hover:text-gold transition-colors ${!isTransparent ? 'text-foreground' : 'text-white'}`}
+                className={`relative hover:text-gold transition-colors ${!isTransparent ? 'text-bronze-dark' : 'text-bronze-dark'}`}
                 onClick={openCart}
               >
                 <ShoppingBag className="h-7 w-7" />
@@ -134,7 +128,7 @@ const Header = () => {
                 <Button
                   variant="ghost"
                   size="icon"
-                  className={`hidden md:inline-flex hover:text-gold transition-colors ${!isTransparent ? 'text-foreground' : 'text-white'}`}
+                  className={`hidden md:inline-flex hover:text-gold transition-colors ${!isTransparent ? 'text-bronze-dark' : 'text-bronze-dark'}`}
                 >
                   <User className="h-7 w-7" />
                 </Button>
@@ -143,7 +137,7 @@ const Header = () => {
               <Button
                 variant="ghost"
                 size="icon"
-                className={`md:hidden hover:text-gold transition-colors ${!isTransparent ? 'text-foreground' : 'text-white'}`}
+                className={`md:hidden hover:text-gold transition-colors ${!isTransparent ? 'text-bronze-dark' : 'text-bronze-dark'}`}
                 onClick={() => setIsMobileMenuOpen(true)}
               >
                 <Menu className="h-8 w-8" />

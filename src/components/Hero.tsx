@@ -3,6 +3,7 @@ import { ArrowDown } from "lucide-react";
 import heroBanner from "@/assets/hero-banner.jpg";
 import { useEffect, useState } from "react";
 import { settingsService } from "@/lib/services/settingsService";
+import { getDirectUrl } from "@/lib/utils/imageUtils";
 
 const Hero = () => {
   const [scrollY, setScrollY] = useState(0);
@@ -69,7 +70,7 @@ const Hero = () => {
             }}
           >
             <img
-              src={img}
+              src={getDirectUrl(img)}
               alt="Puniora Luxury Perfume Collection"
               className="w-full h-full object-cover animate-scale-in"
               onError={(e) => {

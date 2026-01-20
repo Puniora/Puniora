@@ -8,6 +8,7 @@ import { reviewService, Review } from "@/lib/services/reviewService";
 import { productService } from "@/lib/services/productService";
 import { toast } from "sonner";
 import { Separator } from "@/components/ui/separator";
+import { getDirectUrl } from "@/lib/utils/imageUtils";
 
 interface ReviewSectionProps {
   productId: string;
@@ -23,7 +24,7 @@ const ReviewSection = ({ productId }: ReviewSectionProps) => {
   const [comment, setComment] = useState("");
   const [imageFiles, setImageFiles] = useState<File[]>([]);
   const [imagePreviews, setImagePreviews] = useState<string[]>([]);
-  
+
   useEffect(() => {
     fetchReviews();
   }, [productId]);
@@ -68,7 +69,7 @@ const ReviewSection = ({ productId }: ReviewSectionProps) => {
 
     try {
       setSubmitting(true);
-      
+
       // Upload images if any
       const imageUrls: string[] = [];
       if (imageFiles.length > 0) {
@@ -109,28 +110,28 @@ const ReviewSection = ({ productId }: ReviewSectionProps) => {
           <div className="glass p-8 rounded-3xl shadow-xl shadow-gold/5">
             <h2 className="text-3xl font-heading mb-6">Customer Reviews</h2>
             <div className="flex items-center gap-6">
-               <div className="text-6xl font-bold gold-text-gradient">
-                  {reviews.length > 0 
-                    ? (reviews.reduce((acc, r) => acc + r.rating, 0) / reviews.length).toFixed(1)
-                    : "0"}
-               </div>
-               <div className="space-y-1">
-                  <div className="flex gap-0.5">
-                    {[1, 2, 3, 4, 5].map((s) => (
-                      <Star 
-                        key={s} 
-                        className={`h-5 w-5 ${s <= Math.round(reviews.reduce((acc, r) => acc + r.rating, 0) / (reviews.length || 1)) ? 'fill-gold text-gold' : 'text-muted-foreground/20'}`} 
-                      />
-                    ))}
-                  </div>
-                  <p className="text-xs font-bold uppercase tracking-widest text-muted-foreground">Based on {reviews.length} reviews</p>
-               </div>
+              <div className="text-6xl font-bold gold-text-gradient">
+                {reviews.length > 0
+                  ? (reviews.reduce((acc, r) => acc + r.rating, 0) / reviews.length).toFixed(1)
+                  : "0"}
+              </div>
+              <div className="space-y-1">
+                <div className="flex gap-0.5">
+                  {[1, 2, 3, 4, 5].map((s) => (
+                    <Star
+                      key={s}
+                      className={`h-5 w-5 ${s <= Math.round(reviews.reduce((acc, r) => acc + r.rating, 0) / (reviews.length || 1)) ? 'fill-gold text-gold' : 'text-muted-foreground/20'}`}
+                    />
+                  ))}
+                </div>
+                <p className="text-xs font-bold uppercase tracking-widest text-muted-foreground">Based on {reviews.length} reviews</p>
+              </div>
             </div>
           </div>
 
           <form onSubmit={handleSubmit} className="space-y-6 bg-muted/20 p-8 rounded-3xl border border-border/50 backdrop-blur-sm">
             <h3 className="font-heading text-2xl">Share Your Experience</h3>
-            
+
             <div className="space-y-3">
               <Label className="text-[10px] uppercase tracking-[0.2em] font-bold text-muted-foreground">Rating</Label>
               <div className="flex gap-2">
@@ -143,8 +144,8 @@ const ReviewSection = ({ productId }: ReviewSectionProps) => {
                     onMouseLeave={() => setHoverRating(0)}
                     className="transition-all hover:scale-125 p-1"
                   >
-                    <Star 
-                      className={`h-8 w-8 ${(hoverRating || rating) >= s ? 'fill-gold text-gold shadow-gold' : 'text-muted-foreground/30'}`} 
+                    <Star
+                      className={`h-8 w-8 ${(hoverRating || rating) >= s ? 'fill-gold text-gold shadow-gold' : 'text-muted-foreground/30'}`}
                     />
                   </button>
                 ))}
@@ -153,9 +154,9 @@ const ReviewSection = ({ productId }: ReviewSectionProps) => {
 
             <div className="space-y-2">
               <Label htmlFor="userName" className="text-[10px] uppercase tracking-[0.2em] font-bold text-muted-foreground">Your Name</Label>
-              <Input 
-                id="userName" 
-                placeholder="How should we address you?" 
+              <Input
+                id="userName"
+                placeholder="How should we address you?"
                 className="h-12 bg-white/50 border-border/50 focus:border-gold rounded-xl px-4 italic"
                 value={userName}
                 onChange={(e) => setUserName(e.target.value)}
@@ -165,9 +166,9 @@ const ReviewSection = ({ productId }: ReviewSectionProps) => {
 
             <div className="space-y-2">
               <Label htmlFor="comment">Review</Label>
-              <Textarea 
-                id="comment" 
-                placeholder="Share your experience with this fragrance..." 
+              <Textarea
+                id="comment"
+                placeholder="Share your experience with this fragrance..."
                 className="min-h-[100px]"
                 value={comment}
                 onChange={(e) => setComment(e.target.value)}
@@ -199,10 +200,10 @@ const ReviewSection = ({ productId }: ReviewSectionProps) => {
               </div>
             </div>
 
-            <Button 
-              type="submit" 
-              variant="gold" 
-              className="w-full" 
+            <Button
+              type="submit"
+              variant="gold"
+              className="w-full"
               disabled={submitting}
             >
               {submitting ? <Loader2 className="h-4 w-4 animate-spin mr-2" /> : "Post Review"}
@@ -218,8 +219,8 @@ const ReviewSection = ({ productId }: ReviewSectionProps) => {
             </div>
           ) : reviews.length === 0 ? (
             <div className="text-center py-12 bg-muted/20 rounded-xl border border-dashed flex flex-col items-center">
-               <StarOff className="h-10 w-10 text-muted-foreground/30 mb-4" />
-               <p className="text-muted-foreground">No reviews yet. Be the first to review!</p>
+              <StarOff className="h-10 w-10 text-muted-foreground/30 mb-4" />
+              <p className="text-muted-foreground">No reviews yet. Be the first to review!</p>
             </div>
           ) : (
             <div className="space-y-8">
@@ -229,22 +230,22 @@ const ReviewSection = ({ productId }: ReviewSectionProps) => {
                     <div>
                       <div className="flex gap-1 mb-1">
                         {[1, 2, 3, 4, 5].map((s) => (
-                          <Star 
-                            key={s} 
-                            className={`h-3 w-3 ${s <= review.rating ? 'fill-gold text-gold' : 'text-muted-foreground/20'}`} 
+                          <Star
+                            key={s}
+                            className={`h-3 w-3 ${s <= review.rating ? 'fill-gold text-gold' : 'text-muted-foreground/20'}`}
                           />
                         ))}
                       </div>
                       <h4 className="font-semibold text-lg">{review.user_name}</h4>
                     </div>
                     <div className="flex items-center gap-4">
-                       <span className="text-xs text-muted-foreground">
-                         {new Date(review.created_at).toLocaleDateString('en-IN', {
-                            day: 'numeric',
-                            month: 'short',
-                            year: 'numeric'
-                         })}
-                       </span>
+                      <span className="text-xs text-muted-foreground">
+                        {new Date(review.created_at).toLocaleDateString('en-IN', {
+                          day: 'numeric',
+                          month: 'short',
+                          year: 'numeric'
+                        })}
+                      </span>
                     </div>
                   </div>
                   <p className="text-muted-foreground leading-relaxed mb-4">
@@ -254,7 +255,7 @@ const ReviewSection = ({ productId }: ReviewSectionProps) => {
                     <div className="flex gap-3 overflow-x-auto pb-2">
                       {review.images.map((img, idx) => (
                         <div key={idx} className="w-24 h-24 rounded-lg overflow-hidden flex-shrink-0 border border-border cursor-pointer hover:border-gold transition-colors">
-                           <img src={img} alt="" className="w-full h-full object-cover" />
+                          <img src={getDirectUrl(img)} alt="" className="w-full h-full object-cover" />
                         </div>
                       ))}
                     </div>

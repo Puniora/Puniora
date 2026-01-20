@@ -25,6 +25,7 @@ import {
 } from "@/components/ui/accordion";
 import { Loader2, ShoppingCart, ArrowLeft, Star, ShieldCheck, Truck, RefreshCw, Share2, CreditCard, Banknote, MapPin, Clock } from "lucide-react";
 import { toast } from "sonner";
+import { getDirectUrl } from "@/lib/utils/imageUtils";
 
 const ProductDetails = () => {
   const { id } = useParams<{ id: string }>();
@@ -72,22 +73,22 @@ const ProductDetails = () => {
 
           // Fetch bundle items if this is a gift set with no images (or placeholder)
           if (data.isGiftSet && (!data.images || data.images.length === 0 || (data.images.length === 1 && !data.images[0]))) {
-             if (data.bundleItems && data.bundleItems.length > 0) {
-                 // We need to fetch these items. Since we don't have getProductsByIds, we'll fetch all or use getProductById in parallel
-                 // Fetching all is safer for caching + simpler if count is low (<100 products), but parallel individual fetch is also fine for small bundles.
-                 // Let's use getProductById in parallel for efficiency if we assume they are not already cached heavily.
-                 // Actually, productService doesn't expose cache directly, so let's do parallel requests.
-                 const bundlePromises = data.bundleItems.map(bId => productService.getProductById(bId));
-                 const bundleResults = await Promise.all(bundlePromises);
-                 const validImages = bundleResults
-                    .filter(p => p !== null)
-                    .map(p => p!.images[0])
-                    .filter(Boolean);
-                 
-                 if (validImages.length > 0) {
-                     setBundleImages(validImages);
-                 }
-             }
+            if (data.bundleItems && data.bundleItems.length > 0) {
+              // We need to fetch these items. Since we don't have getProductsByIds, we'll fetch all or use getProductById in parallel
+              // Fetching all is safer for caching + simpler if count is low (<100 products), but parallel individual fetch is also fine for small bundles.
+              // Let's use getProductById in parallel for efficiency if we assume they are not already cached heavily.
+              // Actually, productService doesn't expose cache directly, so let's do parallel requests.
+              const bundlePromises = data.bundleItems.map(bId => productService.getProductById(bId));
+              const bundleResults = await Promise.all(bundlePromises);
+              const validImages = bundleResults
+                .filter(p => p !== null)
+                .map(p => p!.images[0])
+                .filter(Boolean);
+
+              if (validImages.length > 0) {
+                setBundleImages(validImages);
+              }
+            }
           }
         }
       } catch (error) {
@@ -151,7 +152,7 @@ const ProductDetails = () => {
     <div className="min-h-screen bg-background">
       <Header />
 
-      <main className="pt-24 pb-16">
+      <main className="pt-40 pb-24">
         <div className="container mx-auto px-6">
           {/* Breadcrumb / Back button */}
           <Link to="/" className="inline-flex items-center gap-2 text-sm text-muted-foreground hover:text-gold transition-colors mb-4 lg:mb-8 group">
@@ -169,14 +170,13 @@ const ProductDetails = () => {
                   {product.images.map((img, index) => (
                     <div
                       key={`img-${index}`}
-                      className={`relative w-20 h-20 shrink-0 bg-white border-2 rounded-xl p-2 flex items-center justify-center cursor-pointer transition-all duration-300 ${
-                        (selectedImage === img || (!selectedImage && activeImage === index && !product.videos?.includes(selectedImage)))
-                          ? 'border-gold shadow-md shadow-gold/10'
-                          : 'border-border hover:border-gold/50'
-                      }`}
+                      className={`relative w-20 h-20 shrink-0 bg-white border-2 rounded-xl p-2 flex items-center justify-center cursor-pointer transition-all duration-300 ${(selectedImage === img || (!selectedImage && activeImage === index && !product.videos?.includes(selectedImage)))
+                        ? 'border-gold shadow-md shadow-gold/10'
+                        : 'border-border hover:border-gold/50'
+                        }`}
                       onClick={() => { setActiveImage(index); setSelectedImage(img); }}
                     >
-                      <img src={img} alt="" className="w-full h-full object-contain" />
+                      <img src={getDirectUrl(img)} alt="" className="w-full h-full object-contain" />
                     </div>
                   ))}
 
@@ -194,15 +194,14 @@ const ProductDetails = () => {
                     return (
                       <div
                         key={`vid-${index}`}
-                        className={`relative w-20 h-20 shrink-0 bg-black border-2 rounded-xl flex items-center justify-center overflow-hidden cursor-pointer transition-all duration-300 ${
-                          selectedImage === video
-                            ? 'border-gold shadow-md shadow-gold/10'
-                            : 'border-border hover:border-gold/50'
-                        }`}
+                        className={`relative w-20 h-20 shrink-0 bg-black border-2 rounded-xl flex items-center justify-center overflow-hidden cursor-pointer transition-all duration-300 ${selectedImage === video
+                          ? 'border-gold shadow-md shadow-gold/10'
+                          : 'border-border hover:border-gold/50'
+                          }`}
                         onClick={() => { setSelectedImage(video); }}
                       >
                         {thumbUrl ? (
-                          <img src={thumbUrl} alt="Video thumbnail" className="w-full h-full object-cover opacity-80 hover:opacity-100 transition-opacity" />
+                          <img src={getDirectUrl(thumbUrl)} alt="Video thumbnail" className="w-full h-full object-cover opacity-80 hover:opacity-100 transition-opacity" />
                         ) : (
                           <div className="w-full h-full bg-neutral-900" />
                         )}
@@ -257,14 +256,14 @@ const ProductDetails = () => {
 
                   // If we have bundle items but no specific selected image, show grid
                   if (bundleImages.length > 0 && !selectedImage && activeImage === 0 && (!product.images || product.images.length <= 1)) {
-                      return (
-                         <div className={`w-full h-full grid ${bundleImages.length === 2 ? 'grid-cols-2' : 'grid-cols-2 grid-rows-2'}`}>
-                            {bundleImages.slice(0, 4).map((img, idx) => (
-                               <img 
-                                 key={idx}
-                                 src={img} 
-                                 alt="" 
-                                 className={`w-full h-full object-cover border-white/50
+                    return (
+                      <div className={`w-full h-full grid ${bundleImages.length === 2 ? 'grid-cols-2' : 'grid-cols-2 grid-rows-2'}`}>
+                        {bundleImages.slice(0, 4).map((img, idx) => (
+                          <img
+                            key={idx}
+                            src={getDirectUrl(img)}
+                            alt=""
+                            className={`w-full h-full object-cover border-white/50
                                    ${bundleImages.length === 2 && idx === 0 ? 'border-r' : ''}
                                    ${bundleImages.length > 2 && idx === 0 ? 'border-r border-b' : ''}
                                    ${bundleImages.length > 2 && idx === 1 ? 'border-l border-b' : ''}
@@ -272,17 +271,17 @@ const ProductDetails = () => {
                                    ${bundleImages.length > 2 && idx === 3 ? 'border-l border-t' : ''}
                                    ${bundleImages.length === 3 && idx === 2 ? 'col-span-2 border-r-0' : ''} 
                                  `}
-                               />
-                            ))}
-                         </div>
-                      );
+                          />
+                        ))}
+                      </div>
+                    );
                   }
 
                   return (
                     <div className="w-full h-full flex items-center justify-center">
                       <img
                         key={currentMedia}
-                        src={currentMedia}
+                        src={getDirectUrl(currentMedia)}
                         alt={product.name}
                         className="w-full h-full object-contain max-w-full max-h-full transition-all duration-500 group-hover:scale-105 animate-fade-in"
                         onError={(e) => {
@@ -374,41 +373,41 @@ const ProductDetails = () => {
                     <span className="text-xs font-bold uppercase tracking-[0.2em] text-muted-foreground text-gold">Olfactory Notes</span>
                     <div className="flex flex-wrap gap-4">
                       {(product.olfactoryNotes && product.olfactoryNotes.length > 0) ? (
-                         // Rich Notes Display
-                         product.olfactoryNotes.map((note, i) => (
-                            <button
-                              key={i}
-                              onClick={() => setSelectedNote(selectedNote === note.name ? "" : note.name)} // Toggle
-                              className={`group relative flex flex-col items-center gap-2 p-3 rounded-xl border transition-all duration-300 w-24 ${selectedNote === note.name
-                                ? 'bg-gold/10 text-gold border-gold shadow-md shadow-gold/10 ring-1 ring-gold/20'
-                                : 'bg-white/50 backdrop-blur-sm text-foreground border-border hover:border-gold/50 hover:bg-gold/5'
-                                }`}
-                            >
-                              <div className={`w-14 h-14 rounded-full overflow-hidden border-2 shrink-0 transition-colors ${selectedNote === note.name ? 'border-gold' : 'border-white shadow-sm'}`}>
-                                   {note.image ? (
-                                     <img src={note.image} className="w-full h-full object-cover" alt={note.name} />
-                                   ) : (
-                                     <div className="w-full h-full bg-gold/20 flex items-center justify-center text-[8px] font-bold text-muted-foreground">
-                                        NOTE
-                                     </div>
-                                   )}
-                              </div>
-                              <span className="text-[10px] font-bold uppercase tracking-wider text-center leading-tight">{note.name}</span>
-                            </button>
-                         ))
+                        // Rich Notes Display
+                        product.olfactoryNotes.map((note, i) => (
+                          <button
+                            key={i}
+                            onClick={() => setSelectedNote(selectedNote === note.name ? "" : note.name)} // Toggle
+                            className={`group relative flex flex-col items-center gap-2 p-3 rounded-xl border transition-all duration-300 w-24 ${selectedNote === note.name
+                              ? 'bg-gold/10 text-gold border-gold shadow-md shadow-gold/10 ring-1 ring-gold/20'
+                              : 'bg-white/50 backdrop-blur-sm text-foreground border-border hover:border-gold/50 hover:bg-gold/5'
+                              }`}
+                          >
+                            <div className={`w-14 h-14 rounded-full overflow-hidden border-2 shrink-0 transition-colors ${selectedNote === note.name ? 'border-gold' : 'border-white shadow-sm'}`}>
+                              {note.image ? (
+                                <img src={getDirectUrl(note.image)} className="w-full h-full object-cover" alt={note.name} />
+                              ) : (
+                                <div className="w-full h-full bg-gold/20 flex items-center justify-center text-[8px] font-bold text-muted-foreground">
+                                  NOTE
+                                </div>
+                              )}
+                            </div>
+                            <span className="text-[10px] font-bold uppercase tracking-wider text-center leading-tight">{note.name}</span>
+                          </button>
+                        ))
                       ) : (
                         // Fallback to simple notes
                         product.notes.map((note, i) => (
-                            <button
-                                key={i}
-                                onClick={() => setSelectedNote(selectedNote === note ? "" : note)}
-                                className={`px-4 py-2 rounded-xl text-xs font-medium border shadow-sm transition-all duration-300 ${selectedNote === note
-                                    ? 'bg-gold/10 text-gold border-gold shadow-gold/10'
-                                    : 'bg-white/50 backdrop-blur-sm text-foreground border-border hover:border-gold/50'
-                                    }`}
-                            >
-                                {note}
-                            </button>
+                          <button
+                            key={i}
+                            onClick={() => setSelectedNote(selectedNote === note ? "" : note)}
+                            className={`px-4 py-2 rounded-xl text-xs font-medium border shadow-sm transition-all duration-300 ${selectedNote === note
+                              ? 'bg-gold/10 text-gold border-gold shadow-gold/10'
+                              : 'bg-white/50 backdrop-blur-sm text-foreground border-border hover:border-gold/50'
+                              }`}
+                          >
+                            {note}
+                          </button>
                         ))
                       )}
                     </div>
@@ -536,71 +535,70 @@ const ProductDetails = () => {
         </div>
         {/* Full Width Accordion Section */}
         {product.extraSections && product.extraSections.length > 0 && (
-          <div className="container mx-auto px-6 mt-16 mb-24 animate-fade-in" style={{ animationDelay: '200ms' }}>
-             <div className="w-full border-t border-gold/20">
-                <Accordion type="single" collapsible className="w-full" defaultValue={product.olfactoryNotes && product.olfactoryNotes.length > 0 ? "olfactory-notes" : undefined}>
-                  
-                  {/* Olfactory Notes Section (Default Open) */}
-                  {product.olfactoryNotes && product.olfactoryNotes.length > 0 && (
-                    <AccordionItem value="olfactory-notes" className="border-b border-gold/20 py-4">
-                      <AccordionTrigger className="text-xl md:text-2xl font-medium uppercase tracking-[0.15em] hover:text-gold hover:no-underline py-6 [&[data-state=open]]:text-gold transition-colors">
-                        Olfactory Notes
-                      </AccordionTrigger>
-                      <AccordionContent className="text-muted-foreground text-lg leading-relaxed px-4 pb-8">
-                         <div className="grid grid-cols-1 md:grid-cols-3 gap-8 pt-4">
-                            {product.olfactoryNotes.map((note, idx) => (
-                               <div key={idx} className="flex flex-col items-center text-center space-y-4 animate-fade-in" style={{ animationDelay: `${idx * 100}ms` }}>
-                                  <div className="w-32 h-32 md:w-40 md:h-40 relative">
-                                     <img src={note.image} alt={note.name} className="w-full h-full object-contain drop-shadow-md" />
-                                  </div>
-                                  <div className="space-y-2">
-                                     <h4 className="font-heading text-lg font-bold uppercase tracking-widest text-[#5e4b35]">{note.name}</h4>
-                                     <p className="text-sm text-muted-foreground leading-relaxed italic max-w-xs mx-auto">
-                                       {note.description}
-                                     </p>
-                                  </div>
-                               </div>
-                            ))}
-                         </div>
-                      </AccordionContent>
-                    </AccordionItem>
-                  )}
+          <div className="container mx-auto px-6 mt-32 mb-24 animate-fade-in" style={{ animationDelay: '200ms' }}>
+            <div className="w-full border-t border-gold/20">
+              <Accordion type="single" collapsible className="w-full" defaultValue={product.olfactoryNotes && product.olfactoryNotes.length > 0 ? "olfactory-notes" : undefined}>
 
-                  {product.extraSections.map((section, idx) => (
-                    <AccordionItem key={idx} value={`item-${idx}`} className="border-b border-gold/20 py-4">
-                      <AccordionTrigger className="text-xl md:text-2xl font-medium uppercase tracking-[0.15em] hover:text-gold hover:no-underline py-6 [&[data-state=open]]:text-gold transition-colors">
-                        {section.title}
-                      </AccordionTrigger>
-                      <AccordionContent className="text-muted-foreground text-lg leading-relaxed whitespace-pre-wrap px-4 pb-8">
-                        {section.content}
-                      </AccordionContent>
-                    </AccordionItem>
-                  ))}
-                </Accordion>
-             </div>
+                {/* Olfactory Notes Section (Default Open) */}
+                {product.olfactoryNotes && product.olfactoryNotes.length > 0 && (
+                  <AccordionItem value="olfactory-notes" className="border-b border-gold/20 py-4">
+                    <AccordionTrigger className="text-xl md:text-2xl font-medium uppercase tracking-[0.15em] hover:text-gold hover:no-underline py-6 [&[data-state=open]]:text-gold transition-colors">
+                      Olfactory Notes
+                    </AccordionTrigger>
+                    <AccordionContent className="text-muted-foreground text-lg leading-relaxed px-4 pb-8">
+                      <div className="grid grid-cols-1 md:grid-cols-3 gap-8 pt-4">
+                        {product.olfactoryNotes.map((note, idx) => (
+                          <div key={idx} className="flex flex-col items-center text-center space-y-4 animate-fade-in" style={{ animationDelay: `${idx * 100}ms` }}>
+                            <div className="w-32 h-32 md:w-40 md:h-40 relative">
+                              <img src={getDirectUrl(note.image)} alt={note.name} className="w-full h-full object-contain drop-shadow-md" />
+                            </div>
+                            <div className="space-y-2">
+                              <h4 className="font-heading text-lg font-bold uppercase tracking-widest text-[#5e4b35]">{note.name}</h4>
+                              <p className="text-sm text-muted-foreground leading-relaxed italic max-w-xs mx-auto">
+                                {note.description}
+                              </p>
+                            </div>
+                          </div>
+                        ))}
+                      </div>
+                    </AccordionContent>
+                  </AccordionItem>
+                )}
+
+                {product.extraSections.map((section, idx) => (
+                  <AccordionItem key={idx} value={`item-${idx}`} className="border-b border-gold/20 py-4">
+                    <AccordionTrigger className="text-xl md:text-2xl font-medium uppercase tracking-[0.15em] hover:text-gold hover:no-underline py-6 [&[data-state=open]]:text-gold transition-colors">
+                      {section.title}
+                    </AccordionTrigger>
+                    <AccordionContent className="text-muted-foreground text-lg leading-relaxed whitespace-pre-wrap px-4 pb-8">
+                      {section.content}
+                    </AccordionContent>
+                  </AccordionItem>
+                ))}
+              </Accordion>
+            </div>
           </div>
         )}
 
         {/* Product Gallery Section (Masonry) - Fallback to main images if gallery is empty */}
         {((product.gallery && product.gallery.length > 0) || (product.images && product.images.length > 0)) && (
-          <div className="container mx-auto px-6 mb-24 animate-fade-in" style={{ animationDelay: '300ms' }}>
+          <div className="container mx-auto px-6 mt-32 mb-24 animate-fade-in" style={{ animationDelay: '300ms' }}>
             <h2 className="text-3xl font-heading mb-8 text-center text-gold uppercase tracking-widest">Visual Story</h2>
             <div className="grid grid-cols-2 md:grid-cols-4 gap-4 auto-rows-[200px] md:auto-rows-[300px]">
               {(product.gallery && product.gallery.length > 0 ? product.gallery : product.images).map((img, index) => (
-                <div 
-                  key={index} 
-                  className={`relative rounded-2xl overflow-hidden group cursor-pointer ${
-                    index % 5 === 0 ? "col-span-2 row-span-2" : "col-span-1 row-span-1"
-                  } ${
-                     // Add some more variety if we have many images
-                     index % 5 === 3 ? "md:col-span-2" : ""
-                  }`}
+                <div
+                  key={index}
+                  className={`relative rounded-2xl overflow-hidden group cursor-pointer ${index % 5 === 0 ? "col-span-2 row-span-2" : "col-span-1 row-span-1"
+                    } ${
+                    // Add some more variety if we have many images
+                    index % 5 === 3 ? "md:col-span-2" : ""
+                    }`}
                   onClick={() => { setSelectedImage(img); window.scrollTo({ top: 0, behavior: 'smooth' }); }}
                 >
-                  <img 
-                    src={img} 
-                    alt={`Gallery ${index}`} 
-                    className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-110" 
+                  <img
+                    src={getDirectUrl(img)}
+                    alt={`Gallery ${index}`}
+                    className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-110"
                   />
                   <div className="absolute inset-0 bg-black/0 group-hover:bg-black/20 transition-colors duration-500" />
                 </div>

@@ -7,108 +7,54 @@
 
 @layer base {
   :root {
-    /* Alabaster White - Clean luxury background */
-    --background: 0 0% 98%;
-    --foreground: 0 0% 10%;
+    /* Puniora Ethereal Gold - Million Dollar Light Theme */
+    --background: 48 33% 98%;
+    /* #FDFCF8 Cream */
+    --foreground: 30 15% 12%;
+    /* #2A2118 Deep Bronze/Black */
 
-    /* Card surfaces */
     --card: 0 0% 100%;
-    --card-foreground: 0 0% 10%;
+    --card-foreground: 30 15% 12%;
 
     --popover: 0 0% 100%;
-    --popover-foreground: 0 0% 10%;
+    --popover-foreground: 30 15% 12%;
 
-    /* Metallic Gold - Primary brand color */
     --primary: 43 68% 52%;
-    --primary-foreground: 0 0% 100%;
+    /* Gold */
+    --primary-foreground: 0 0% 98%;
 
-    /* Warm neutral for secondary elements */
-    --secondary: 30 15% 95%;
-    --secondary-foreground: 0 0% 10%;
+    --secondary: 44 68% 94%;
+    /* Champagne */
+    --secondary-foreground: 30 15% 12%;
 
-    /* Muted tones */
-    --muted: 30 10% 94%;
-    --muted-foreground: 0 0% 40%;
+    --muted: 44 20% 90%;
+    --muted-foreground: 30 10% 40%;
 
-    /* Accent - soft gold tint */
-    --accent: 43 40% 94%;
-    --accent-foreground: 0 0% 10%;
+    --accent: 44 68% 94%;
+    --accent-foreground: 30 15% 12%;
 
     --destructive: 0 84% 60%;
-    --destructive-foreground: 0 0% 100%;
+    --destructive-foreground: 0 0% 98%;
 
-    /* Borders and inputs */
-    --border: 30 20% 88%;
-    --input: 30 20% 88%;
+    --border: 43 30% 90%;
+    /* Soft gold border */
+    --input: 43 30% 90%;
     --ring: 43 68% 52%;
 
-    --radius: 0.25rem;
+    --radius: 0.5rem;
 
-    /* Sidebar */
-    --sidebar-background: 0 0% 98%;
-    --sidebar-foreground: 0 0% 10%;
-    --sidebar-primary: 43 68% 52%;
-    --sidebar-primary-foreground: 0 0% 100%;
-    --sidebar-accent: 30 15% 95%;
-    --sidebar-accent-foreground: 0 0% 10%;
-    --sidebar-border: 30 20% 88%;
-    --sidebar-ring: 43 68% 52%;
-
-    /* Custom brand tokens */
+    /* Custom Tokens */
     --gold: 43 68% 52%;
-    --gold-light: 43 60% 70%;
-    --gold-dark: 43 70% 40%;
-    --charcoal: 0 0% 10%;
-    --charcoal-light: 0 0% 25%;
-    --alabaster: 0 0% 98%;
-    --cream: 40 30% 96%;
+    --gold-light: 43 60% 85%;
+    --gold-dark: 43 70% 35%;
   }
 
+  /* Dark mode is now just a deeper bronze/gold, not black */
   .dark {
-    --background: 0 0% 6%;
-    --foreground: 0 0% 96%;
-
-    --card: 0 0% 8%;
-    --card-foreground: 0 0% 96%;
-
-    --popover: 0 0% 8%;
-    --popover-foreground: 0 0% 96%;
-
-    --primary: 43 68% 52%;
-    --primary-foreground: 0 0% 6%;
-
-    --secondary: 0 0% 14%;
-    --secondary-foreground: 0 0% 96%;
-
-    --muted: 0 0% 14%;
-    --muted-foreground: 0 0% 60%;
-
-    --accent: 0 0% 14%;
-    --accent-foreground: 0 0% 96%;
-
-    --destructive: 0 62% 30%;
-    --destructive-foreground: 0 0% 96%;
-
-    --border: 0 0% 18%;
-    --input: 0 0% 18%;
-    --ring: 43 68% 52%;
-
-    --sidebar-background: 0 0% 8%;
-    --sidebar-foreground: 0 0% 96%;
-    --sidebar-primary: 43 68% 52%;
-    --sidebar-primary-foreground: 0 0% 6%;
-    --sidebar-accent: 0 0% 14%;
-    --sidebar-accent-foreground: 0 0% 96%;
-    --sidebar-border: 0 0% 18%;
-    --sidebar-ring: 43 68% 52%;
-
-    --gold: 43 68% 52%;
-    --gold-light: 43 60% 70%;
-    --gold-dark: 43 70% 40%;
-    --charcoal: 0 0% 96%;
-    --charcoal-light: 0 0% 80%;
-    --alabaster: 0 0% 6%;
-    --cream: 0 0% 10%;
+    --background: 30 15% 8%;
+    --foreground: 48 33% 98%;
+    /* ... keep existing dark/void logic just in case, or map to new luxurious dark bronze? */
+    /* Let's keep it simple: We are forcing LIGHT THEME via the class logic below */
   }
 }
 
@@ -119,14 +65,26 @@
 
   html {
     scroll-behavior: smooth;
+    @apply bg-cream text-bronze-dark;
   }
 
   body {
-    @apply bg-background text-foreground antialiased;
+    /* Liquid Silk Background */
+    background: linear-gradient(120deg, #FDFCF8 0%, #FEFDF2 25%, #FBF6E0 50%, #FEFDF2 75%, #FDFCF8 100%);
+    background-size: 400% 400%;
+    animation: liquid 20s ease infinite;
+
+    @apply text-bronze-dark antialiased selection:bg-gold/20 selection:text-bronze-dark;
     font-family: "Lato", sans-serif;
   }
 
-  h1, h2, h3, h4, h5, h6 {
+
+  h1,
+  h2,
+  h3,
+  h4,
+  h5,
+  h6 {
     font-family: "Playfair Display", serif;
     @apply tracking-tight;
   }
@@ -154,24 +112,43 @@
   }
 
   .gold-gradient {
-    background: linear-gradient(
-      135deg,
-      hsl(43, 68%, 52%) 0%,
-      hsl(43, 60%, 65%) 50%,
-      hsl(43, 68%, 52%) 100%
-    );
+    background: linear-gradient(135deg,
+        hsl(43, 68%, 52%) 0%,
+        hsl(43, 60%, 65%) 50%,
+        hsl(43, 68%, 52%) 100%);
   }
 
   .text-charcoal {
-    color: hsl(var(--charcoal));
+    color: #fff;
+    /* Override charcoal text to white in dark mode */
   }
 
+  /* Diamond Glass - High Contrast & Expensive */
   .glass {
-    @apply bg-white/70 backdrop-blur-md border border-white/20;
+    @apply bg-white/60 backdrop-blur-md border border-white/40;
+    box-shadow: 0 8px 32px 0 rgba(212, 175, 55, 0.1);
+  }
+
+  .glass-card {
+    @apply bg-white/40 backdrop-blur-md border border-white/30 transition-all duration-500;
+    box-shadow: 0 4px 10px rgba(94, 75, 53, 0.05);
+    /* Subtle bronze shadow */
+  }
+
+  .glass-card:hover {
+    @apply bg-white/80 border-white/60 -translate-y-1;
+    box-shadow: 0 20px 40px rgba(212, 175, 55, 0.15);
+    /* Gold glow on hover */
   }
 
   .glass-dark {
-    @apply bg-black/40 backdrop-blur-lg border border-white/10;
+    /* Dark accents on light theme */
+    @apply bg-bronze-dark/90 backdrop-blur-xl border border-gold/20 text-white;
+    box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.2);
+  }
+
+  .text-shadow-gold {
+    text-shadow: 0 0 20px rgba(212, 175, 55, 0.4);
   }
 
   .luxury-shadow {
@@ -187,12 +164,10 @@
   }
 
   .gold-text-gradient {
-    background: linear-gradient(
-      135deg,
-      hsl(43, 68%, 45%) 0%,
-      hsl(43, 70%, 60%) 50%,
-      hsl(43, 68%, 45%) 100%
-    );
+    background: linear-gradient(135deg,
+        hsl(43, 68%, 45%) 0%,
+        hsl(43, 70%, 60%) 50%,
+        hsl(43, 68%, 45%) 100%);
     -webkit-background-clip: text;
     -webkit-text-fill-color: transparent;
     background-clip: text;
@@ -218,6 +193,7 @@
     from {
       opacity: 0;
     }
+
     to {
       opacity: 1;
     }
@@ -228,6 +204,7 @@
       opacity: 0;
       transform: translateY(20px);
     }
+
     to {
       opacity: 1;
       transform: translateY(0);
@@ -239,6 +216,7 @@
       opacity: 0;
       transform: scale(0.95);
     }
+
     to {
       opacity: 1;
       transform: scale(1);
