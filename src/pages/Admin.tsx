@@ -17,6 +17,7 @@ import GiftSetBuilder from "@/components/admin/GiftSetBuilder";
 import SettingsTab from "@/components/admin/SettingsTab";
 import BlogManager from "@/components/admin/BlogManager";
 import { BookOpen } from "lucide-react";
+import NewOrderForm from "@/components/admin/NewOrderForm";
 
 const Admin = () => {
   const [products, setProducts] = useState<Product[]>([]);
