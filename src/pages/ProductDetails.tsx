@@ -152,7 +152,7 @@ const ProductDetails = () => {
     <div className="min-h-screen bg-background">
       <Header />
 
-      <main className="pt-40 pb-24 overflow-x-hidden">
+      <main className="pt-32 md:pt-40 pb-24 overflow-x-hidden w-full max-w-[100vw]">
         <div className="container mx-auto px-4 md:px-6">
           {/* Breadcrumb / Back button */}
           <Link to="/" className="inline-flex items-center gap-2 text-sm text-muted-foreground hover:text-gold transition-colors mb-4 lg:mb-8 group">
@@ -160,17 +160,17 @@ const ProductDetails = () => {
             Back to Collection
           </Link>
 
-          <div className="grid lg:grid-cols-2 gap-8 lg:gap-16 items-start">
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 lg:gap-16 items-start">
             {/* Left Column: Image / Carousel */}
-            <div className="flex flex-col-reverse lg:flex-row gap-4 lg:h-[600px]">
+            <div className="flex flex-col-reverse lg:flex-row gap-4 w-full">
               {/* Thumbnail strip (Images + Videos) */}
               {(product.images.length > 1 || (product.videos && product.videos.length > 0)) && (
-                <div className="flex lg:flex-col gap-4 overflow-x-auto lg:overflow-y-auto lg:w-24 shrink-0 no-scrollbar py-2 px-1">
+                <div className="flex lg:flex-col gap-4 overflow-x-auto lg:overflow-y-auto lg:w-24 shrink-0 no-scrollbar py-2 px-1 w-full lg:w-auto lg:h-[600px]">
                   {/* Images */}
                   {product.images.map((img, index) => (
                     <div
                       key={`img-${index}`}
-                      className={`relative w-20 h-20 shrink-0 bg-white border-2 rounded-xl p-2 flex items-center justify-center cursor-pointer transition-all duration-300 ${(selectedImage === img || (!selectedImage && activeImage === index && !product.videos?.includes(selectedImage)))
+                      className={`relative w-16 h-16 lg:w-20 lg:h-20 shrink-0 bg-white border-2 rounded-xl p-2 flex items-center justify-center cursor-pointer transition-all duration-300 ${(selectedImage === img || (!selectedImage && activeImage === index && !product.videos?.includes(selectedImage)))
                         ? 'border-gold shadow-md shadow-gold/10'
                         : 'border-border hover:border-gold/50'
                         }`}
@@ -194,7 +194,7 @@ const ProductDetails = () => {
                     return (
                       <div
                         key={`vid-${index}`}
-                        className={`relative w-20 h-20 shrink-0 bg-black border-2 rounded-xl flex items-center justify-center overflow-hidden cursor-pointer transition-all duration-300 ${selectedImage === video
+                        className={`relative w-16 h-16 lg:w-20 lg:h-20 shrink-0 bg-black border-2 rounded-xl flex items-center justify-center overflow-hidden cursor-pointer transition-all duration-300 ${selectedImage === video
                           ? 'border-gold shadow-md shadow-gold/10'
                           : 'border-border hover:border-gold/50'
                           }`}
@@ -218,7 +218,7 @@ const ProductDetails = () => {
               )}
 
               {/* Main Image Display */}
-              <div className="flex-1 bg-white rounded-3xl overflow-hidden border border-border shadow-xl shadow-gold/5 flex items-center justify-center h-[40vh] min-h-[300px] lg:h-full relative group">
+              <div className="flex-1 w-full bg-white rounded-3xl overflow-hidden border border-border shadow-xl shadow-gold/5 flex items-center justify-center aspect-square md:aspect-[4/3] lg:h-[600px] lg:aspect-auto relative group">
                 {(() => {
                   const currentMedia = selectedImage || product.images[activeImage];
                   // Helper to check for YouTube
@@ -242,7 +242,7 @@ const ProductDetails = () => {
                         frameBorder="0"
                         allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
                         allowFullScreen
-                        className="w-full h-full aspect-[4/3] rounded-2xl"
+                        className="w-full h-full rounded-2xl"
                       />
                     );
                   } else if (isVideo) {
@@ -278,7 +278,7 @@ const ProductDetails = () => {
                   }
 
                   return (
-                    <div className="w-full h-full flex items-center justify-center">
+                    <div className="w-full h-full flex items-center justify-center p-4 md:p-8">
                       <img
                         key={currentMedia}
                         src={getDirectUrl(currentMedia)}
@@ -317,7 +317,7 @@ const ProductDetails = () => {
                 </div>
 
                 <div className="space-y-4">
-                  <h1 className="text-5xl md:text-6xl font-heading leading-tight text-foreground ">
+                  <h1 className="text-3xl md:text-5xl lg:text-6xl font-heading leading-tight text-foreground break-words">
                     {product.name}
                   </h1>
                   <p className="text-3xl font-medium gold-text-gradient italic">

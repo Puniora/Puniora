@@ -414,6 +414,7 @@ const Checkout = () => {
 
                   {/* Razorpay Removed */}
 
+                  {/* UPI Option Disabled 
                   <div className={`flex items-center space-x-4 border rounded-xl p-4 transition-all duration-300 ${paymentMethod === 'phonepe' ? 'border-purple-500 bg-purple-500/5 shadow-md' : 'border-border/50 hover:border-purple-500/50'}`}>
                     <RadioGroupItem value="phonepe" id="phonepe" className="text-purple-500 border-purple-500" />
                     <Label htmlFor="phonepe" className="flex-1 cursor-pointer">
@@ -430,6 +431,7 @@ const Checkout = () => {
                           <p>{phonePeError}</p>
                       </div>
                   )}
+                  */}
                 </RadioGroup>
               </div>
             </div>
