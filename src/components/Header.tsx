@@ -154,7 +154,7 @@ const Header = () => {
                 <Button
                   variant="ghost"
                   size="icon"
-                  className="hidden md:inline-flex hover:text-gold hover:bg-transparent transition-colors text-white"
+                  className={`hover:text-gold hover:bg-transparent transition-colors ${!isTransparent || isMobileMenuOpen ? 'text-white' : 'text-white'}`}
                 >
                   <User className="h-7 w-7" />
                 </Button>

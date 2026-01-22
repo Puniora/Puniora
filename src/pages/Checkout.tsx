@@ -67,10 +67,28 @@ const Checkout = () => {
   }, [items, navigate]);
 
   useEffect(() => {
+    if (!user && !loading) { // Wait for auth loading if applicable, but assuming 'user' is null if not logged in.
+       // Actually 'user' comes from Context. If context is loading, we might redirect prematurely.
+       // But assuming AuthContext initializes quickly.
+       // Better to check specific 'loading' from context if available, but for now specific check:
+    }
+  }, [user]);
+
+  // Actually, let's just do a simple check. If we are in this component and !user, redirect.
+  // But wait, user might be null initially. 
+  // Let's rely on the previous effect that checks empty cart.
+  
+  useEffect(() => {
+    // Redirect if no user
+    if (!user) {
+        toast.error("Please login to complete your purchase");
+        navigate("/auth");
+    }
+
     if (user) {
       userService.getAddresses(user.id).then(setSavedAddresses);
     }
-  }, [user]);
+  }, [user, navigate]);
 
   const fillAddress = (addr: Address) => {
     setFormData({

@@ -331,88 +331,78 @@ const ProductDetails = () => {
 
 
 
-                {/* Size / Specs */}
-                <div className="space-y-6 bg-muted/30 p-8 rounded-3xl border border-border/50">
-                  <div className="flex flex-col gap-4">
-                    <span className="text-xs font-bold uppercase tracking-[0.2em] text-muted-foreground text-gold">Volume</span>
+                  <div className="space-y-6 bg-muted/30 p-6 md:p-8 rounded-3xl border border-border/50">
+                    <div className="flex flex-col gap-4">
+                      <span className="text-xs font-bold uppercase tracking-[0.2em] text-muted-foreground text-gold">Volume</span>
 
-                    {(() => {
-                      // Merge base product and variants, deduplicating by size
-                      const allOptions = [
-                        { size: product.size, price: product.price, image: product.images[0] }, // Base product
-                        ...(product.variants || [])
-                      ];
+                      {(() => {
+                        const allOptions = [
+                          { size: product.size, price: product.price, image: product.images[0] },
+                          ...(product.variants || [])
+                        ];
+                        const uniqueOptions = Array.from(new Map(allOptions.map(item => [item.size, item])).values());
 
-                      // Deduplicate by size (keeping the first occurrence - which is base, or explicit variant if it overrides)
-                      // Actually, if a variant has same size, we might want its specific details. 
-                      // But user wants Base as default. Let's trust Base first for the "Main" concept.
-                      const uniqueOptions = Array.from(new Map(allOptions.map(item => [item.size, item])).values());
+                        return (
+                          <div className="flex flex-wrap gap-3">
+                            {uniqueOptions.map((variant) => (
+                              <button
+                                key={variant.size}
+                                onClick={() => handleVariantChange(variant)}
+                                className={`px-6 py-2 rounded-full text-sm font-bold tracking-widest border-2 transition-all duration-300 ${selectedSize === variant.size
+                                  ? 'border-gold bg-gold/10 text-gold shadow-md shadow-gold/10'
+                                  : 'border-border bg-white text-muted-foreground hover:border-gold/50'
+                                  }`}
+                              >
+                                {variant.size}
+                              </button>
+                            ))}
+                          </div>
+                        );
+                      })()}
+                    </div>
 
-                      // Sort? Maybe not, keep manual order usually better or base first.
-
-                      return (
-                        <div className="flex flex-wrap gap-3">
-                          {uniqueOptions.map((variant) => (
+                    <div className="space-y-3">
+                      <span className="text-xs font-bold uppercase tracking-[0.2em] text-muted-foreground text-gold">Olfactory Notes</span>
+                      <div className="grid grid-cols-3 gap-3 md:flex md:flex-wrap md:gap-4">
+                        {(product.olfactoryNotes && product.olfactoryNotes.length > 0) ? (
+                          product.olfactoryNotes.map((note, i) => (
                             <button
-                              key={variant.size}
-                              onClick={() => handleVariantChange(variant)}
-                              className={`px-6 py-2 rounded-full text-sm font-bold tracking-widest border-2 transition-all duration-300 ${selectedSize === variant.size
-                                ? 'border-gold bg-gold/10 text-gold shadow-md shadow-gold/10'
-                                : 'border-border bg-white text-muted-foreground hover:border-gold/50'
+                              key={i}
+                              onClick={() => setSelectedNote(selectedNote === note.name ? "" : note.name)}
+                              className={`group relative flex flex-col items-center gap-2 p-2 md:p-3 rounded-xl border transition-all duration-300 w-full md:w-24 ${selectedNote === note.name
+                                ? 'bg-gold/10 text-gold border-gold shadow-md shadow-gold/10 ring-1 ring-gold/20'
+                                : 'bg-white/50 backdrop-blur-sm text-foreground border-border hover:border-gold/50 hover:bg-gold/5'
                                 }`}
                             >
-                              {variant.size}
+                              <div className={`w-12 h-12 md:w-14 md:h-14 rounded-full overflow-hidden border-2 shrink-0 transition-colors ${selectedNote === note.name ? 'border-gold' : 'border-white shadow-sm'}`}>
+                                {note.image ? (
+                                  <img src={getDirectUrl(note.image)} className="w-full h-full object-cover" alt={note.name} />
+                                ) : (
+                                  <div className="w-full h-full bg-gold/20 flex items-center justify-center text-[8px] font-bold text-muted-foreground">
+                                    NOTE
+                                  </div>
+                                )}
+                              </div>
+                              <span className="text-[9px] md:text-[10px] font-bold uppercase tracking-wider text-center leading-tight break-words w-full">{note.name}</span>
                             </button>
-                          ))}
-                        </div>
-                      );
-                    })()}
-                  </div>
-
-                  <div className="space-y-3">
-                    <span className="text-xs font-bold uppercase tracking-[0.2em] text-muted-foreground text-gold">Olfactory Notes</span>
-                    <div className="flex flex-wrap gap-4">
-                      {(product.olfactoryNotes && product.olfactoryNotes.length > 0) ? (
-                        // Rich Notes Display
-                        product.olfactoryNotes.map((note, i) => (
-                          <button
-                            key={i}
-                            onClick={() => setSelectedNote(selectedNote === note.name ? "" : note.name)} // Toggle
-                            className={`group relative flex flex-col items-center gap-2 p-3 rounded-xl border transition-all duration-300 w-24 ${selectedNote === note.name
-                              ? 'bg-gold/10 text-gold border-gold shadow-md shadow-gold/10 ring-1 ring-gold/20'
-                              : 'bg-white/50 backdrop-blur-sm text-foreground border-border hover:border-gold/50 hover:bg-gold/5'
-                              }`}
-                          >
-                            <div className={`w-14 h-14 rounded-full overflow-hidden border-2 shrink-0 transition-colors ${selectedNote === note.name ? 'border-gold' : 'border-white shadow-sm'}`}>
-                              {note.image ? (
-                                <img src={getDirectUrl(note.image)} className="w-full h-full object-cover" alt={note.name} />
-                              ) : (
-                                <div className="w-full h-full bg-gold/20 flex items-center justify-center text-[8px] font-bold text-muted-foreground">
-                                  NOTE
-                                </div>
-                              )}
-                            </div>
-                            <span className="text-[10px] font-bold uppercase tracking-wider text-center leading-tight">{note.name}</span>
-                          </button>
-                        ))
-                      ) : (
-                        // Fallback to simple notes
-                        product.notes.map((note, i) => (
-                          <button
-                            key={i}
-                            onClick={() => setSelectedNote(selectedNote === note ? "" : note)}
-                            className={`px-4 py-2 rounded-xl text-xs font-medium border shadow-sm transition-all duration-300 ${selectedNote === note
-                              ? 'bg-gold/10 text-gold border-gold shadow-gold/10'
-                              : 'bg-white/50 backdrop-blur-sm text-foreground border-border hover:border-gold/50'
-                              }`}
-                          >
-                            {note}
-                          </button>
-                        ))
-                      )}
+                          ))
+                        ) : (
+                          product.notes.map((note, i) => (
+                            <button
+                              key={i}
+                              onClick={() => setSelectedNote(selectedNote === note ? "" : note)}
+                              className={`px-4 py-2 rounded-xl text-xs font-medium border shadow-sm transition-all duration-300 ${selectedNote === note
+                                ? 'bg-gold/10 text-gold border-gold shadow-gold/10'
+                                : 'bg-white/50 backdrop-blur-sm text-foreground border-border hover:border-gold/50'
+                                }`}
+                            >
+                              {note}
+                            </button>
+                          ))
+                        )}
+                      </div>
                     </div>
                   </div>
-                </div>
 
                 {/* Share Button */}
                 <div className="flex justify-start pt-2">
