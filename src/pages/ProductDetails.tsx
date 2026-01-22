@@ -152,8 +152,8 @@ const ProductDetails = () => {
     <div className="min-h-screen bg-background">
       <Header />
 
-      <main className="pt-40 pb-24">
-        <div className="container mx-auto px-6">
+      <main className="pt-40 pb-24 overflow-x-hidden">
+        <div className="container mx-auto px-4 md:px-6">
           {/* Breadcrumb / Back button */}
           <Link to="/" className="inline-flex items-center gap-2 text-sm text-muted-foreground hover:text-gold transition-colors mb-4 lg:mb-8 group">
             <ArrowLeft className="h-4 w-4 transform group-hover:-translate-x-1 transition-transform" />
@@ -325,7 +325,7 @@ const ProductDetails = () => {
                   </p>
                 </div>
 
-                <p className="text-muted-foreground text-lg leading-relaxed border-l-2 border-gold/20 pl-6 italic">
+                <p className="text-muted-foreground text-lg leading-relaxed border-l-2 border-gold/20 pl-6 italic break-words max-w-full overflow-hidden">
                   "{product.description}"
                 </p>
 

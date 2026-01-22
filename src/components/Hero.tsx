@@ -123,7 +123,7 @@ const Hero = () => {
               "Handcrafted in India"
             ].map((usp, i) => (
               <div key={usp} className="flex items-center gap-2 shrink-0 opacity-0 animate-fade-in" style={{ animationDelay: `${2.2 + (i * 0.2)}s`, animationFillMode: 'forwards' }}>
-                <div className="w-1.5 h-1.5 rounded-full bg-gold shadow-[0_0_8px_rgba(212,175,55,0.8)]" />
+                <div className="w-1.5 h-1.5 rounded-full bg-gold shadow-[0_0_8px_rgba(255,85,0,0.8)]" />
                 <span className="text-[10px] uppercase tracking-[0.2em] font-medium text-white/80">{usp}</span>
               </div>
             ))}

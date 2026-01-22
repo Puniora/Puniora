@@ -1,4 +1,4 @@
-/* Puniora Luxury Perfume Brand Design System */
+/* Puniora Luxury Perfume Brand - Midnight Ember Theme */
 @import url("https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,500;0,600;0,700;1,400;1,500&family=Lato:wght@300;400;500;600;700&display=swap");
 
 @tailwind base;
@@ -7,54 +7,45 @@
 
 @layer base {
   :root {
-    /* Puniora Ethereal Gold - Million Dollar Light Theme */
-    --background: 48 33% 98%;
-    /* #FDFCF8 Cream */
-    --foreground: 30 15% 12%;
-    /* #2A2118 Deep Bronze/Black */
+    /* Midnight Ember Theme Variables */
+    --background: 0 0% 0%; /* #000000 Absolute Black */
+    --foreground: 0 0% 98%; /* #FAFAFA Mist White */
 
-    --card: 0 0% 100%;
-    --card-foreground: 30 15% 12%;
+    --card: 0 0% 5%; /* #0D0D0D Near Black for cards */
+    --card-foreground: 0 0% 98%;
 
-    --popover: 0 0% 100%;
-    --popover-foreground: 30 15% 12%;
+    --popover: 0 0% 4%;
+    --popover-foreground: 0 0% 98%;
 
-    --primary: 43 68% 52%;
-    /* Gold */
-    --primary-foreground: 0 0% 98%;
+    --primary: 24 95% 53%; /* #F76B1C Vibrant Ember Orange */
+    --primary-foreground: 0 0% 100%;
 
-    --secondary: 44 68% 94%;
-    /* Champagne */
-    --secondary-foreground: 30 15% 12%;
+    --secondary: 0 0% 9%;
+    --secondary-foreground: 0 0% 98%;
 
-    --muted: 44 20% 90%;
-    --muted-foreground: 30 10% 40%;
+    --muted: 0 0% 12%;
+    --muted-foreground: 0 0% 65%;
 
-    --accent: 44 68% 94%;
-    --accent-foreground: 30 15% 12%;
+    --accent: 24 95% 53%;
+    --accent-foreground: 0 0% 100%;
 
     --destructive: 0 84% 60%;
     --destructive-foreground: 0 0% 98%;
 
-    --border: 43 30% 90%;
-    /* Soft gold border */
-    --input: 43 30% 90%;
-    --ring: 43 68% 52%;
+    --border: 0 0% 12%;
+    --input: 0 0% 12%;
+    --ring: 24 95% 53%;
 
-    --radius: 0.5rem;
+    --radius: 0.75rem;
 
-    /* Custom Tokens */
-    --gold: 43 68% 52%;
-    --gold-light: 43 60% 85%;
-    --gold-dark: 43 70% 35%;
+    /* Legacy Gold Tokens mapped to Orange for compat */
+    --gold: 24 95% 53%; 
   }
 
-  /* Dark mode is now just a deeper bronze/gold, not black */
+  /* Force dark mode behavior globally */
   .dark {
-    --background: 30 15% 8%;
-    --foreground: 48 33% 98%;
-    /* ... keep existing dark/void logic just in case, or map to new luxurious dark bronze? */
-    /* Let's keep it simple: We are forcing LIGHT THEME via the class logic below */
+    --background: 0 0% 0%;
+    --foreground: 0 0% 98%;
   }
 }
 
@@ -65,135 +56,90 @@
 
   html {
     scroll-behavior: smooth;
-    @apply bg-cream text-bronze-dark;
+    @apply bg-puniora-void text-white;
   }
 
   body {
-    /* Liquid Silk Background */
-    background: linear-gradient(120deg, #FDFCF8 0%, #FEFDF2 25%, #FBF6E0 50%, #FEFDF2 75%, #FDFCF8 100%);
-    background-size: 400% 400%;
-    animation: liquid 20s ease infinite;
-
-    @apply text-bronze-dark antialiased selection:bg-gold/20 selection:text-bronze-dark;
+    /* Deep Void Gradient Background with localized orange glows */
+    background-color: #000000;
+    background-image: 
+      radial-gradient(circle at 50% 0%, rgba(247, 107, 28, 0.15) 0%, transparent 50%),
+      radial-gradient(circle at 85% 30%, rgba(247, 107, 28, 0.08) 0%, transparent 40%),
+      radial-gradient(circle at 15% 70%, rgba(247, 107, 28, 0.05) 0%, transparent 45%);
+    background-attachment: fixed;
+    @apply text-white antialiased selection:bg-puniora-orange-500/30
+      selection:text-puniora-orange-500;
     font-family: "Lato", sans-serif;
   }
 
-
-  h1,
-  h2,
-  h3,
-  h4,
-  h5,
-  h6 {
+  h1, h2, h3, h4, h5, h6 {
     font-family: "Playfair Display", serif;
     @apply tracking-tight;
   }
 }
 
 @layer components {
-  .font-heading {
-    font-family: "Playfair Display", serif;
-  }
-
-  .font-body {
-    font-family: "Lato", sans-serif;
-  }
-
-  .text-gold {
-    color: hsl(var(--gold));
-  }
-
-  .bg-gold {
-    background-color: hsl(var(--gold));
-  }
-
-  .border-gold {
-    border-color: hsl(var(--gold));
-  }
-
-  .gold-gradient {
-    background: linear-gradient(135deg,
-        hsl(43, 68%, 52%) 0%,
-        hsl(43, 60%, 65%) 50%,
-        hsl(43, 68%, 52%) 100%);
-  }
-
-  .text-charcoal {
-    color: #fff;
-    /* Override charcoal text to white in dark mode */
-  }
-
-  /* Diamond Glass - High Contrast & Expensive */
+  /* Premium Glassmorphism */
   .glass {
-    @apply bg-white/60 backdrop-blur-md border border-white/40;
-    box-shadow: 0 8px 32px 0 rgba(212, 175, 55, 0.1);
+    @apply bg-black/30 backdrop-blur-2xl border border-white/10 shadow-[0_8px_32px_0_rgba(0,0,0,0.36)];
   }
 
   .glass-card {
-    @apply bg-white/40 backdrop-blur-md border border-white/30 transition-all duration-500;
-    box-shadow: 0 4px 10px rgba(94, 75, 53, 0.05);
-    /* Subtle bronze shadow */
+    @apply bg-white/5 backdrop-blur-xl border border-white/10 
+      transition-all duration-500 ease-out rounded-2xl;
+    box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 
+                0 2px 4px -1px rgba(0, 0, 0, 0.06),
+                inset 0 0 0 1px rgba(255, 255, 255, 0.05);
   }
 
   .glass-card:hover {
-    @apply bg-white/80 border-white/60 -translate-y-1;
-    box-shadow: 0 20px 40px rgba(212, 175, 55, 0.15);
-    /* Gold glow on hover */
+    @apply border-puniora-orange-500/40 -translate-y-1 bg-white/[0.07];
+    box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.2), 
+                0 10px 10px -5px rgba(0, 0, 0, 0.1),
+                0 0 20px rgba(247, 107, 28, 0.15); /* Orange glow on hover */
   }
 
-  .glass-dark {
-    /* Dark accents on light theme */
-    @apply bg-bronze-dark/90 backdrop-blur-xl border border-gold/20 text-white;
-    box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.2);
+  /* Text Effects */
+  .text-glow {
+    text-shadow: 0 0 20px rgba(247, 107, 28, 0.6);
   }
 
-  .text-shadow-gold {
-    text-shadow: 0 0 20px rgba(212, 175, 55, 0.4);
+  .text-gradient-orange {
+    @apply bg-clip-text text-transparent bg-gradient-to-r 
+      from-[#FF8C42] via-[#F76B1C] to-[#E65100];
   }
 
-  .luxury-shadow {
-    box-shadow:
-      0 4px 20px -2px hsla(0, 0%, 0%, 0.08),
-      0 2px 8px -2px hsla(0, 0%, 0%, 0.04);
+  /* Button Styles Override for 'Gold' (now Orange) classes */
+  .btn-primary-glow {
+    @apply shadow-[0_0_15px_rgba(247,107,28,0.5)] hover:shadow-[0_0_25px_rgba(247,107,28,0.7)];
   }
 
-  .luxury-shadow-lg {
-    box-shadow:
-      0 10px 40px -4px hsla(0, 0%, 0%, 0.12),
-      0 4px 16px -4px hsla(0, 0%, 0%, 0.06);
+  /* Utility for legacy gold classes to appear orange */
+  .text-gold {
+    @apply text-puniora-orange-500;
   }
 
-  .gold-text-gradient {
-    background: linear-gradient(135deg,
-        hsl(43, 68%, 45%) 0%,
-        hsl(43, 70%, 60%) 50%,
-        hsl(43, 68%, 45%) 100%);
-    -webkit-background-clip: text;
-    -webkit-text-fill-color: transparent;
-    background-clip: text;
+  .bg-gold {
+    @apply bg-puniora-orange-500;
   }
 
-
+  .border-gold {
+    @apply border-puniora-orange-500;
+  }
 }
 
 @layer utilities {
   .animate-fade-in {
-    animation: fadeIn 0.6s ease-out forwards;
+    animation: fadeIn 0.8s cubic-bezier(0.16, 1, 0.3, 1) forwards;
   }
-
   .animate-slide-up {
-    animation: slideUp 0.6s ease-out forwards;
-  }
-
-  .animate-scale-in {
-    animation: scaleIn 0.4s ease-out forwards;
+    animation: slideUp 0.8s cubic-bezier(0.16, 1, 0.3, 1) forwards;
   }
 
   @keyframes fadeIn {
     from {
       opacity: 0;
     }
-
     to {
       opacity: 1;
     }
@@ -202,24 +148,17 @@
   @keyframes slideUp {
     from {
       opacity: 0;
-      transform: translateY(20px);
+      transform: translateY(30px);
     }
-
     to {
       opacity: 1;
       transform: translateY(0);
     }
   }
-
-  @keyframes scaleIn {
-    from {
-      opacity: 0;
-      transform: scale(0.95);
-    }
-
-    to {
-      opacity: 1;
-      transform: scale(1);
-    }
+  
+  /* Complex gradients for specific uses */
+  .bg-gradient-radial-orange {
+    background: radial-gradient(circle, rgba(247,107,28,0.2) 0%, rgba(0,0,0,0) 70%);
   }
 }
+

@@ -68,7 +68,7 @@ const ProductGrid = () => {
             <Loader2 className="h-10 w-10 animate-spin text-gold" />
           </div>
         ) : (
-          <div className="grid grid-cols-2 lg:grid-cols-3 gap-6 md:gap-12 mb-24">
+          <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-4 md:gap-8 mb-24">
             {displayProducts.map((product, index) => (
               <ProductCard key={product.id} product={product} index={index} />
             ))}

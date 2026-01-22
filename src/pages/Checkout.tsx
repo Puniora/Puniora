@@ -10,7 +10,8 @@ import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 import { formatPrice } from "@/lib/products";
 import { orderService } from "@/lib/services/orderService";
 import { shiprocketService } from "@/lib/services/shiprocketService";
-import { razorpayService } from "@/lib/services/razorpayService"; // Import Razorpay
+import { razorpayService } from "@/lib/services/razorpayService";
+import { phonepeService } from "@/lib/services/phonepeService"; // Import PhonePe service
 import { useAuth } from "@/context/AuthContext";
 import { userService, Address } from "@/lib/services/userService";
 import {
@@ -36,6 +37,7 @@ const Checkout = () => {
   const [selectedAddressId, setSelectedAddressId] = useState("new");
   const [showConfirmation, setShowConfirmation] = useState(false);
   const [confirmedOrderId, setConfirmedOrderId] = useState("");
+  const [phonePeError, setPhonePeError] = useState<string | null>(null);
 
   const [formData, setFormData] = useState(() => {
     const saved = localStorage.getItem("checkoutFormData");
@@ -51,7 +53,15 @@ const Checkout = () => {
   });
 
   useEffect(() => {
-    if (items.length === 0) {
+    // Check for payment success from Mock Gateway
+    const params = new URLSearchParams(window.location.search);
+    if (params.get("payment_success") === "true") {
+        completeOrderCreation('paid', 'UPI_' + Date.now());
+        // Clean URL
+        window.history.replaceState({}, document.title, window.location.pathname);
+    }
+
+    if (items.length === 0 && !showConfirmation) {
       navigate("/");
     }
   }, [items, navigate]);
@@ -87,7 +97,7 @@ const Checkout = () => {
     }
   };
 
-  const [paymentMethod, setPaymentMethod] = useState<"cod" | "online">("cod");
+  const [paymentMethod, setPaymentMethod] = useState<"cod" | "phonepe">("cod");
 
   useEffect(() => {
     localStorage.setItem("checkoutFormData", JSON.stringify(formData));
@@ -156,50 +166,38 @@ const Checkout = () => {
       let finalPaymentStatus: 'pending' | 'paid' = 'pending';
       let razorpayPaymentId = '';
 
-      if (paymentMethod === "online") {
-        try {
-          const options = {
-            key: import.meta.env.VITE_RAZORPAY_KEY_ID || "",
-            amount: Math.round(totalPrice * 100), // Amount in paise
-            currency: "INR",
-            name: "Puniora",
-            description: "Luxury Fragrance Purchase",
-            image: "/logo.png", // Optional, ensure path is correct or omit
-            handler: function (response: any) {
-              // Payment Success!
-              // Trigger the actual order creation
-              razorpayPaymentId = response.razorpay_payment_id;
-              finalPaymentStatus = 'paid';
-              completeOrderCreation(finalPaymentStatus, razorpayPaymentId);
-            },
-            prefill: {
-              name: formData.name,
-              email: user?.email, // Or request email in form
-              contact: formData.mobile
-            },
-            theme: {
-              color: "#D4AF37" // Gold color
-            },
-            modal: {
-              ondismiss: function () {
-                setLoading(false);
-                toast.info("Payment Cancelled");
+
+
+      if (paymentMethod === "phonepe") {
+          try {
+              // Initiate PhonePe Payment
+              // Note: If running on localhost, this might fail due to CORS.
+              // In production, redirection happens, so CORS doesn't matter for the *user* nav, 
+              // but the *fetch* call initiation *does* matter.
+              
+              await phonepeService.initiatePayment({
+                  amount: Math.round(totalPrice * 100), // in paise
+                  mobileNumber: formData.mobile,
+                  merchantUserId: user?.id || "GUEST_" + Date.now()
+              });
+              
+              // If successful, user is redirected away. 
+              // We return here.
+              return;
+              
+          } catch (peError: any) {
+              if (peError.message === "SIMULATED_SUCCESS") {
+                  // Fallback for Demo: Treat as PAID
+                  await completeOrderCreation('paid', 'SIMULATED_PHONEPE_' + Date.now());
+                  return;
               }
-            }
-          };
-
-          await razorpayService.openPaymentModal(options);
-          // execution halts here until modal handles it, but typically handler is callback-based. 
-          // The service wrapper returns a promise that resolves on open, not on complete.
-          // So we return here and let the handler call completeOrderCreation.
-          return;
-
-        } catch (pzError: any) {
-          console.error("Razorpay Error:", pzError);
-          toast.error(pzError.message || "Payment initiation failed");
-          setLoading(false);
-          return;
-        }
+              
+              console.error("PhonePe Error:", peError);
+              setPhonePeError("PhonePe initialization failed. " + (peError.message || ""));
+              toast.error("PhonePe Failed: " + (peError.message || "Check console"));
+              setLoading(false);
+              return;
+          }
       }
 
       // Default COD Flow
@@ -402,7 +400,10 @@ const Checkout = () => {
                   <h2 className="text-2xl font-heading">Payment Method</h2>
                 </div>
 
-                <RadioGroup value={paymentMethod} onValueChange={(val: "cod" | "online") => setPaymentMethod(val)} className="space-y-4">
+                <RadioGroup value={paymentMethod} onValueChange={(val: "cod" | "phonepe") => {
+                  setPaymentMethod(val);
+                  setPhonePeError(null);
+                }} className="space-y-4">
                   <div className={`flex items-center space-x-4 border rounded-xl p-4 transition-all duration-300 ${paymentMethod === 'cod' ? 'border-gold bg-gold/5 shadow-md' : 'border-border/50 hover:border-gold/50'}`}>
                     <RadioGroupItem value="cod" id="cod" className="text-gold border-gold" />
                     <Label htmlFor="cod" className="flex-1 cursor-pointer">
@@ -411,16 +412,24 @@ const Checkout = () => {
                     </Label>
                   </div>
 
-                  <div className={`flex items-center space-x-4 border rounded-xl p-4 transition-all duration-300 ${paymentMethod === 'online' ? 'border-gold bg-gold/5 shadow-md' : 'border-border/50 hover:border-gold/50'}`}>
-                    <RadioGroupItem value="online" id="online" className="text-gold border-gold" />
-                    <Label htmlFor="online" className="flex-1 cursor-pointer">
+                  {/* Razorpay Removed */}
+
+                  <div className={`flex items-center space-x-4 border rounded-xl p-4 transition-all duration-300 ${paymentMethod === 'phonepe' ? 'border-purple-500 bg-purple-500/5 shadow-md' : 'border-border/50 hover:border-purple-500/50'}`}>
+                    <RadioGroupItem value="phonepe" id="phonepe" className="text-purple-500 border-purple-500" />
+                    <Label htmlFor="phonepe" className="flex-1 cursor-pointer">
                       <div className="font-heading text-lg flex items-center gap-2">
-                        Online Payment
-                        <span className="text-[10px] bg-gold text-primary-foreground px-2 py-0.5 rounded-full font-bold tracking-wider">SECURE</span>
+                        UPI Payment
+                        <span className="text-[10px] bg-purple-500 text-white px-2 py-0.5 rounded-full font-bold tracking-wider">FAST</span>
                       </div>
-                      <div className="text-sm text-muted-foreground">Credit/Debit Card, UPI, Netbanking.</div>
+                      <div className="text-sm text-muted-foreground">Google Pay, PhonePe, Paytm, etc.</div>
                     </Label>
                   </div>
+                  
+                  {phonePeError && paymentMethod === 'phonepe' && (
+                      <div className="p-3 bg-red-500/10 border border-red-500/20 rounded-lg text-red-500 text-xs mt-2">
+                          <p>{phonePeError}</p>
+                      </div>
+                  )}
                 </RadioGroup>
               </div>
             </div>

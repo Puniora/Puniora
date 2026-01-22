@@ -17,6 +17,7 @@ import BlogDetail from "@/pages/BlogDetail";
 import ProductDetails from "@/pages/ProductDetails";
 import Checkout from "@/pages/Checkout";
 import TrackOrder from "@/pages/TrackOrder";
+import PaymentGateway from "@/pages/PaymentGateway";
 import NotFound from "@/pages/NotFound";
 import PrivacyPolicy from "@/pages/policies/PrivacyPolicy";
 import Terms from "@/pages/policies/Terms";
@@ -70,6 +71,7 @@ const App = () => (
               />
               <Route path="/checkout" element={<Checkout />} />
               <Route path="/track" element={<TrackOrder />} />
+              <Route path="/secure-payment" element={<PaymentGateway />} />
               {/* Policy Pages - For Razorpay Compliance */}
               <Route path="/privacy-policy" element={<PrivacyPolicy />} />
               <Route path="/terms-and-conditions" element={<Terms />} />

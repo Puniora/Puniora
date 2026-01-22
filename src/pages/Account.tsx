@@ -147,8 +147,13 @@ const Account = () => {
       // Refresh addresses
       const updatedAddresses = await userService.getAddresses(user.id);
       setAddresses(updatedAddresses);
-    } catch (error) {
-      toast.error("Failed to save address");
+    } catch (error: any) {
+      console.error("Address Save Error:", error);
+      if (error.message?.includes("foreign key constraint") || error.details?.includes("is not present in table")) {
+         toast.error("Session invalid. Please Logout and Login again.");
+      } else {
+         toast.error(error.message || "Failed to save address");
+      }
     }
   };
 
@@ -203,17 +208,17 @@ const Account = () => {
              <h1 className="text-4xl font-heading text-foreground mb-2">My Account</h1>
              <p className="text-muted-foreground">Welcome back, <span className="text-gold font-bold">{profile?.full_name || user.email}</span></p>
            </div>
-           <Button variant="outline" onClick={handleLogout} className="border-destructive/20 text-destructive hover:bg-destructive/10 gap-2">
+           <Button variant="luxuryOutline" onClick={handleLogout} className="border-white/20 text-muted-foreground hover:text-white hover:border-white hover:bg-white/5 gap-2 h-10 px-6 rounded-full transition-all duration-300">
              <LogOut className="h-4 w-4" /> Logout
            </Button>
         </div>
 
         <Tabs defaultValue="orders" className="space-y-8">
-          <TabsList className="bg-muted/50 p-1 rounded-full border border-gold/10">
-            <TabsTrigger value="orders" className="rounded-full px-6 data-[state=active]:bg-gold data-[state=active]:text-white data-[state=active]:shadow-lg shadow-gold/20 transition-all">
+          <TabsList className="bg-black/40 backdrop-blur-xl p-1 rounded-full border border-white/10 w-fit mx-auto md:mx-0">
+            <TabsTrigger value="orders" className="rounded-full px-8 py-2.5 data-[state=active]:bg-white/10 data-[state=active]:text-gold data-[state=active]:border data-[state=active]:border-gold/30 hover:text-white/80 transition-all duration-300">
                My Orders
             </TabsTrigger>
-            <TabsTrigger value="addresses" className="rounded-full px-6 data-[state=active]:bg-gold data-[state=active]:text-white data-[state=active]:shadow-lg shadow-gold/20 transition-all">
+            <TabsTrigger value="addresses" className="rounded-full px-8 py-2.5 data-[state=active]:bg-white/10 data-[state=active]:text-gold data-[state=active]:border data-[state=active]:border-gold/30 hover:text-white/80 transition-all duration-300">
                Address Book
             </TabsTrigger>
           </TabsList>
@@ -355,54 +360,51 @@ const Account = () => {
                </div>
              ) : (
                <div className="grid gap-4">
-                 {orders.map((order) => (
-                   <div key={order.id} onClick={() => setSelectedOrder(order)} className="bg-white border rounded-2xl p-6 hover:shadow-lg transition-all duration-300 group cursor-pointer hover:border-gold/50">
-                      <div className="flex flex-col md:flex-row justify-between gap-4 mb-4 border-b border-dashed pb-4">
-                         <div>
-                           <p className="text-xs uppercase tracking-widest text-muted-foreground font-bold">Order ID</p>
-                           <p className="font-mono text-sm">#{order.id.slice(0, 8)}</p>
-                         </div>
-                         <div>
-                           <p className="text-xs uppercase tracking-widest text-muted-foreground font-bold">Date</p>
-                           <p className="text-sm">{new Date(order.created_at).toLocaleDateString()}</p>
-                         </div>
-                         <div>
-                           <p className="text-xs uppercase tracking-widest text-muted-foreground font-bold">Total</p>
-                           <p className="font-bold text-gold">{formatPrice(order.total_amount)}</p>
-                         </div>
-                         <div className="flex items-center gap-4">
-                           <div>
-                             <p className="text-xs uppercase tracking-widest text-muted-foreground font-bold">Status</p>
-                             <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${
-                               order.tracking_status === 'Delivered' ? 'bg-green-100 text-green-800' : 
-                               order.tracking_status === 'Cancelled' ? 'bg-red-100 text-red-800' :
-                               'bg-blue-100 text-blue-800'
-                             }`}>
-                               {order.tracking_status}
-                             </span>
-                           </div>
-                           <ChevronRight className="h-5 w-5 text-muted-foreground group-hover:text-gold transition-colors" />
-                         </div>
-                      </div>
-                      
-                      <div className="space-y-2">
-                        {order.items.slice(0, 2).map((item, idx) => (
-                          <div key={idx} className="flex items-center gap-4 opacity-70 group-hover:opacity-100 transition-opacity">
-                             <div className="h-10 w-10 bg-muted/50 rounded-lg overflow-hidden shrink-0 border">
-                               {item.image && <img src={item.image} className="h-full w-full object-cover" />}
+                  {orders.map((order) => (
+                    <div key={order.id} onClick={() => setSelectedOrder(order)} className="glass p-6 rounded-2xl hover:bg-white/5 transition-all duration-300 group cursor-pointer border-l-4 border-l-transparent hover:border-l-gold relative overflow-hidden">
+                       <div className="absolute inset-0 bg-gradient-to-r from-gold/5 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-500" />
+                       
+                       <div className="flex flex-col md:flex-row justify-between gap-6 mb-6 relative">
+                          <div className="flex-1">
+                             <div className="flex items-center gap-3 mb-2">
+                                <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-[10px] font-bold uppercase tracking-wider ${
+                                  order.tracking_status === 'Delivered' ? 'bg-green-500/10 text-green-500 border border-green-500/20' : 
+                                  order.tracking_status === 'Cancelled' ? 'bg-red-500/10 text-red-500 border border-red-500/20' :
+                                  'bg-blue-500/10 text-blue-400 border border-blue-500/20'
+                                }`}>
+                                  {order.tracking_status}
+                                </span>
+                                <span className="text-muted-foreground text-xs">{new Date(order.created_at).toLocaleDateString()}</span>
                              </div>
-                             <div className="flex-1">
-                               <p className="text-sm font-semibold">{item.name}</p>
-                               <p className="text-[10px] text-muted-foreground">{item.size} x {item.quantity}</p>
-                             </div>
+                             <p className="font-mono text-sm text-white/60">ID: <span className="text-white">{order.id.slice(0, 8)}</span></p>
                           </div>
-                        ))}
-                        {order.items.length > 2 && (
-                          <p className="text-xs text-muted-foreground pl-14">+ {order.items.length - 2} more items</p>
-                        )}
-                      </div>
-                   </div>
-                 ))}
+                          
+                          <div className="text-right">
+                            <p className="text-2xl font-heading text-gold">{formatPrice(order.total_amount)}</p>
+                            <p className="text-[10px] uppercase tracking-widest text-muted-foreground">{order.items.length} Item{order.items.length !== 1 && 's'}</p>
+                          </div>
+                       </div>
+                       
+                       <div className="flex flex-wrap gap-3">
+                         {order.items.slice(0, 4).map((item, idx) => (
+                           <div key={idx} className="h-12 w-12 bg-white/5 rounded-lg overflow-hidden shrink-0 border border-white/10 group-hover:border-gold/30 transition-colors">
+                              {item.image && <img src={item.image} className="h-full w-full object-cover" />}
+                           </div>
+                         ))}
+                         {order.items.length > 4 && (
+                           <div className="h-12 w-12 bg-white/5 rounded-lg flex items-center justify-center text-xs text-muted-foreground border border-white/10">
+                              +{order.items.length - 4}
+                           </div>
+                         )}
+                       </div>
+                       
+                       <div className="mt-4 pt-4 border-t border-white/5 flex items-center justify-between">
+                          <span className="text-xs text-muted-foreground group-hover:text-gold transition-colors flex items-center gap-2">
+                            View Details <ArrowRight className="h-3 w-3" />
+                          </span>
+                       </div>
+                    </div>
+                  ))}
                </div>
              )}
           </TabsContent>

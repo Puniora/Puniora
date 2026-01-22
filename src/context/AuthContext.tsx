@@ -32,6 +32,9 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
       setSession(session);
       setUser(session?.user ?? null);
       setLoading(false);
+    }).catch((error) => {
+      console.error("Auth session check failed:", error);
+      setLoading(false);
     });
 
     // Listen for auth changes
@@ -59,10 +62,24 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
 
       if (error) throw error;
       toast.success("OTP sent!", {
-        description: "Check your email for the 6-digit verification code.",
+        description: "Check your email for the verification code.",
       });
     } catch (error: any) {
       console.error("Login error:", error);
+      
+      // Smart Handling: If rate limit exceeded, user likely already has a valid OTP.
+      // We allow them to proceed to the OTP step to enter the code they have.
+      if (error.message?.toLowerCase().includes("rate limit") || 
+          error.message?.toLowerCase().includes("too many requests") ||
+          error.status === 429) {
+            
+        toast.info("OTP already sent recently", {
+          description: "Please check your email for the code sent a moment ago. Rate limit exceeded for new codes.",
+        });
+        // We do NOT throw here, effectively treating it as a "success" so the UI moves to the next step
+        return; 
+      }
+
       toast.error("Failed to send OTP", {
         description: error.message,
       });

@@ -186,27 +186,12 @@ const ProductForm = ({ isOpen, onClose, onSuccess, product }: ProductFormProps) 
 
 
 
-  const getDirectUrl = (url: string) => {
-    if (!url) return url;
-    // Handle Google Drive links
-    if (url.includes("drive.google.com") && url.includes("/file/d/")) {
-      try {
-        const id = url.split("/file/d/")[1].split("/")[0];
-        return `https://drive.google.com/thumbnail?id=${id}&sz=w4000`;
-      } catch (e) {
-        return url;
-      }
-    }
-    // Handle Dropbox links
-    if (url.includes("dropbox.com")) {
-      return url.replace("dl=0", "raw=1");
-    }
-    return url;
-  };
+
 
   const validateUrl = (url: string): string | null => {
+    // ImgBB Specific Check: Viewer links (ibb.co/xyz) vs Direct links (i.ibb.co/xyz.jpg)
     if (url.includes("ibb.co") && !url.includes("i.ibb.co")) {
-      return "For ImgBB, please use the 'Direct Link' (ends in .jpg/.png), not the Viewer link.";
+      return "You pasted an ImgBB Viewer Link. Please copy the 'Direct Link' (ending in .jpg/.png) instead.";
     }
     return null;
   };
@@ -592,7 +577,7 @@ const ProductForm = ({ isOpen, onClose, onSuccess, product }: ProductFormProps) 
               <div className="flex flex-col gap-3">
                 <div className="flex gap-2">
                   <Input
-                    placeholder="Paste image link (ImgBB, etc.)"
+                    placeholder="Paste Direct Link (e.g. https://i.ibb.co/...)"
                     value={imageUrlInput}
                     onChange={(e) => setImageUrlInput(e.target.value)}
                     onKeyDown={(e) => e.key === 'Enter' && (e.preventDefault(), handleAddImageUrl())}
@@ -604,7 +589,7 @@ const ProductForm = ({ isOpen, onClose, onSuccess, product }: ProductFormProps) 
                 </div>
 
                 <p className="text-[10px] text-muted-foreground">
-                  Use direct links (ImgBB, Dropbox) to save database space. Or upload below:
+                  <strong>Important:</strong> If using ImgBB, select "Direct Link" from the dropdown codes. It must start with <code>i.ibb.co</code>.
                 </p>
               </div>
 

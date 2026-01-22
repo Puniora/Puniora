@@ -32,7 +32,7 @@ const Auth = () => {
 
   const handleVerifyOtp = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!otp || otp.length !== 6) return;
+    if (!otp || otp.length < 6) return;
     try {
       await verifyOtp(email, otp);
       navigate("/account");
@@ -55,7 +55,7 @@ const Auth = () => {
           <div className="absolute inset-0 bg-gold/5 blur-[80px] -z-10 rounded-full" />
 
           <div className="text-center space-y-4">
-            <h1 className="text-4xl md:text-5xl font-heading text-foreground">Welcome Back</h1>
+            <h1 className="text-4xl md:text-5xl font-heading text-white tracking-wide">Welcome Back</h1>
             <p className="text-muted-foreground text-lg">
               {step === "email"
                 ? "Sign in to manage your orders and saved addresses."
@@ -63,7 +63,7 @@ const Auth = () => {
             </p>
           </div>
 
-          <div className="bg-white/50 backdrop-blur-xl border border-white/20 p-8 rounded-3xl shadow-xl shadow-gold/5 ring-1 ring-gold/10">
+          <div className="glass p-8 rounded-3xl shadow-[0_0_50px_-10px_rgba(255,85,0,0.1)] border-orange-500/10">
             {step === "email" ? (
               <form onSubmit={handleSendOtp} className="space-y-6">
                 <div className="space-y-2">
@@ -76,7 +76,7 @@ const Auth = () => {
                       placeholder="you@example.com"
                       value={email}
                       onChange={(e) => setEmail(e.target.value)}
-                      className="pl-10 h-12 bg-white/50 border-gold/20 focus:border-gold focus:ring-gold/20 transition-all font-medium"
+                      className="pl-10 h-12 bg-black/40 border-white/10 focus:border-gold focus:ring-gold/10 transition-all font-medium text-white placeholder:text-white/30"
                       required
                     />
                   </div>
@@ -97,7 +97,7 @@ const Auth = () => {
                 </Button>
 
                 <p className="text-xs text-center text-muted-foreground">
-                  We'll send a 6-digit verification code to your email.
+                  We'll send a verification code to your email.
                 </p>
               </form>
             ) : (
@@ -120,9 +120,9 @@ const Auth = () => {
                       type="text"
                       placeholder="000000"
                       value={otp}
-                      onChange={(e) => setOtp(e.target.value.replace(/\D/g, '').slice(0, 6))}
-                      className="pl-10 h-12 bg-white/50 border-gold/20 focus:border-gold focus:ring-gold/20 transition-all font-medium text-center tracking-[0.5em] text-2xl"
-                      maxLength={6}
+                      onChange={(e) => setOtp(e.target.value.replace(/\D/g, '').slice(0, 8))}
+                      className="pl-10 h-12 bg-black/40 border-white/10 focus:border-gold focus:ring-gold/10 transition-all font-medium text-center tracking-[0.5em] text-2xl text-white"
+                      maxLength={8}
                       required
                     />
                   </div>
@@ -133,7 +133,7 @@ const Auth = () => {
 
                 <Button
                   type="submit"
-                  disabled={loading || otp.length !== 6}
+                  disabled={loading || otp.length < 6}
                   className="w-full h-12 bg-gold hover:bg-gold/90 text-white font-bold uppercase tracking-widest text-sm shadow-lg shadow-gold/20 transition-transform hover:scale-[1.02] disabled:opacity-50"
                 >
                   {loading ? (
