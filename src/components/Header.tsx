@@ -225,20 +225,7 @@ const Header = () => {
                   </div>
                 </nav>
   
-                <div className="grid grid-cols-2 gap-4 pt-2">
-                    <a href="/admin-login" onClick={() => setIsMobileMenuOpen(false)}>
-                      <Button variant="luxuryOutline" className="w-full justify-between group h-12 border-white/10 hover:border-gold hover:bg-gold/10 text-white bg-white/5">
-                        Admin
-                        <User className="h-4 w-4 group-hover:text-gold" />
-                      </Button>
-                    </a>
-                    <Link to={user ? "/account" : "/auth"} onClick={() => setIsMobileMenuOpen(false)}>
-                      <Button variant="luxuryOutline" className="w-full justify-between group h-12 border-white/10 hover:border-gold hover:bg-gold/10 text-white bg-white/5">
-                        {user ? "Account" : "Login"}
-                        <User className="h-4 w-4 group-hover:text-gold" />
-                      </Button>
-                    </Link>
-                </div>
+
              </div>
           </div>
         </div>
