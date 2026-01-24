@@ -4,7 +4,7 @@ import { productService } from "@/lib/services/productService";
 import { Product, formatPrice } from "@/lib/products";
 import Header from "@/components/Header";
 import Footer from "@/components/Footer";
-import CartDrawer from "@/components/CartDrawer";
+
 import RelatedProducts from "@/components/RelatedProducts";
 import ReviewSection from "@/components/ReviewSection";
 import { Button } from "@/components/ui/button";
@@ -26,6 +26,7 @@ import {
 import { Loader2, ShoppingCart, ArrowLeft, Star, ShieldCheck, Truck, RefreshCw, Share2, CreditCard, Banknote, MapPin, Clock } from "lucide-react";
 import { toast } from "sonner";
 import { getDirectUrl } from "@/lib/utils/imageUtils";
+import RevealOnScroll from "@/components/ui/RevealOnScroll";
 
 const ProductDetails = () => {
   const { id } = useParams<{ id: string }>();
@@ -155,13 +156,16 @@ const ProductDetails = () => {
       <main className="pt-32 md:pt-40 pb-24 overflow-x-hidden w-full max-w-[100vw]">
         <div className="container mx-auto px-4 md:px-6">
           {/* Breadcrumb / Back button */}
-          <Link to="/" className="inline-flex items-center gap-2 text-sm text-muted-foreground hover:text-gold transition-colors mb-4 lg:mb-8 group">
-            <ArrowLeft className="h-4 w-4 transform group-hover:-translate-x-1 transition-transform" />
-            Back to Collection
-          </Link>
+          <RevealOnScroll variant="fade-in" delay={100}>
+            <Link to="/" className="inline-flex items-center gap-2 text-sm text-muted-foreground hover:text-gold transition-colors mb-4 lg:mb-8 group">
+              <ArrowLeft className="h-4 w-4 transform group-hover:-translate-x-1 transition-transform" />
+              Back to Collection
+            </Link>
+          </RevealOnScroll>
 
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 lg:gap-16 items-start">
             {/* Left Column: Image / Carousel */}
+            <RevealOnScroll variant="fade-up" delay={200} className="w-full">
             <div className="flex flex-col-reverse lg:flex-row gap-4 w-full">
               {/* Thumbnail strip (Images + Videos) */}
               {(product.images.length > 1 || (product.videos && product.videos.length > 0)) && (
@@ -293,9 +297,11 @@ const ProductDetails = () => {
                 })()}
               </div>
             </div>
+            </RevealOnScroll>
 
             {/* Right Column: Details (Sticky on Desktop) */}
-            <div className="lg:sticky lg:top-32 space-y-6 lg:space-y-8 flex flex-col h-full">
+            <div className="lg:sticky lg:top-36 space-y-6 lg:space-y-8 flex flex-col h-full">
+              <RevealOnScroll variant="slide-left" delay={300}>
               <div className="space-y-6">
                 <div className="flex items-center gap-6">
                   <span className="bg-gold/10 text-gold px-4 py-1.5 rounded-full text-[10px] font-bold uppercase tracking-[0.3em] backdrop-blur-sm">
@@ -409,17 +415,21 @@ const ProductDetails = () => {
                   <Button
                     variant="outline"
                     size="sm"
+                    type="button"
                     className="rounded-full border-gold/20 hover:border-gold/60 text-muted-foreground hover:text-gold hover:bg-gold/5 transition-all duration-500 gap-2 px-6 h-9 tracking-wider text-[10px] font-bold uppercase shadow-sm"
-                    onClick={() => {
-                      if (navigator.share) {
-                        navigator.share({
-                          title: product.name,
-                          text: `Check out ${product.name} on Puniora!`,
-                          url: window.location.href,
-                        });
-                      } else {
-                        navigator.clipboard.writeText(window.location.href);
-                        toast.success("Link copied to clipboard!");
+                    onClick={async () => {
+                      try {
+                        if (navigator.share) {
+                          await navigator.share({
+                            title: product.name,
+                            url: window.location.href,
+                          });
+                        } else {
+                          await navigator.clipboard.writeText(window.location.href);
+                          toast.success("Link copied to clipboard!");
+                        }
+                      } catch (error) {
+                         console.error("Share failed/cancelled", error);
                       }
                     }}
                   >
@@ -503,6 +513,7 @@ const ProductDetails = () => {
                   </div>
                 </div>
               </div>
+              </RevealOnScroll>
             </div>
           </div>
         </div>
@@ -512,11 +523,11 @@ const ProductDetails = () => {
           <div className="flex items-center gap-4 max-w-lg mx-auto">
             <div className="flex flex-col">
               <span className="text-[10px] uppercase font-bold tracking-widest text-muted-foreground">Price</span>
-              <span className="text-lg font-bold text-gold">{formatPrice(product.price)}</span>
+              <span className="text-xl font-heading text-gold">{formatPrice(product.price)}</span>
             </div>
             <Button
               variant="gold"
-              className="flex-1 h-12 shadow-lg shadow-gold/20 font-bold uppercase tracking-widest text-[10px]"
+              className="flex-1 h-12 rounded-full shadow-lg shadow-gold/20 font-bold uppercase tracking-[0.2em] text-[10px] bg-gradient-to-r from-gold to-yellow-600 hover:from-yellow-600 hover:to-gold text-white border-none"
               onClick={() => addToCart({ ...product, price: selectedPrice, size: selectedSize, selectedNote: selectedNote, images: [selectedImage, ...product.images.filter(i => i !== selectedImage)] })}
             >
               Add to Cart
@@ -525,7 +536,8 @@ const ProductDetails = () => {
         </div>
         {/* Full Width Accordion Section */}
         {product.extraSections && product.extraSections.length > 0 && (
-          <div className="container mx-auto px-6 mt-32 mb-24 animate-fade-in" style={{ animationDelay: '200ms' }}>
+          <div className="container mx-auto px-6 mt-32 mb-24">
+            <RevealOnScroll>
             <div className="w-full border-t border-gold/20">
               <Accordion type="single" collapsible className="w-full" defaultValue={product.olfactoryNotes && product.olfactoryNotes.length > 0 ? "olfactory-notes" : undefined}>
 
@@ -567,12 +579,14 @@ const ProductDetails = () => {
                 ))}
               </Accordion>
             </div>
+            </RevealOnScroll>
           </div>
         )}
 
         {/* Product Gallery Section (Masonry) - Fallback to main images if gallery is empty */}
         {((product.gallery && product.gallery.length > 0) || (product.images && product.images.length > 0)) && (
-          <div className="container mx-auto px-6 mt-32 mb-24 animate-fade-in" style={{ animationDelay: '300ms' }}>
+          <div className="container mx-auto px-6 mt-32 mb-24">
+            <RevealOnScroll variant="fade-up">
             <h2 className="text-3xl font-heading mb-8 text-center text-gold uppercase tracking-widest">Visual Story</h2>
             <div className="grid grid-cols-2 md:grid-cols-4 gap-4 auto-rows-[200px] md:auto-rows-[300px]">
               {(product.gallery && product.gallery.length > 0 ? product.gallery : product.images).map((img, index) => (
@@ -594,18 +608,23 @@ const ProductDetails = () => {
                 </div>
               ))}
             </div>
+            </RevealOnScroll>
           </div>
         )}
 
         {/* Related Products & Reviews */}
         <div className="container mx-auto px-6 mb-20 animate-fade-in" style={{ animationDelay: '400ms' }}>
-          <RelatedProducts currentProductId={product.id} category={product.category} />
-          <ReviewSection productId={product.id} />
+          <RevealOnScroll>
+            <RelatedProducts currentProductId={product.id} category={product.category} />
+          </RevealOnScroll> 
+          <RevealOnScroll variant="fade-up" delay={200}>
+            <ReviewSection productId={product.id} />
+          </RevealOnScroll>
         </div>
       </main>
 
       <Footer />
-      <CartDrawer />
+
     </div>
   );
 };

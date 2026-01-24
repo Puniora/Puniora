@@ -69,7 +69,7 @@ const TrackOrder = () => {
       <div className="min-h-screen bg-background flex flex-col">
          <Header />
 
-         <main className="flex-1 pt-32 pb-20">
+         <main className="flex-1 pt-40 pb-20">
             <div className="container mx-auto px-6 max-w-4xl">
                <div className="text-center space-y-4 mb-12">
                   <h1 className="text-4xl md:text-5xl font-heading">Track Your Orders</h1>

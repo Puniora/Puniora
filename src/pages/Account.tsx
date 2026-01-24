@@ -202,7 +202,7 @@ const Account = () => {
   return (
     <div className="min-h-screen bg-background flex flex-col">
       <Header />
-      <main className="flex-1 container mx-auto px-6 pt-24 pb-12">
+      <main className="flex-1 container mx-auto px-6 pt-40 pb-12">
         <div className="flex flex-col md:flex-row gap-8 items-start mb-12">
            <div className="flex-1">
              <h1 className="text-4xl font-heading text-foreground mb-2">My Account</h1>
@@ -228,48 +228,56 @@ const Account = () => {
                <div className="flex justify-center py-12"><Loader2 className="animate-spin text-gold" /></div>
              ) : selectedOrder ? (
                // DETAILED ORDER VIEW
-                <div className="bg-white border rounded-3xl p-8 max-w-4xl mx-auto animate-slide-up">
-                   <Button variant="ghost" size="sm" onClick={() => setSelectedOrder(null)} className="mb-4 -ml-2 text-muted-foreground hover:text-gold">
+                <div className="glass p-8 rounded-3xl max-w-4xl mx-auto animate-slide-up relative overflow-hidden">
+                   {/* Background Glow */}
+                   <div className="absolute top-0 right-0 w-96 h-96 bg-gold/5 rounded-full blur-[100px] pointer-events-none" />
+                   
+                   <Button variant="ghost" size="sm" onClick={() => setSelectedOrder(null)} className="mb-6 -ml-2 text-muted-foreground hover:text-white hover:bg-white/5 relative z-10">
                       <ArrowRight className="h-4 w-4 mr-2 rotate-180" /> Back to My Orders
                    </Button>
                    
-                   <div className="flex flex-col md:flex-row justify-between items-start mb-8 gap-4">
+                   <div className="flex flex-col md:flex-row justify-between items-start mb-10 gap-6 relative z-10">
                       <div>
-                         <div className="flex items-center gap-3 mb-1">
-                           <h2 className="text-2xl font-heading">{selectedOrder.tracking_status}</h2>
-                           {selectedOrder.tracking_status === 'Cancelled' && <Badge variant="destructive">Cancelled</Badge>}
+                         <div className="flex items-center gap-3 mb-2">
+                           <h2 className="text-3xl font-heading text-white">{selectedOrder.tracking_status}</h2>
+                           {selectedOrder.tracking_status === 'Cancelled' && <Badge variant="destructive" className="bg-red-500/20 text-red-500 hover:bg-red-500/30 border-red-500/50">Cancelled</Badge>}
                          </div>
-                         <p className="text-sm text-muted-foreground">Order #{selectedOrder.id.slice(0,8)} • Placed on {new Date(selectedOrder.created_at).toLocaleDateString()}</p>
+                         <p className="text-sm text-muted-foreground font-mono">Order <span className="text-white">#{selectedOrder.id.slice(0,8)}</span> • Placed on {new Date(selectedOrder.created_at).toLocaleDateString()}</p>
                       </div>
-                       <div className="flex gap-2">
-                         <Badge variant="outline" className="text-gold border-gold/20 bg-gold/5">{selectedOrder.payment_status}</Badge>
+                       <div className="flex gap-3">
+                         <Badge variant="outline" className={`px-4 py-1.5 ${
+                             selectedOrder.payment_status === 'paid' ? 'text-green-400 border-green-500/30 bg-green-500/10' : 'text-gold border-gold/30 bg-gold/10'
+                         }`}>
+                             {selectedOrder.payment_status === 'pending' ? 'Cash on Delivery' : selectedOrder.payment_status.toUpperCase()}
+                         </Badge>
+
                          {(selectedOrder.tracking_status === 'Order Placed' || selectedOrder.tracking_status === 'Packed') && (
                            <Dialog open={isCancelDialogOpen} onOpenChange={setIsCancelDialogOpen}>
                              <DialogTrigger asChild>
-                               <Button variant="destructive" size="sm">Cancel Order</Button>
+                               <Button variant="destructive" size="sm" className="bg-red-500/10 hover:bg-red-500/20 text-red-500 border border-red-500/20">Cancel Order</Button>
                              </DialogTrigger>
-                             <DialogContent>
+                             <DialogContent className="glass border-white/10 text-white">
                                <DialogHeader>
                                  <DialogTitle>Cancel Order</DialogTitle>
-                                 <DialogDescription>Please tell us why you are cancelling this order.</DialogDescription>
+                                 <DialogDescription className="text-muted-foreground">Please tell us why you are cancelling this order.</DialogDescription>
                                </DialogHeader>
                                <div className="space-y-4 py-4">
                                  <div className="space-y-2">
-                                   <Label>Reason for Cancellation</Label>
+                                   <Label className="text-muted-foreground">Reason for Cancellation</Label>
                                    <Select value={cancelReason} onValueChange={setCancelReason}>
-                                     <SelectTrigger>
+                                     <SelectTrigger className="glass border-white/10 text-white">
                                        <SelectValue placeholder="Select a reason" />
                                      </SelectTrigger>
-                                     <SelectContent>
+                                     <SelectContent className="glass border-white/10 text-white">
                                        {cancellationReasons.map((reason) => (
-                                         <SelectItem key={reason} value={reason}>{reason}</SelectItem>
+                                         <SelectItem key={reason} value={reason} className="focus:bg-white/10 focus:text-gold cursor-pointer">{reason}</SelectItem>
                                        ))}
                                      </SelectContent>
                                    </Select>
                                  </div>
                                </div>
                                <DialogFooter>
-                                 <Button variant="outline" onClick={() => setIsCancelDialogOpen(false)}>Keep Order</Button>
+                                 <Button variant="ghost" onClick={() => setIsCancelDialogOpen(false)} className="hover:bg-white/10 hover:text-white">Keep Order</Button>
                                  <Button variant="destructive" onClick={handleCancelOrder} disabled={cancelLoading || !cancelReason}>
                                    {cancelLoading ? <Loader2 className="h-4 w-4 animate-spin" /> : "Confirm Cancellation"}
                                  </Button>
@@ -282,22 +290,24 @@ const Account = () => {
 
                    {/* Progress (Hide if cancelled) */}
                    {selectedOrder.tracking_status !== 'Cancelled' && (
-                     <div className="relative py-8 mb-12 hidden md:block">
-                        <div className="absolute top-1/2 left-0 right-0 h-1 bg-muted rounded-full -translate-y-1/2" />
+                     <div className="relative py-10 mb-12 hidden md:block px-4">
+                        <div className="absolute top-1/2 left-0 right-0 h-0.5 bg-white/10 rounded-full -translate-y-1/2" />
                         <div 
-                          className="absolute top-1/2 left-0 h-1 bg-gold rounded-full -translate-y-1/2 transition-all duration-1000"
+                          className="absolute top-1/2 left-0 h-0.5 bg-gradient-to-r from-gold/50 to-gold rounded-full -translate-y-1/2 transition-all duration-1000 shadow-[0_0_10px_rgba(212,175,55,0.5)]"
                           style={{ width: `${(getStatusIndex(selectedOrder.tracking_status) / (statusSteps.length - 1)) * 100}%` }}
                         />
                         <div className="relative flex justify-between">
                            {statusSteps.map((step, idx) => {
                               const currentIdx = getStatusIndex(selectedOrder.tracking_status);
                               const isCompleted = idx <= currentIdx;
+                              const isCurrent = idx === currentIdx;
+                              
                               return (
-                                 <div key={idx} className="flex flex-col items-center gap-2 bg-white px-2 cursor-default group">
-                                    <div className={`h-8 w-8 rounded-full border-2 flex items-center justify-center transition-colors ${isCompleted ? 'bg-gold border-gold text-white' : 'bg-white border-muted text-muted-foreground'}`}>
-                                       <step.icon className="h-4 w-4" />
+                                 <div key={idx} className="flex flex-col items-center gap-4 cursor-default group relative z-10 w-24">
+                                    <div className={`h-10 w-10 rounded-full border flex items-center justify-center transition-all duration-300 ${isCompleted ? 'bg-black border-gold text-gold shadow-[0_0_15px_rgba(212,175,55,0.3)] scale-110' : 'bg-black border-white/10 text-muted-foreground'}`}>
+                                       <step.icon className={`h-4 w-4 ${isCurrent ? 'animate-pulse' : ''}`} />
                                     </div>
-                                    <span className={`text-[10px] uppercase font-bold ${isCompleted ? 'text-foreground' : 'text-muted-foreground'}`}>{step.label}</span>
+                                    <span className={`text-[10px] uppercase font-bold tracking-widest text-center transition-colors ${isCompleted ? 'text-gold' : 'text-muted-foreground/50'}`}>{step.label}</span>
                                  </div>
                               )
                            })}
@@ -306,47 +316,73 @@ const Account = () => {
                    )}
 
                    {/* Details Grid */}
-                   <div className="grid md:grid-cols-2 gap-12 text-sm">
-                      <div>
-                         <h4 className="font-bold mb-4 uppercase text-xs text-muted-foreground tracking-widest border-b pb-2">Delivery Address</h4>
-                         <p className="font-medium text-lg">{selectedOrder.customer_name}</p>
-                         <p className="text-muted-foreground leading-relaxed mt-1">
-                            {selectedOrder.address_json.houseAddress}<br/>
-                            {selectedOrder.address_json.landmark && <>{selectedOrder.address_json.landmark}<br/></>}
-                            {selectedOrder.address_json.place}, {selectedOrder.address_json.district}<br/>
-                            {selectedOrder.address_json.state}
-                         </p>
-                         <p className="mt-3 text-muted-foreground font-mono flex items-center gap-2">
-                           <Phone className="h-3 w-3" /> {selectedOrder.customer_mobile}
-                         </p>
+                   <div className="grid md:grid-cols-2 gap-8 text-sm relative z-10">
+                      <div className="glass bg-white/5 p-6 rounded-2xl border-white/5 space-y-4">
+                         <div className="flex items-center gap-3 border-b border-white/10 pb-4 mb-2">
+                           <div className="h-8 w-8 rounded-full bg-white/5 flex items-center justify-center">
+                              <MapPin className="h-4 w-4 text-gold" />
+                           </div>
+                           <h4 className="font-heading text-lg text-white">Delivery Address</h4>
+                         </div>
+                         
+                         <div className="space-y-1">
+                           <p className="font-bold text-white text-lg">{selectedOrder.customer_name}</p>
+                           <p className="text-muted-foreground leading-relaxed text-sm">
+                              {selectedOrder.address_json.houseAddress}
+                           </p>
+                           <p className="text-muted-foreground leading-relaxed text-sm">
+                              {selectedOrder.address_json.landmark}
+                           </p>
+                           <p className="text-muted-foreground leading-relaxed text-sm">
+                              {selectedOrder.address_json.place}, {selectedOrder.address_json.district}
+                           </p>
+                           <p className="text-muted-foreground leading-relaxed text-sm">
+                              {selectedOrder.address_json.state}
+                           </p>
+                         </div>
+                         
+                         <div className="pt-4 mt-2 border-t border-white/10">
+                           <p className="text-gold font-mono text-sm flex items-center gap-2 bg-gold/10 w-fit px-3 py-1.5 rounded-lg border border-gold/20">
+                             <Phone className="h-3 w-3" /> {selectedOrder.customer_mobile}
+                           </p>
+                         </div>
 
                          {/* Courier Info */}
                          {selectedOrder.awb_code && (
-                           <div className="mt-6 bg-muted/30 p-4 rounded-xl border border-dashed">
-                             <p className="text-xs uppercase font-bold text-muted-foreground mb-1">Courier AWB</p>
-                             <p className="font-mono text-gold">{selectedOrder.awb_code}</p>
+                           <div className="mt-4 bg-black/40 p-4 rounded-xl border border-dashed border-white/20">
+                             <p className="text-[10px] uppercase font-bold text-muted-foreground mb-1 tracking-widest">Courier AWB</p>
+                             <p className="font-mono text-white tracking-wider">{selectedOrder.awb_code}</p>
                            </div>
                          )}
                       </div>
 
-                      <div>
-                         <h4 className="font-bold mb-4 uppercase text-xs text-muted-foreground tracking-widest border-b pb-2">Order Items</h4>
-                         <div className="space-y-4">
+                      <div className="glass bg-white/5 p-6 rounded-2xl border-white/5 flex flex-col h-full">
+                         <div className="flex items-center gap-3 border-b border-white/10 pb-4 mb-6">
+                           <div className="h-8 w-8 rounded-full bg-white/5 flex items-center justify-center">
+                              <Package className="h-4 w-4 text-gold" />
+                           </div>
+                           <h4 className="font-heading text-lg text-white">Order Items</h4>
+                         </div>
+                         
+                         <div className="space-y-6 flex-1 overflow-y-auto max-h-[300px] pr-2 custom-scrollbar">
                             {selectedOrder.items.map((item, i) => (
-                               <div key={i} className="flex gap-4">
-                                  <div className="h-16 w-16 bg-muted rounded-lg overflow-hidden shrink-0 border">
-                                    {item.image && <img src={item.image} className="w-full h-full object-cover" />}
+                               <div key={i} className="flex gap-4 group">
+                                  <div className="h-16 w-16 bg-white/5 rounded-lg overflow-hidden shrink-0 border border-white/10 group-hover:border-gold/30 transition-colors">
+                                    {item.image && <img src={item.image} className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-500" />}
                                   </div>
-                                  <div className="flex-1">
-                                    <p className="font-medium">{item.name}</p>
-                                    <p className="text-xs text-muted-foreground">{item.size} x {item.quantity}</p>
+                                  <div className="flex-1 flex flex-col justify-center">
+                                    <p className="font-medium text-white group-hover:text-gold transition-colors">{item.name}</p>
+                                    <p className="text-xs text-muted-foreground">{item.size} <span className="text-white/20 mx-1">|</span> Qty: {item.quantity}</p>
                                   </div>
-                                  <span className="font-medium">{formatPrice(item.price * item.quantity)}</span>
+                                  <span className="font-mono text-white/80 text-sm mt-1">{formatPrice(item.price * item.quantity)}</span>
                                </div>
                             ))}
-                            <div className="pt-4 mt-4 border-t flex justify-between items-center">
-                               <span className="text-muted-foreground uppercase text-xs font-bold">Total Amount</span>
-                               <span className="text-xl font-heading text-gold">{formatPrice(selectedOrder.total_amount)}</span>
+                         </div>
+                         
+                         <div className="pt-6 mt-auto border-t border-white/10">
+                            <div className="flex justify-between items-center bg-gold/10 p-4 rounded-xl border border-gold/20">
+                               <span className="text-gold uppercase text-[10px] font-bold tracking-widest">Total Amount</span>
+                               <span className="text-2xl font-heading text-gold">{formatPrice(selectedOrder.total_amount)}</span>
                             </div>
                          </div>
                       </div>

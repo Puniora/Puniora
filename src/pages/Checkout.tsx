@@ -11,7 +11,7 @@ import { formatPrice } from "@/lib/products";
 import { orderService } from "@/lib/services/orderService";
 import { shiprocketService } from "@/lib/services/shiprocketService";
 import { razorpayService } from "@/lib/services/razorpayService";
-import { phonepeService } from "@/lib/services/phonepeService"; // Import PhonePe service
+
 import { useAuth } from "@/context/AuthContext";
 import { userService, Address } from "@/lib/services/userService";
 import {
@@ -37,7 +37,7 @@ const Checkout = () => {
   const [selectedAddressId, setSelectedAddressId] = useState("new");
   const [showConfirmation, setShowConfirmation] = useState(false);
   const [confirmedOrderId, setConfirmedOrderId] = useState("");
-  const [phonePeError, setPhonePeError] = useState<string | null>(null);
+  const [razorpayError, setRazorpayError] = useState<string | null>(null);
 
   const [formData, setFormData] = useState(() => {
     const saved = localStorage.getItem("checkoutFormData");
@@ -115,7 +115,10 @@ const Checkout = () => {
     }
   };
 
-  const [paymentMethod, setPaymentMethod] = useState<"cod" | "phonepe">("cod");
+  const [paymentMethod, setPaymentMethod] = useState<"cod" | "razorpay">("razorpay");
+
+  const discountAmount = paymentMethod === 'razorpay' ? Math.round(totalPrice * 0.05) : 0;
+  const finalTotal = totalPrice - discountAmount;
 
   useEffect(() => {
     localStorage.setItem("checkoutFormData", JSON.stringify(formData));
@@ -186,33 +189,47 @@ const Checkout = () => {
 
 
 
-      if (paymentMethod === "phonepe") {
+      if (paymentMethod === "razorpay") {
           try {
-              // Initiate PhonePe Payment
-              // Note: If running on localhost, this might fail due to CORS.
-              // In production, redirection happens, so CORS doesn't matter for the *user* nav, 
-              // but the *fetch* call initiation *does* matter.
-              
-              await phonepeService.initiatePayment({
-                  amount: Math.round(totalPrice * 100), // in paise
-                  mobileNumber: formData.mobile,
-                  merchantUserId: user?.id || "GUEST_" + Date.now()
-              });
-              
-              // If successful, user is redirected away. 
-              // We return here.
-              return;
-              
-          } catch (peError: any) {
-              if (peError.message === "SIMULATED_SUCCESS") {
-                  // Fallback for Demo: Treat as PAID
-                  await completeOrderCreation('paid', 'SIMULATED_PHONEPE_' + Date.now());
-                  return;
+            const options = {
+              key: import.meta.env.VITE_RAZORPAY_KEY_ID,
+              amount: Math.round(finalTotal * 100), // in paise using detailed final total
+              currency: "INR",
+              name: "Puniora",
+              description: "Purchase from Puniora",
+              image: `${window.location.origin}/favicon.png`,
+              handler: async function (response: any) {
+                // Payment Success
+                console.log("Razorpay Success:", response);
+                await completeOrderCreation('paid', response.razorpay_payment_id);
+              },
+              prefill: {
+                name: formData.name,
+                contact: formData.mobile,
+                email: user?.email || ""
+              },
+              theme: {
+                color: "#D4AF37", // Gold color
+                backdrop_color: "#1a1a1a" // Attempt to darken backdrop if supported by standard checkout (though standard checkout backdrop is usually fixed opacity)
+              },
+              modal: {
+                ondismiss: function() {
+                  setLoading(false);
+                  toast.info("Payment cancelled");
+                },
+                // Force a more minimal look if possible via standard options
+                animation: true
               }
-              
-              console.error("PhonePe Error:", peError);
-              setPhonePeError("PhonePe initialization failed. " + (peError.message || ""));
-              toast.error("PhonePe Failed: " + (peError.message || "Check console"));
+            };
+            
+            await razorpayService.openPaymentModal(options);
+            // Note: loading state is handled by modal dismiss or success callback
+            return;
+
+          } catch (rzpError: any) {
+              console.error("Razorpay Error:", rzpError);
+              setRazorpayError("Razorpay initialization failed. " + (rzpError.message || ""));
+              toast.error("Payment Failed: " + (rzpError.message || "Check console"));
               setLoading(false);
               return;
           }
@@ -242,7 +259,7 @@ const Checkout = () => {
           landmark: formData.landmark
         },
 
-        total_amount: totalPrice,
+        total_amount: finalTotal,
         payment_status: pStatus,
         razorpay_payment_id: pId || undefined,
         user_id: user?.id,
@@ -351,51 +368,53 @@ const Checkout = () => {
                     </div>
                   )}
 
-                  <div className="grid md:grid-cols-2 gap-6">
-                    <div className="space-y-2">
+                  {/* Name & Mobile - Compact Grid */}
+                  <div className="grid grid-cols-2 gap-4">
+                    <div className="space-y-1.5">
                       <Label htmlFor="name" className="text-[10px] uppercase tracking-widest font-bold text-muted-foreground">Full Name</Label>
-                      <Input id="name" required placeholder="John Doe" className="h-12 border-border/50 focus:border-gold rounded-xl italic" value={formData.name} onChange={handleInputChange} />
+                      <Input id="name" required placeholder="John Doe" className="h-10 border-border/50 focus:border-gold rounded-xl text-sm" value={formData.name} onChange={handleInputChange} />
                     </div>
-                    <div className="space-y-2">
-                      <Label htmlFor="mobile" className="text-[10px] uppercase tracking-widest font-bold text-muted-foreground">Mobile Number</Label>
-                      <Input id="mobile" required type="tel" placeholder="+91 XXXX XXX XXX" className="h-12 border-border/50 focus:border-gold rounded-xl italic" value={formData.mobile} onChange={handleInputChange} />
+                    <div className="space-y-1.5">
+                      <Label htmlFor="mobile" className="text-[10px] uppercase tracking-widest font-bold text-muted-foreground">Mobile</Label>
+                      <Input id="mobile" required type="tel" placeholder="+91..." className="h-10 border-border/50 focus:border-gold rounded-xl text-sm" value={formData.mobile} onChange={handleInputChange} />
                     </div>
                   </div>
 
                   <Separator className="bg-border/50" />
 
                   <div className="flex items-center justify-between">
-                    <Label className="text-[10px] uppercase tracking-widest font-bold text-muted-foreground">Full Delivery Address</Label>
+                    <Label className="text-[10px] uppercase tracking-widest font-bold text-muted-foreground">Address</Label>
                     <Button
                       type="button"
                       variant="ghost"
                       size="sm"
                       onClick={handleGetLocation}
                       disabled={geoLoading}
-                      className="text-gold hover:text-gold hover:bg-gold/10 gap-2 h-8 px-3 rounded-full border border-gold/20"
+                      className="text-gold hover:text-gold hover:bg-gold/10 gap-2 h-7 px-2.5 rounded-full border border-gold/20 text-[10px]"
                     >
                       {geoLoading ? <Loader2 className="h-3 w-3 animate-spin" /> : <MapPin className="h-3 w-3" />}
-                      {geoLoading ? "Locating..." : "Use Current Location"}
+                      {geoLoading ? "Locating..." : "Use GPS"}
                     </Button>
                   </div>
 
-                  <div className="grid md:grid-cols-2 gap-6">
-                    <div className="space-y-2">
-                      <Input id="state" required placeholder="State" className="h-12 border-border/50 focus:border-gold rounded-xl italic" value={formData.state} onChange={handleInputChange} />
+                  {/* Address Grid - Compact */}
+                  <div className="grid grid-cols-2 gap-4">
+                    <div className="space-y-1.5">
+                      <Input id="state" required placeholder="State" className="h-10 border-border/50 focus:border-gold rounded-xl text-sm" value={formData.state} onChange={handleInputChange} />
                     </div>
-                    <div className="space-y-2">
-                      <Input id="district" required placeholder="District" className="h-12 border-border/50 focus:border-gold rounded-xl italic" value={formData.district} onChange={handleInputChange} />
+                    <div className="space-y-1.5">
+                      <Input id="district" required placeholder="District" className="h-10 border-border/50 focus:border-gold rounded-xl text-sm" value={formData.district} onChange={handleInputChange} />
                     </div>
-                    <div className="space-y-2">
-                      <Input id="place" required placeholder="City / Place / Town" className="h-12 border-border/50 focus:border-gold rounded-xl italic" value={formData.place} onChange={handleInputChange} />
+                    <div className="space-y-1.5">
+                      <Input id="place" required placeholder="City/Town" className="h-10 border-border/50 focus:border-gold rounded-xl text-sm" value={formData.place} onChange={handleInputChange} />
                     </div>
-                    <div className="space-y-2">
-                      <Input id="landmark" placeholder="Landmark (Optional)" className="h-12 border-border/50 focus:border-gold rounded-xl italic" value={formData.landmark} onChange={handleInputChange} />
+                    <div className="space-y-1.5">
+                      <Input id="landmark" placeholder="Landmark" className="h-10 border-border/50 focus:border-gold rounded-xl text-sm" value={formData.landmark} onChange={handleInputChange} />
                     </div>
                   </div>
 
-                  <div className="space-y-2">
-                    <Input id="houseAddress" required placeholder="House Name / Buildling Number" className="h-12 border-border/50 focus:border-gold rounded-xl italic" value={formData.houseAddress} onChange={handleInputChange} />
+                  <div className="space-y-1.5">
+                    <Input id="houseAddress" required placeholder="Address / House No." className="h-10 border-border/50 focus:border-gold rounded-xl text-sm" value={formData.houseAddress} onChange={handleInputChange} />
                   </div>
                 </form>
               </div>
@@ -418,9 +437,9 @@ const Checkout = () => {
                   <h2 className="text-2xl font-heading">Payment Method</h2>
                 </div>
 
-                <RadioGroup value={paymentMethod} onValueChange={(val: "cod" | "phonepe") => {
+                <RadioGroup value={paymentMethod} onValueChange={(val: "cod" | "razorpay") => {
                   setPaymentMethod(val);
-                  setPhonePeError(null);
+                  setRazorpayError(null);
                 }} className="space-y-4">
                   <div className={`flex items-center space-x-4 border rounded-xl p-4 transition-all duration-300 ${paymentMethod === 'cod' ? 'border-gold bg-gold/5 shadow-md' : 'border-border/50 hover:border-gold/50'}`}>
                     <RadioGroupItem value="cod" id="cod" className="text-gold border-gold" />
@@ -430,26 +449,25 @@ const Checkout = () => {
                     </Label>
                   </div>
 
-                  {/* Razorpay Removed */}
-
-                  {/* UPI Option Disabled 
-                  <div className={`flex items-center space-x-4 border rounded-xl p-4 transition-all duration-300 ${paymentMethod === 'phonepe' ? 'border-purple-500 bg-purple-500/5 shadow-md' : 'border-border/50 hover:border-purple-500/50'}`}>
-                    <RadioGroupItem value="phonepe" id="phonepe" className="text-purple-500 border-purple-500" />
-                    <Label htmlFor="phonepe" className="flex-1 cursor-pointer">
-                      <div className="font-heading text-lg flex items-center gap-2">
-                        UPI Payment
-                        <span className="text-[10px] bg-purple-500 text-white px-2 py-0.5 rounded-full font-bold tracking-wider">FAST</span>
+                  <div className={`flex items-center space-x-4 border rounded-xl p-4 transition-all duration-300 ${paymentMethod === 'razorpay' ? 'border-blue-500 bg-blue-500/5 shadow-md' : 'border-border/50 hover:border-blue-500/50'}`}>
+                    <RadioGroupItem value="razorpay" id="razorpay" className="text-blue-500 border-blue-500 mt-1 self-start" />
+                    <Label htmlFor="razorpay" className="flex-1 cursor-pointer">
+                      <div className="flex flex-wrap items-center gap-2 mb-1">
+                        <span className="font-heading text-lg">Online Payment</span>
+                        <div className="flex items-center gap-2">
+                          <span className="text-[10px] bg-blue-500/10 text-blue-600 border border-blue-500/20 px-2 py-0.5 rounded-full font-bold tracking-wider">SECURE</span>
+                          <span className="text-[10px] bg-green-600 text-white px-2 py-0.5 rounded-full font-bold tracking-wider shadow-sm animate-pulse">5% OFF</span>
+                        </div>
                       </div>
-                      <div className="text-sm text-muted-foreground">Google Pay, PhonePe, Paytm, etc.</div>
+                      <div className="text-sm text-muted-foreground leading-snug">Credit/Debit Card, UPI, NetBanking (via Razorpay)</div>
                     </Label>
                   </div>
-                  
-                  {phonePeError && paymentMethod === 'phonepe' && (
+
+                  {razorpayError && paymentMethod === 'razorpay' && (
                       <div className="p-3 bg-red-500/10 border border-red-500/20 rounded-lg text-red-500 text-xs mt-2">
-                          <p>{phonePeError}</p>
+                          <p>{razorpayError}</p>
                       </div>
                   )}
-                  */}
                 </RadioGroup>
               </div>
             </div>
@@ -492,9 +510,17 @@ const Checkout = () => {
                     <span className="text-sm uppercase tracking-widest font-bold opacity-70">Shipping</span>
                     <span className="text-gold font-bold text-xs">FREE</span>
                   </div>
+
+                  {discountAmount > 0 && (
+                      <div className="flex justify-between items-center text-green-500">
+                      <span className="text-sm uppercase tracking-widest font-bold opacity-90">Online Discount (5%)</span>
+                      <span className="font-bold text-xs">- {formatPrice(discountAmount)}</span>
+                    </div>
+                  )}
+
                   <div className="flex justify-between items-center pt-4 border-t border-border/50">
                     <span className="text-xl font-heading">Total</span>
-                    <span className="text-2xl font-heading text-gold">{formatPrice(totalPrice)}</span>
+                    <span className="text-2xl font-heading text-gold">{formatPrice(finalTotal)}</span>
                   </div>
                 </div>
 

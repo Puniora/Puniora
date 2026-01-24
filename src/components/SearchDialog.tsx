@@ -68,38 +68,56 @@ const SearchDialog = ({ open, onOpenChange }: SearchDialogProps) => {
         placeholder="Search perfumes, notes, or categories..."
         value={query}
         onValueChange={setQuery}
+        className="text-base h-16 md:h-14 font-medium"
       />
-      <CommandList>
-        <CommandEmpty>No results found.</CommandEmpty>
+      <CommandList className="max-h-[60vh] md:max-h-[300px] p-2">
+        <CommandEmpty className="py-10 text-muted-foreground text-sm font-medium">
+          No fragrances found.
+        </CommandEmpty>
 
         {loading ? (
-          <div className="py-6 flex justify-center">
-            <Loader2 className="h-6 w-6 animate-spin text-muted-foreground" />
+          <div className="py-12 flex justify-center">
+            <Loader2 className="h-6 w-6 animate-spin text-gold" />
           </div>
         ) : (
           <>
             {/* Quick Suggestions if query is empty */}
             {!query && (
-              <CommandGroup heading="Suggestions">
-                <CommandItem onSelect={() => setQuery("Men")}>Best for Men</CommandItem>
-                <CommandItem onSelect={() => setQuery("Women")}>Best for Women</CommandItem>
-                <CommandItem onSelect={() => setQuery("Unisex")}>Unisex Collection</CommandItem>
-                <CommandItem onSelect={() => setQuery("Rose")}>Rose Scents</CommandItem>
+              <CommandGroup heading="Suggestions" className="pt-2 pb-4">
+                 <div className="grid grid-cols-2 gap-2 px-1">
+                  {["Best for Men", "Best for Women", "Unisex Collection", "Rose Scents"].map((item) => (
+                    <CommandItem 
+                      key={item} 
+                      onSelect={() => setQuery(item.startsWith("Best for") ? item.replace("Best for ", "") : item.split(" ")[0])}
+                      className="cursor-pointer border border-border/50 bg-muted/20 hover:bg-gold/10 hover:border-gold/30 hover:text-gold transition-all py-3 rounded-xl justify-center text-center font-medium opacity-80 aria-selected:bg-gold/10 aria-selected:text-gold aria-selected:opacity-100"
+                    >
+                      {item}
+                    </CommandItem>
+                  ))}
+                 </div>
               </CommandGroup>
             )}
 
             {query && filteredProducts.length > 0 && (
-              <CommandGroup heading="Products">
+              <CommandGroup heading="Products" className="pb-4">
                 {filteredProducts.map((product) => (
-                  <CommandItem key={product.id} onSelect={() => handleSelect(product.id)} className="flex items-center gap-3 cursor-pointer">
-                    <div className="h-10 w-10 bg-muted rounded-md overflow-hidden shrink-0 border border-border/50">
-                      {product.images?.[0] && <img src={getDirectUrl(product.images[0])} alt={product.name} className="w-full h-full object-cover" />}
+                  <CommandItem 
+                    key={product.id} 
+                    onSelect={() => handleSelect(product.id)} 
+                    className="flex items-center gap-4 cursor-pointer p-3 rounded-xl mb-1 data-[selected=true]:bg-gold/20 data-[selected=true]:text-white transition-colors group"
+                  >
+                    <div className="h-12 w-12 bg-white rounded-lg overflow-hidden shrink-0 border border-border flex items-center justify-center p-1">
+                      {product.images?.[0] ? (
+                        <img src={getDirectUrl(product.images[0])} alt={product.name} className="w-full h-full object-contain" />
+                      ) : (
+                        <div className="w-full h-full bg-muted/50" />
+                      )}
                     </div>
-                    <div className="flex-1">
-                      <h4 className="font-heading text-sm">{product.name}</h4>
-                      <p className="text-[10px] text-muted-foreground uppercase tracking-wider">{product.category} • {product.size}</p>
+                    <div className="flex-1 min-w-0">
+                      <h4 className="font-heading text-base truncate data-[selected=true]:text-gold transition-colors">{product.name}</h4>
+                      <p className="text-[10px] text-muted-foreground uppercase tracking-wider truncate group-data-[selected=true]:text-white/70">{product.category} • {product.size}</p>
                     </div>
-                    <span className="text-xs font-bold text-gold">{formatPrice(product.price)}</span>
+                    <span className="text-sm font-bold text-gold shrink-0">{formatPrice(product.price)}</span>
                   </CommandItem>
                 ))}
               </CommandGroup>

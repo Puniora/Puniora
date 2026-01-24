@@ -3,8 +3,9 @@ import Hero from "@/components/Hero";
 import ProductGrid from "@/components/ProductGrid";
 import FeaturedGiftSet from "@/components/FeaturedGiftSet";
 import Footer from "@/components/Footer";
-import CartDrawer from "@/components/CartDrawer";
+
 import { SEO } from "@/components/SEO";
+import RevealOnScroll from "@/components/ui/RevealOnScroll";
 
 const Index = () => {
   return (
@@ -16,11 +17,20 @@ const Index = () => {
 
       <div className="relative z-10">
         <Header />
-        <Hero />
-        <ProductGrid />
-        <FeaturedGiftSet />
+        <RevealOnScroll variant="fade-in" duration={1000}>
+          <Hero />
+        </RevealOnScroll>
+        
+        <RevealOnScroll variant="fade-up" delay={200}>
+           <ProductGrid />
+        </RevealOnScroll>
+
+        <RevealOnScroll variant="scale-up" threshold={0.2} delay={100}>
+          <FeaturedGiftSet />
+        </RevealOnScroll>
+        
         <Footer />
-        <CartDrawer />
+
         <SEO
           title="Home"
           description="Discover luxury fragrances at Puniora. Shop our exclusive collection of perfumes, attars, and incense."

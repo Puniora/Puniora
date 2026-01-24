@@ -87,18 +87,18 @@ const ProductCard = ({ product, index, overrideImages }: ProductCardProps) => {
         </div>
 
         {/* Minimalist Info (Below Image) */}
-        <div className="pt-6 pb-6 px-6 text-center relative z-10 space-y-2 bg-[#050505] flex-1 border-t border-white/5">
-          <h3 className="font-heading text-2xl text-white group-hover:text-gold transition-colors duration-500">
+        <div className="pt-4 pb-4 px-4 md:pt-6 md:pb-6 md:px-6 text-center relative z-10 space-y-1.5 md:space-y-2 bg-[#050505] flex-1 border-t border-white/5">
+          <h3 className="font-heading text-lg md:text-2xl text-white group-hover:text-gold transition-colors duration-500 truncate px-2">
             {product.name}
           </h3>
           <div className="w-8 h-px bg-white/20 mx-auto group-hover:w-16 group-hover:bg-gold transition-all duration-500" />
-          <p className="text-[10px] text-white/40 tracking-[0.3em] uppercase group-hover:text-white/60 transition-colors">
+          <p className="text-[9px] md:text-[10px] text-white/40 tracking-[0.2em] md:tracking-[0.3em] uppercase group-hover:text-white/60 transition-colors line-clamp-1 md:line-clamp-none px-2">
             {product.notes.join(" • ")}
           </p>
 
           {/* Mobile Price/Add */}
-          <div className="md:hidden flex items-center justify-center gap-4 pt-3">
-            <span className="text-gold font-heading text-lg font-bold">
+          <div className="md:hidden flex items-center justify-center gap-4 pt-2">
+            <span className="text-gold font-heading text-base md:text-lg font-bold">
               {formatPrice(product.price)}
             </span>
           </div>
