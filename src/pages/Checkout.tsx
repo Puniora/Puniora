@@ -43,6 +43,7 @@ const Checkout = () => {
     const saved = localStorage.getItem("checkoutFormData");
     return saved ? JSON.parse(saved) : {
       name: "",
+      email: "",
       mobile: "",
       state: "",
       district: "",
@@ -67,28 +68,14 @@ const Checkout = () => {
   }, [items, navigate]);
 
   useEffect(() => {
-    if (!user && !loading) { // Wait for auth loading if applicable, but assuming 'user' is null if not logged in.
-       // Actually 'user' comes from Context. If context is loading, we might redirect prematurely.
-       // But assuming AuthContext initializes quickly.
-       // Better to check specific 'loading' from context if available, but for now specific check:
-    }
-  }, [user]);
-
-  // Actually, let's just do a simple check. If we are in this component and !user, redirect.
-  // But wait, user might be null initially. 
-  // Let's rely on the previous effect that checks empty cart.
-  
-  useEffect(() => {
-    // Redirect if no user
-    if (!user) {
-        toast.error("Please login to complete your purchase");
-        navigate("/auth");
-    }
-
     if (user) {
       userService.getAddresses(user.id).then(setSavedAddresses);
+      // Auto-fill email if not set
+      if (!formData.email) {
+          setFormData(prev => ({ ...prev, email: user.email }));
+      }
     }
-  }, [user, navigate]);
+  }, [user]);
 
   const fillAddress = (addr: Address) => {
     setFormData({
@@ -251,6 +238,7 @@ const Checkout = () => {
       const orderData = {
         customer_name: formData.name,
         customer_mobile: formData.mobile,
+        customer_email: user?.email || formData.email,
         address_json: {
           state: formData.state,
           district: formData.district,
@@ -262,7 +250,7 @@ const Checkout = () => {
         total_amount: finalTotal,
         payment_status: pStatus,
         razorpay_payment_id: pId || undefined,
-        user_id: user?.id,
+        user_id: user?.id, // Optional for guests
         items: items.map(i => ({
           id: i.product.id,
           name: i.product.name,
@@ -368,12 +356,20 @@ const Checkout = () => {
                     </div>
                   )}
 
-                  {/* Name & Mobile - Compact Grid */}
-                  <div className="grid grid-cols-2 gap-4">
+                  {/* Name, Email, Mobile - Compact Grid */}
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                     <div className="space-y-1.5">
                       <Label htmlFor="name" className="text-[10px] uppercase tracking-widest font-bold text-muted-foreground">Full Name</Label>
                       <Input id="name" required placeholder="John Doe" className="h-10 border-border/50 focus:border-gold rounded-xl text-sm" value={formData.name} onChange={handleInputChange} />
                     </div>
+
+                    {!user && (
+                        <div className="space-y-1.5">
+                        <Label htmlFor="email" className="text-[10px] uppercase tracking-widest font-bold text-muted-foreground">Email (For Updates)</Label>
+                        <Input id="email" required type="email" placeholder="john@example.com" className="h-10 border-border/50 focus:border-gold rounded-xl text-sm" value={formData.email || ""} onChange={handleInputChange} />
+                        </div>
+                    )}
+                    
                     <div className="space-y-1.5">
                       <Label htmlFor="mobile" className="text-[10px] uppercase tracking-widest font-bold text-muted-foreground">Mobile</Label>
                       <Input id="mobile" required type="tel" placeholder="+91..." className="h-10 border-border/50 focus:border-gold rounded-xl text-sm" value={formData.mobile} onChange={handleInputChange} />

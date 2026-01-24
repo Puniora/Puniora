@@ -111,7 +111,7 @@ const Account = () => {
       setLoading(true);
       const [profileData, ordersData, addressesData] = await Promise.all([
         userService.getProfile(user.id),
-        orderService.getOrdersByUser(user.id),
+        orderService.getOrdersByUser(user.id, user.email),
         userService.getAddresses(user.id)
       ]);
       setProfile(profileData);

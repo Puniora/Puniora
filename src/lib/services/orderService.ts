@@ -23,6 +23,7 @@ export interface Order {
   created_at: string;
   customer_name: string;
   customer_mobile: string;
+  customer_email?: string; // Added for guest checkout
   address_json: Address;
   total_amount: number;
   payment_status: 'pending' | 'paid' | 'failed';
@@ -179,12 +180,21 @@ export const orderService = {
     return data || [];
   },
 
-  async getOrdersByUser(userId: string) {
-    const { data, error } = await supabase
+  // Modified to fetch by user_id OR email (for linking guest orders)
+  async getOrdersByUser(userId: string, email?: string) {
+    let query = supabase
       .from('orders')
       .select('*')
-      .eq('user_id', userId)
       .order('created_at', { ascending: false });
+
+    if (email) {
+      // Fetch orders where either user_id matches OR customer_email matches
+      query = query.or(`user_id.eq.${userId},customer_email.eq.${email}`);
+    } else {
+      query = query.eq('user_id', userId);
+    }
+    
+    const { data, error } = await query;
 
     if (error) {
        console.error('Error fetching user orders:', error);
