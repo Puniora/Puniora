@@ -153,7 +153,7 @@ const ProductDetails = () => {
     <div className="min-h-screen bg-background">
       <Header />
 
-      <main className="pt-32 md:pt-40 pb-24 overflow-x-hidden w-full max-w-[100vw]">
+      <main className="pt-24 md:pt-40 pb-24 overflow-x-hidden w-full">
         <div className="container mx-auto px-4 md:px-6">
           {/* Breadcrumb / Back button */}
           <RevealOnScroll variant="fade-in" delay={100}>
@@ -281,6 +281,14 @@ const ProductDetails = () => {
                     );
                   }
 
+                  if (!currentMedia) {
+                    return (
+                       <div className="w-full h-full flex items-center justify-center p-4 md:p-8 bg-muted/10 rounded-2xl">
+                          <img src="https://placehold.co/600x800?text=No+Image" alt="Placeholder" className="h-full object-contain opacity-50" />
+                       </div>
+                    );
+                  }
+
                   return (
                     <div className="w-full h-full flex items-center justify-center p-4 md:p-8">
                       <img
@@ -341,7 +349,11 @@ const ProductDetails = () => {
                       <p className="text-3xl font-medium gold-text-gradient italic">
                         {formatPrice(selectedPrice)}
                       </p>
-                      <span className="text-xs text-muted-foreground uppercase tracking-wider font-bold">Special Price</span>
+                      <div className="flex items-center gap-2">
+                        <span className="px-2 py-1 bg-gradient-to-r from-gold via-yellow-500 to-gold text-white text-[10px] font-bold uppercase tracking-wider rounded-md shadow-md shadow-gold/20 animate-pulse-slow">
+                          Offer Price
+                        </span>
+                      </div>
                     </div>
                   </div>
                 </div>
@@ -536,9 +548,11 @@ const ProductDetails = () => {
         {/* Mobile Sticky Action Bar */}
         <div className="lg:hidden fixed bottom-0 left-0 right-0 z-40 bg-white/80 backdrop-blur-xl border-t border-border/50 p-4 animate-slide-up shadow-[0_-10px_40px_rgba(0,0,0,0.05)]">
           <div className="flex items-center gap-4 max-w-lg mx-auto">
-            <div className="flex flex-col">
-              <span className="text-[10px] uppercase font-bold tracking-widest text-muted-foreground">Price</span>
-              <span className="text-xl font-heading text-gold">{formatPrice(product.price)}</span>
+            <div className="flex flex-col gap-1">
+              <span className="px-1.5 py-0.5 bg-gradient-to-r from-gold via-yellow-500 to-gold text-white text-[8px] font-bold uppercase tracking-wider rounded w-fit shadow-sm shadow-gold/20">
+                Offer Price
+              </span>
+              <span className="text-xl font-heading text-gold leading-none">{formatPrice(product.price)}</span>
             </div>
             <Button
               variant="gold"

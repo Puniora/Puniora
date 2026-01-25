@@ -24,7 +24,7 @@ import {
 import { toast } from "sonner";
 import Header from "@/components/Header";
 import Footer from "@/components/Footer";
-import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from "@/components/ui/dialog";
 
 
 const Checkout = () => {
@@ -321,19 +321,19 @@ const Checkout = () => {
     <div className="min-h-screen bg-background flex flex-col">
       <Header />
 
-      <main className="flex-1 pt-32 pb-20">
-        <div className="container mx-auto px-6 max-w-6xl">
-          <div className="flex items-center gap-4 mb-12 animate-fade-in">
+      <main className="flex-1 pt-24 md:pt-32 pb-20 overflow-x-hidden w-full">
+        <div className="container mx-auto px-4 md:px-6 max-w-6xl">
+          <div className="flex items-center gap-4 mb-8 md:mb-12 animate-fade-in">
             <Button variant="ghost" size="icon" onClick={() => navigate(-1)} className="rounded-full hover:bg-gold/10">
               <ArrowLeft className="h-5 w-5" />
             </Button>
-            <h1 className="text-4xl md:text-5xl font-heading">Complete Your Order</h1>
+            <h1 className="text-3xl md:text-5xl font-heading">Complete Your Order</h1>
           </div>
 
-          <div className="grid lg:grid-cols-2 gap-16 items-start">
+          <div className="flex flex-col lg:grid lg:grid-cols-2 gap-8 lg:gap-16 items-start">
             {/* Left: Shipping Form */}
-            <div className="space-y-10 animate-slide-up">
-              <div className="glass p-8 rounded-3xl space-y-8 shadow-xl shadow-gold/5">
+            <div className="space-y-6 md:space-y-10 animate-slide-up w-full">
+              <div className="glass p-5 md:p-8 rounded-2xl md:rounded-3xl space-y-6 md:space-y-8 shadow-xl shadow-gold/5 w-full">
                 <div className="flex items-center gap-4">
                   <div className="h-10 w-10 bg-gold/10 rounded-xl flex items-center justify-center">
                     <MapPin className="h-5 w-5 text-gold" />
@@ -570,6 +570,9 @@ const Checkout = () => {
                 <CheckCircle2 className="h-12 w-12 text-green-500" />
               </div>
               <DialogTitle className="text-3xl font-heading">Order Confirmed!</DialogTitle>
+              <DialogDescription className="text-muted-foreground text-sm">
+                Your order has been placed successfully.
+              </DialogDescription>
             </div>
           </DialogHeader>
 
