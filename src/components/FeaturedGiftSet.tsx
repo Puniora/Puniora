@@ -63,8 +63,12 @@ const FeaturedGiftSet = () => {
             <div className="lg:hidden relative w-full h-[85vh] min-h-[600px] overflow-hidden group">
                 <div className="absolute inset-0">
                     <img
-                        src={getDirectUrl(displayImage)}
+                        src={getDirectUrl(displayImage, 1200)}
                         alt={productData.name}
+                        width="800"
+                        height="1200"
+                        loading="eager"
+                        fetchPriority="high"
                         className="w-full h-full object-cover transition-transform [transition-duration:2000ms] group-hover:scale-105"
                     />
                     <div className="absolute inset-0 bg-gradient-to-r from-[#050505] via-[#050505]/60 to-transparent" />
@@ -129,8 +133,12 @@ const FeaturedGiftSet = () => {
                             <div className="relative rounded-t-[150px] rounded-b-[20px] overflow-hidden shadow-2xl shadow-black/50 aspect-[4/5] max-w-md mx-auto">
                                 <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-transparent opacity-60 z-10" />
                                 <img
-                                    src={getDirectUrl(displayImage)}
+                                    src={getDirectUrl(displayImage, 1200)}
                                     alt={productData.name}
+                                    width="500"
+                                    height="625"
+                                    loading="eager"
+                                    fetchPriority="high"
                                     className="w-full h-full object-cover transform transition-transform duration-1000 group-hover:scale-110"
                                 />
                                 <div className="absolute bottom-8 left-8 z-20 bg-white/10 backdrop-blur-md border border-white/20 px-6 py-3 rounded-full flex items-center gap-3 shadow-lg hover:bg-white/20 transition-colors cursor-default">

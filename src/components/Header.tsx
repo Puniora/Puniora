@@ -131,6 +131,7 @@ const Header = () => {
                 size="icon"
                 className={`hover:text-gold hover:bg-transparent transition-colors ${!isTransparent || isMobileMenuOpen ? 'text-white' : 'text-white'}`}
                 onClick={() => setIsSearchOpen(true)}
+                aria-label="Search"
               >
                 <Search className="h-7 w-7" />
               </Button>
@@ -140,6 +141,7 @@ const Header = () => {
                 size="icon"
                 className={`relative hover:text-gold hover:bg-transparent transition-colors ${!isTransparent || isMobileMenuOpen ? 'text-white' : 'text-white'}`}
                 onClick={openCart}
+                aria-label="Open Cart"
               >
                 <ShoppingBag className="h-7 w-7" />
                 {totalItems > 0 && (
@@ -155,6 +157,7 @@ const Header = () => {
                   variant="ghost"
                   size="icon"
                   className={`hover:text-gold hover:bg-transparent transition-colors ${!isTransparent || isMobileMenuOpen ? 'text-white' : 'text-white'}`}
+                  aria-label="User Account"
                 >
                   <User className="h-7 w-7" />
                 </Button>
@@ -165,6 +168,7 @@ const Header = () => {
                 size="icon"
                 className={`md:hidden hover:text-gold hover:bg-transparent transition-colors ${!isTransparent || isMobileMenuOpen ? 'text-white' : 'text-white'}`}
                 onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
+                aria-label="Toggle Menu"
               >
                 <div className="relative h-8 w-8 flex items-center justify-center">
                   <X 

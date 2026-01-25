@@ -45,7 +45,7 @@ const ProductCard = ({ product, index, overrideImages }: ProductCardProps) => {
               {overrideImages.slice(0, 4).map((img, idx) => (
                 <img
                   key={idx}
-                  src={getDirectUrl(img)}
+                  src={getDirectUrl(img, 600)}
                   alt=""
                   className={`w-full h-full object-cover opacity-90 group-hover:opacity-100 transition-opacity duration-500`}
                 />
@@ -53,8 +53,10 @@ const ProductCard = ({ product, index, overrideImages }: ProductCardProps) => {
             </div>
           ) : (
             <img
-              src={getDirectUrl(product.images[0])}
+              src={getDirectUrl(product.images[0], 600)}
               alt={`${product.name} - ${product.category}`}
+              loading="lazy"
+              decoding="async"
               className="w-full h-full object-cover opacity-95 group-hover:opacity-100 transition-all [transition-duration:1.5s] ease-out group-hover:scale-105"
             />
           )}

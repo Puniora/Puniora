@@ -9,7 +9,7 @@
  * @param url - The URL to convert
  * @returns Direct view URL or original URL if not a Google Drive link
  */
-export const getDirectUrl = (url: string, width: number = 4000): string => {
+export const getDirectUrl = (url: string, width: number = 800): string => {
     if (!url) return url;
 
     // Handle Google Drive links
