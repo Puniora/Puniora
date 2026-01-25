@@ -65,7 +65,7 @@ const Terms = () => {
             <section className="space-y-4">
               <h2 className="text-2xl font-heading text-foreground">6. Contact Information</h2>
               <p>
-                Questions about the Terms of Service should be sent to us at <strong>help@puniora.com</strong>.
+                Questions about the Terms of Service should be sent to us at <strong>contact@puniora.com</strong>.
               </p>
             </section>
           </div>

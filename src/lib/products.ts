@@ -28,6 +28,7 @@ export interface Product {
   name: string;
   category: "Men" | "Women" | "Unisex";
   price: number;
+  real_price?: number; // MRP for strikethrough
   size: string;
   notes: string[];
   description: string;
@@ -111,5 +112,5 @@ export const giftSet: Product = {
 };
 
 export const formatPrice = (price: number): string => {
-  return `₹${price.toLocaleString("en-IN")}`;
+  return `₹${price.toLocaleString("en-IN", { maximumFractionDigits: 2 })}`;
 };

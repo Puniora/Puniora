@@ -104,8 +104,15 @@ const Checkout = () => {
 
   const [paymentMethod, setPaymentMethod] = useState<"cod" | "razorpay">("razorpay");
 
-  const discountAmount = paymentMethod === 'razorpay' ? Math.round(totalPrice * 0.05) : 0;
-  const finalTotal = totalPrice - discountAmount;
+  const subTotal = totalPrice; // Sum of special prices
+  // Use 2 decimal precision for tax and discount
+  const gstAmount = Number((subTotal * 0.18).toFixed(2));
+  
+  // Discount is 5% of subtotal (as per previous logic retention)
+  const discountAmount = paymentMethod === 'razorpay' ? Number((subTotal * 0.05).toFixed(2)) : 0;
+  
+  const finalTotalBeforeDiscount = subTotal + gstAmount;
+  const finalTotal = Number((finalTotalBeforeDiscount - discountAmount).toFixed(2));
 
   useEffect(() => {
     localStorage.setItem("checkoutFormData", JSON.stringify(formData));
@@ -360,13 +367,13 @@ const Checkout = () => {
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                     <div className="space-y-1.5">
                       <Label htmlFor="name" className="text-[10px] uppercase tracking-widest font-bold text-muted-foreground">Full Name</Label>
-                      <Input id="name" required placeholder="John Doe" className="h-10 border-border/50 focus:border-gold rounded-xl text-sm" value={formData.name} onChange={handleInputChange} />
+                      <Input id="name" required placeholder="Full Name" className="h-10 border-border/50 focus:border-gold rounded-xl text-sm" value={formData.name} onChange={handleInputChange} />
                     </div>
 
                     {!user && (
                         <div className="space-y-1.5">
                         <Label htmlFor="email" className="text-[10px] uppercase tracking-widest font-bold text-muted-foreground">Email (For Updates)</Label>
-                        <Input id="email" required type="email" placeholder="john@example.com" className="h-10 border-border/50 focus:border-gold rounded-xl text-sm" value={formData.email || ""} onChange={handleInputChange} />
+                        <Input id="email" required type="email" placeholder="your@email.com" className="h-10 border-border/50 focus:border-gold rounded-xl text-sm" value={formData.email || ""} onChange={handleInputChange} />
                         </div>
                     )}
                     
@@ -497,11 +504,17 @@ const Checkout = () => {
 
                 <Separator className="bg-border/50" />
 
-                <div className="space-y-4">
+                  <div className="space-y-4">
                   <div className="flex justify-between items-center text-muted-foreground">
-                    <span className="text-sm uppercase tracking-widest font-bold opacity-70">Subtotal</span>
-                    <span className="font-medium">{formatPrice(totalPrice)}</span>
+                    <span className="text-sm uppercase tracking-widest font-bold opacity-70">Subtotal (Special Price)</span>
+                    <span className="font-medium">{formatPrice(subTotal)}</span>
                   </div>
+                  
+                  <div className="flex justify-between items-center text-muted-foreground">
+                     <span className="text-sm uppercase tracking-widest font-bold opacity-70">GST (18%)</span>
+                     <span className="font-medium">{formatPrice(gstAmount)}</span>
+                  </div>
+
                   <div className="flex justify-between items-center text-muted-foreground">
                     <span className="text-sm uppercase tracking-widest font-bold opacity-70">Shipping</span>
                     <span className="text-gold font-bold text-xs">FREE</span>
@@ -515,7 +528,7 @@ const Checkout = () => {
                   )}
 
                   <div className="flex justify-between items-center pt-4 border-t border-border/50">
-                    <span className="text-xl font-heading">Total</span>
+                    <span className="text-xl font-heading">Total Payable</span>
                     <span className="text-2xl font-heading text-gold">{formatPrice(finalTotal)}</span>
                   </div>
                 </div>

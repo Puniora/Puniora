@@ -304,8 +304,25 @@ const GiftSetBuilder = ({ products, onRefresh }: GiftSetBuilderProps) => {
 
                                         <div className="flex justify-between items-center text-sm">
                                             <span className="text-muted-foreground">Selected Items:</span>
-                                            <span className="font-bold">{selectedProducts.length}</span>
+                                            <span className="font-bold text-gold">{selectedProducts.length}</span>
                                         </div>
+
+                                        {/* Selected Items Visual List - New Addition */}
+                                        {selectedProducts.length > 0 && (
+                                            <div className="flex gap-2 overflow-x-auto pb-2 custom-scrollbar snap-x">
+                                                {selectedProducts.map(p => (
+                                                    <div key={p.id} className="relative flex-shrink-0 w-16 h-16 rounded-lg overflow-hidden border border-border group snap-start">
+                                                        <img src={getDirectUrl(p.images[0])} alt={p.name} className="w-full h-full object-cover" />
+                                                        <div 
+                                                            className="absolute inset-0 bg-black/60 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity cursor-pointer"
+                                                            onClick={() => toggleItem(p.id)}
+                                                        >
+                                                            <X className="w-4 h-4 text-white" />
+                                                        </div>
+                                                    </div>
+                                                ))}
+                                            </div>
+                                        )}
 
                                         <div className="pt-4 border-t border-border">
                                             <Label className="text-gold font-bold mb-1.5 block">Bundle Price (₹)</Label>
@@ -368,14 +385,26 @@ const GiftSetBuilder = ({ products, onRefresh }: GiftSetBuilderProps) => {
                     </Card>
                 </div>
             ) : (
-                <div className="bg-muted/10 border border-gold/20 rounded-xl p-8 text-center animate-fade-in">
-                    <div className="bg-gold/10 w-16 h-16 rounded-full flex items-center justify-center mx-auto mb-4">
-                        <Gift className="w-8 h-8 text-gold" />
+                <div className="relative overflow-hidden bg-black/40 border border-gold/20 rounded-2xl p-8 text-center animate-fade-in">
+                    {/* Background Glow */}
+                    <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-64 h-64 bg-gold/5 blur-[100px] rounded-full pointer-events-none" />
+                    
+                    <div className="relative z-10 flex flex-col items-center">
+                        <div className="bg-gradient-to-br from-gold/20 to-gold/5 w-16 h-16 rounded-full flex items-center justify-center mb-4 border border-gold/30 shadow-[0_0_15px_rgba(212,175,55,0.1)]">
+                            <Gift className="w-8 h-8 text-gold" />
+                        </div>
+                        <h3 className="text-2xl font-heading mb-3 text-foreground">Gift Set Limit Reached</h3>
+                        <p className="text-muted-foreground max-w-md mx-auto mb-6 text-sm leading-relaxed">
+                            You currently have <span className="text-gold font-bold">{existingGiftSets.length}</span> active gift sets. 
+                            To create a new one, please edit an existing set or delete one to make space.
+                        </p>
+                        
+                        <div className="flex gap-2 items-center text-xs text-gold/60 uppercase tracking-widest font-bold">
+                            <Sparkles className="w-3 h-3" />
+                            Premium Feature
+                            <Sparkles className="w-3 h-3" />
+                        </div>
                     </div>
-                    <h3 className="text-xl font-heading mb-2">Gift Set Limit Reached</h3>
-                    <p className="text-muted-foreground max-w-md mx-auto mb-6">
-                        You can only have one active gift set at a time. To make changes, please edit the existing set below.
-                    </p>
                 </div>
             )}
 
@@ -384,8 +413,11 @@ const GiftSetBuilder = ({ products, onRefresh }: GiftSetBuilderProps) => {
                 <h3 className="text-xl font-heading mb-6">Active Gift Sets</h3>
                 <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
                     {existingGiftSets.map(gs => (
-                        <div key={gs.id} className="group bg-white border border-border rounded-xl p-4 shadow-sm hover:shadow-md transition-all flex gap-4 relative">
-                            <div className="w-20 h-20 bg-muted rounded-lg overflow-hidden flex-shrink-0">
+                        <div key={gs.id} className="group glass border border-gold/20 rounded-xl p-4 shadow-lg shadow-gold/5 hover:border-gold/50 transition-all flex gap-4 relative overflow-hidden">
+                            {/* Hover Gradient Effect */}
+                            <div className="absolute inset-0 bg-gradient-to-br from-gold/5 to-transparent opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none" />
+                            
+                            <div className="w-20 h-20 bg-muted/50 rounded-lg overflow-hidden flex-shrink-0 border border-border/50">
                                 {gs.images.length > 0 ? (
                                     <img src={getDirectUrl(gs.images[0])} alt={gs.name} className="w-full h-full object-cover" />
                                 ) : (
@@ -394,10 +426,13 @@ const GiftSetBuilder = ({ products, onRefresh }: GiftSetBuilderProps) => {
                                     </div>
                                 )}
                             </div>
-                            <div className="flex-1">
-                                <h4 className="font-bold text-lg leading-tight mb-1">{gs.name}</h4>
-                                <p className="text-gold font-bold">₹{gs.price}</p>
-                                <p className="text-xs text-muted-foreground mt-2">{gs.bundleItems ? `${gs.bundleItems.length} items bundled` : 'Legacy Bundle'}</p>
+                            <div className="flex-1 min-w-0">
+                                <h4 className="font-heading text-lg leading-tight mb-1 truncate text-foreground group-hover:text-gold transition-colors">{gs.name}</h4>
+                                <p className="text-xl font-heading text-gold">₹{gs.price}</p>
+                                <p className="text-xs text-muted-foreground mt-2 flex items-center gap-1">
+                                    <span className="w-1.5 h-1.5 rounded-full bg-gold/50" />
+                                    {gs.bundleItems ? `${gs.bundleItems.length} items bundled` : 'Legacy Bundle'}
+                                </p>
                             </div>
                             <div className="absolute top-2 right-2 flex gap-2 opacity-0 group-hover:opacity-100 transition-opacity">
                                 <Button

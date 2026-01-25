@@ -123,8 +123,8 @@ const Contact = () => {
                                         </div>
                                         <div>
                                             <p className="font-bold mb-1">Email</p>
-                                            <a href="mailto:help@puniora.com" className="text-muted-foreground hover:text-gold transition-colors">
-                                                help@puniora.com
+                                            <a href="mailto:contact@puniora.com" className="text-muted-foreground hover:text-gold transition-colors">
+                                                contact@puniora.com
                                             </a>
                                         </div>
                                     </div>
@@ -135,8 +135,8 @@ const Contact = () => {
                                         </div>
                                         <div>
                                             <p className="font-bold mb-1">Phone</p>
-                                            <a href="tel:+917010418285" className="text-muted-foreground hover:text-gold transition-colors">
-                                                +91 7010418285
+                                            <a href="tel:7010418285" className="text-muted-foreground hover:text-gold transition-colors">
+                                                7010418285
                                             </a>
                                         </div>
                                     </div>
@@ -146,12 +146,11 @@ const Contact = () => {
                                             <MapPin className="h-6 w-6 text-gold" />
                                         </div>
                                         <div>
-                                            <p className="font-bold mb-1">Address</p>
+                                            <p className="font-bold mb-1">Address & GST</p>
                                             <p className="text-muted-foreground">
-                                                213/9, Plot 1 Part,<br />
-                                                Melma Nagar Main Road,<br />
-                                                Mangadu, Chennai 600122<br />
-                                                Tamil Nadu, India
+                                                213/9, Melma Nagar main road Mangadu,<br />
+                                                Chennai, Tamilnadu 600122<br />
+                                                <span className="font-bold mt-1 block text-gold/80">GST: 33AGNPI3783K2ZZ</span>
                                             </p>
                                         </div>
                                     </div>

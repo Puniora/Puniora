@@ -326,9 +326,24 @@ const ProductDetails = () => {
                   <h1 className="text-3xl md:text-5xl lg:text-6xl font-heading leading-tight text-foreground break-words">
                     {product.name}
                   </h1>
-                  <p className="text-3xl font-medium gold-text-gradient italic">
-                    {formatPrice(selectedPrice)}
-                  </p>
+                  <div className="flex flex-col gap-1">
+                    {product.real_price && product.real_price > selectedPrice && (
+                       <div className="flex items-center gap-3">
+                         <span className="text-xl text-muted-foreground line-through decoration-destructive decoration-2">
+                           {formatPrice(product.real_price)}
+                         </span>
+                         <span className="px-2 py-0.5 bg-green-500/10 text-green-600 text-xs font-bold rounded-full border border-green-500/20 uppercase tracking-wider">
+                           {Math.round(((product.real_price - selectedPrice) / product.real_price) * 100)}% OFF
+                         </span>
+                       </div>
+                    )}
+                    <div className="flex items-baseline gap-2">
+                      <p className="text-3xl font-medium gold-text-gradient italic">
+                        {formatPrice(selectedPrice)}
+                      </p>
+                      <span className="text-xs text-muted-foreground uppercase tracking-wider font-bold">Special Price</span>
+                    </div>
+                  </div>
                 </div>
 
                 <p className="text-muted-foreground text-lg leading-relaxed border-l-2 border-gold/20 pl-6 italic break-words max-w-full overflow-hidden">

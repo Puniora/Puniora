@@ -40,6 +40,7 @@ const productSchema = z.object({
   name: z.string().min(2, "Name must be at least 2 characters"),
   category: z.enum(["Men", "Women", "Unisex"]),
   price: z.coerce.number().min(1, "Price must be greater than 0"),
+  real_price: z.coerce.number().optional(),
   size: z.string().min(1, "Size is required"),
   notes: z.string().optional(), // Made optional as it's derived
   description: z.string().min(10, "Description must be at least 10 characters"),
@@ -101,6 +102,7 @@ const ProductForm = ({ isOpen, onClose, onSuccess, product }: ProductFormProps) 
       name: "",
       category: "Unisex",
       price: 1299,
+      real_price: 1599,
       size: "50ml",
       notes: "",
       description: "",
@@ -116,6 +118,7 @@ const ProductForm = ({ isOpen, onClose, onSuccess, product }: ProductFormProps) 
         name: product.name,
         category: product.category,
         price: product.price,
+        real_price: product.real_price || product.price + 300, // Default to a bit higher if missing
         size: product.size,
         notes: product.notes ? product.notes.join(", ") : "", // Derived from rich notes
         description: product.description,
@@ -167,6 +170,7 @@ const ProductForm = ({ isOpen, onClose, onSuccess, product }: ProductFormProps) 
         name: "",
         category: "Unisex",
         price: 1299,
+        real_price: 1599,
         size: "50ml",
         notes: "",
         description: "",
@@ -542,14 +546,14 @@ const ProductForm = ({ isOpen, onClose, onSuccess, product }: ProductFormProps) 
               )}
             </div>
 
-            {/* Base Price/Size (Fallback or Default) */}
+            {/* Price section - Updated for Dual Price */}
             <div className="grid grid-cols-2 gap-4">
               <FormField
                 control={form.control}
-                name="price"
+                name="real_price"
                 render={({ field }) => (
                   <FormItem>
-                    <FormLabel>Base Price (₹)</FormLabel>
+                    <FormLabel>Real Price (MRP)</FormLabel>
                     <FormControl>
                       <Input type="number" {...field} />
                     </FormControl>
@@ -557,6 +561,27 @@ const ProductForm = ({ isOpen, onClose, onSuccess, product }: ProductFormProps) 
                   </FormItem>
                 )}
               />
+              <FormField
+                control={form.control}
+                name="price"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel className="text-gold font-bold">Special Price (Selling)</FormLabel>
+                    <FormControl>
+                      <Input type="number" {...field} className="border-gold/50 bg-gold/5" />
+                    </FormControl>
+                    {form.watch("real_price") && form.watch("price") && form.watch("real_price")! > form.watch("price") && (
+                      <p className="text-[10px] text-green-600 font-bold mt-1">
+                        {Math.round(((form.watch("real_price")! - form.watch("price")) / form.watch("real_price")!) * 100)}% OFF
+                      </p>
+                    )}
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+            </div>
+
+            <div className="grid grid-cols-2 gap-4">
               <FormField
                 control={form.control}
                 name="size"

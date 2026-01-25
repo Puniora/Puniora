@@ -36,7 +36,8 @@ CREATE TABLE IF NOT EXISTS public.products (
   "olfactoryNotes" JSONB DEFAULT '[]'::jsonb,
   "extraSections" JSONB DEFAULT '[]'::jsonb,
   "isHidden" BOOLEAN DEFAULT FALSE,
-  videos TEXT[] DEFAULT '{}'
+  videos TEXT[] DEFAULT '{}',
+  real_price DECIMAL(10, 2)
 );
 
 -- DISABLE Row Level Security for production simplicity (Admin App handles security via API logic often)
@@ -286,3 +287,10 @@ DROP TRIGGER IF EXISTS on_product_updated ON public.products;
 CREATE TRIGGER on_product_updated
   BEFORE UPDATE ON public.products
   FOR EACH ROW EXECUTE PROCEDURE public.handle_updated_at();
+-- Add real_price column to products table
+DO $$ 
+BEGIN 
+    IF NOT EXISTS (SELECT 1 FROM information_schema.columns WHERE table_name = 'products' AND column_name = 'real_price') THEN 
+        ALTER TABLE public.products ADD COLUMN real_price DECIMAL(10, 2); 
+    END IF; 
+END $$;

@@ -11,6 +11,7 @@ const mapToProduct = (data: any): Product => ({
   bundleItems: data.bundle_items || [],
   gallery: data.gallery || [],
   isHidden: data.isHidden || false,
+  real_price: data.real_price,
 });
 
 const mapToDb = (product: any) => {
@@ -22,6 +23,9 @@ const mapToDb = (product: any) => {
   if (db.bundleItems !== undefined) {
     db.bundle_items = db.bundleItems;
     delete db.bundleItems;
+  }
+  if (db.real_price !== undefined) {
+    db.real_price = db.real_price; // Assuming column name is same
   }
   if (db.gallery !== undefined) {
     // Ensure it's an array
