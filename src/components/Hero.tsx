@@ -7,25 +7,40 @@ import { getDirectUrl } from "@/lib/utils/imageUtils";
 
 const Hero = () => {
   const [scrollY, setScrollY] = useState(0);
-  const [heroImages, setHeroImages] = useState<string[]>([]); // Start empty, don't show default
+  const [desktopImages, setDesktopImages] = useState<string[]>([]);
+  const [mobileImages, setMobileImages] = useState<string[]>([]);
   const [currentIndex, setCurrentIndex] = useState(0);
+  const [isMobile, setIsMobile] = useState(false);
+
+  // Determine active images based on viewport
+  const heroImages = (isMobile && mobileImages.length > 0) ? mobileImages : desktopImages;
+
+  useEffect(() => {
+    const checkMobile = () => {
+        setIsMobile(window.innerWidth < 768);
+    };
+    
+    checkMobile(); // Initial check
+    window.addEventListener('resize', checkMobile);
+    return () => window.removeEventListener('resize', checkMobile);
+  }, []);
 
   useEffect(() => {
     const fetchHeroImages = async () => {
       try {
-        console.log("Hero: Fetching settings...");
-        const images = await settingsService.getJsonSetting<string[]>("hero_images", []);
-        console.log("Hero: Fetched images:", images);
+        const [dImages, mImages] = await Promise.all([
+             settingsService.getJsonSetting<string[]>("hero_images", []),
+             settingsService.getJsonSetting<string[]>("hero_images_mobile", [])
+        ]);
 
-        if (images && images.length > 0) {
-          console.log("Hero: Setting new images state");
-          setHeroImages(images);
-        } else {
-          // If DB is empty, maybe we show nothing? Or keep logic? 
-          // User said "only show the image in the db".
-          // If DB is empty, let's leave it empty.
-          console.log("Hero: No images in DB.");
+        if (dImages && dImages.length > 0) {
+          setDesktopImages(dImages);
         }
+        
+        if (mImages && mImages.length > 0) {
+            setMobileImages(mImages);
+        }
+
       } catch (error) {
         console.warn("Failed to fetch hero image settings", error);
       }
@@ -34,6 +49,7 @@ const Hero = () => {
   }, []);
 
   useEffect(() => {
+    // Reset index if image set changes or length is small
     if (heroImages.length <= 1) return;
 
     const interval = setInterval(() => {
@@ -41,7 +57,7 @@ const Hero = () => {
     }, 5000);
 
     return () => clearInterval(interval);
-  }, [heroImages.length]);
+  }, [heroImages.length]); // Re-run when active image set changes
 
   useEffect(() => {
     const handleScroll = () => {
@@ -52,16 +68,13 @@ const Hero = () => {
     return () => window.removeEventListener("scroll", handleScroll);
   }, []);
 
-  // If no images, render placeholder or just background?
-  // Let's render background with no image loop if empty.
-
   return (
     <section className="relative min-h-[75vh] md:min-h-[85vh] flex items-center justify-center overflow-hidden pt-20 pb-24">
       {/* Background with Parallax */}
       <div className="absolute inset-0 overflow-hidden">
         {heroImages.map((img, index) => (
           <div
-            key={img}
+            key={`${img}-${index}`} // Unique key for transition
             className={`absolute inset-0 z-0 h-[120%] transition-opacity duration-1000 ease-in-out ${index === currentIndex ? "opacity-100" : "opacity-0"
               }`}
             style={{
@@ -72,30 +85,14 @@ const Hero = () => {
             <img
               src={getDirectUrl(img)}
               alt="Puniora Luxury Perfume Collection"
-              className="w-full h-full object-cover animate-scale-in"
+              className={`w-full h-full object-cover animate-scale-in ${isMobile ? 'object-[center_top]' : 'object-center'}`}
               onError={(e) => {
                 console.error("Hero image failed to load:", img);
-                // No fallback as requested
               }}
             />
           </div>
         ))}
-        {/* Overlays Removed */}
       </div>
-
-      {/* Floating Particles/Glows Removed */}
-
-      {/* Content */}
-      {/* Content Removed as per request */}
-      {/* Content Removed - Text and Buttons */}
-
-      {/* Scroll Indicator - Hidden for shorter hero */}
-      {/* <div className="absolute bottom-32 left-1/2 -translate-x-1/2 hidden md:block opacity-0 animate-fade-in" style={{ animationDelay: "2s", animationFillMode: 'forwards' }}>
-          <div className="flex flex-col items-center gap-4">
-            <span className="text-[10px] uppercase tracking-[0.3em] text-white/50 animate-bounce">Scroll Down</span>
-            <ArrowDown className="text-gold/80 animate-bounce h-5 w-5" />
-          </div>
-        </div> */}
 
       {/* Carousel Indicators */}
       {heroImages.length > 1 && (

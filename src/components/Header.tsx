@@ -68,7 +68,7 @@ const Header = () => {
         } 
         ${isMobileMenuOpen 
           ? "bg-black/85 backdrop-blur-3xl rounded-[32px]" 
-          : (!isTransparent ? "glass rounded-[32px]" : "")
+          : (!isTransparent ? "glass rounded-[32px]" : "bg-gradient-to-b from-black/70 to-transparent py-6")
         }`}
       >
         <div className="container mx-auto px-6">

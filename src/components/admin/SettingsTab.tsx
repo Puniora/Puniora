@@ -8,10 +8,13 @@ import { settingsService } from "@/lib/services/settingsService";
 import { productService } from "@/lib/services/productService"; // Import product service for upload
 import { toast } from "sonner";
 import { Loader2, Save, Image as ImageIcon, X, MessageSquare } from "lucide-react";
+import { getDirectUrl } from "@/lib/utils/imageUtils";
 
 const SettingsTab = () => {
   const [heroImages, setHeroImages] = useState<string[]>([]);
+  const [mobileHeroImages, setMobileHeroImages] = useState<string[]>([]);
   const [newImage, setNewImage] = useState("");
+  const [newMobileImage, setNewMobileImage] = useState("");
   const [enableBanner, setEnableBanner] = useState(false);
   const [bannerText, setBannerText] = useState("");
   const [loading, setLoading] = useState(true);
@@ -29,20 +32,19 @@ const SettingsTab = () => {
       setLoading(true);
       // Try fetching the new array setting
       const images = await settingsService.getJsonSetting<string[]>("hero_images", []);
+      const mobileImages = await settingsService.getJsonSetting<string[]>("hero_images_mobile", []);
       
       if (images && images.length > 0) {
-        // Auto-fix existing links on load
-        const fixedImages = images.map(img => getDirectUrl(img));
-        setHeroImages(fixedImages);
-        
-        // If corrections were made, could optionally auto-save, but let's just show them correctly first
-        // so user sees them working and can hit save if they want.
+        setHeroImages(images.map(img => getDirectUrl(img)));
       } else {
-        // Fallback/Migration: Check for old single image setting
         const oldUrl = await settingsService.getSetting("hero_image_url");
         if (oldUrl) {
           setHeroImages([getDirectUrl(oldUrl)]);
         }
+      }
+
+      if (mobileImages && mobileImages.length > 0) {
+          setMobileHeroImages(mobileImages.map(img => getDirectUrl(img)));
       }
 
       // Fetch banner settings
@@ -64,6 +66,7 @@ const SettingsTab = () => {
       setSaving(true);
       const results = await Promise.all([
         settingsService.updateSetting("hero_images", heroImages),
+        settingsService.updateSetting("hero_images_mobile", mobileHeroImages),
         settingsService.updateSetting("banner_enabled", String(enableBanner)),
         settingsService.updateSetting("banner_text", bannerText)
       ]);
@@ -93,16 +96,8 @@ const SettingsTab = () => {
 
 
 
-  const getDirectUrl = (url: string) => {
-    if (!url) return url;
-    
-    // Handle Dropbox links
-    if (url.includes("dropbox.com")) {
-      return url.replace("dl=0", "raw=1");
-    }
 
-    return url;
-  };
+
 
   const validateUrl = (url: string): string | null => {
     // Check for ImgBB viewer links (common mistake)
@@ -130,10 +125,34 @@ const SettingsTab = () => {
     toast.success("Image added! Don't forget to Save.");
   };
 
+  const addMobileImage = () => {
+    if (!newMobileImage.trim()) return;
+    
+    const validationError = validateUrl(newMobileImage.trim());
+    if (validationError) {
+      toast.warning("Invalid Link Format", {
+        description: validationError,
+        duration: 6000,
+      });
+      return;
+    }
+
+    const directUrl = getDirectUrl(newMobileImage.trim());
+    setMobileHeroImages([...mobileHeroImages, directUrl]);
+    setNewMobileImage("");
+    toast.success("Mobile image added! Don't forget to Save.");
+  };
+
   const removeImage = (index: number) => {
     const newImages = [...heroImages];
     newImages.splice(index, 1);
     setHeroImages(newImages);
+  };
+
+  const removeMobileImage = (index: number) => {
+    const newImages = [...mobileHeroImages];
+    newImages.splice(index, 1);
+    setMobileHeroImages(newImages);
   };
 
   if (loading) {
@@ -179,10 +198,10 @@ const SettingsTab = () => {
               </p>
             </div>
 
-            <div className="space-y-4 mt-6">
-               <Label>Current Images ({heroImages.length})</Label>
+            <div className="space-y-4">
+               <Label>Current Desktop Images ({heroImages.length})</Label>
                {heroImages.length === 0 && (
-                 <p className="text-sm text-muted-foreground italic">No images added. Default banner will be used.</p>
+                 <p className="text-sm text-muted-foreground italic">No desktop images added. Default banner will be used.</p>
                )}
                
                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
@@ -194,14 +213,12 @@ const SettingsTab = () => {
                          alt={`Hero ${index + 1}`} 
                          className="object-cover w-full h-full"
                          onError={(e) => {
-                           // Try one more fallback for some drive links or just show placeholder
                            const target = e.target as HTMLImageElement;
                            if (!target.src.includes('placehold.co')) {
-                              target.src = "https://placehold.co/600x400?text=Invalid+Image+URL";
+                               target.src = "https://placehold.co/600x400?text=Invalid+Image+URL";
                            }
                          }}
                        />
-                       {/* Overlay for better text readability and actions */}
                        <div className="absolute inset-0 bg-black/0 group-hover:bg-black/10 transition-colors" />
                      </div>
                      
@@ -219,6 +236,62 @@ const SettingsTab = () => {
                        <p className="text-[10px] text-muted-foreground truncate font-mono select-all">
                          {img}
                        </p>
+                     </div>
+                   </div>
+                 ))}
+               </div>
+            </div>
+
+            <div className="space-y-4 pt-6 border-t">
+               <h3 className="text-lg font-medium flex items-center gap-2">
+                 <ImageIcon className="h-5 w-5 text-gold" />
+                 Mobile Hero Images (Portrait)
+               </h3>
+               
+               <div className="grid gap-2">
+                  <Label htmlFor="mobile-hero-image">Add Mobile Image URL</Label>
+                  <div className="flex gap-2">
+                    <Input
+                      id="mobile-hero-image"
+                      placeholder="Paste mobile image link here..."
+                      value={newMobileImage}
+                      onChange={(e) => setNewMobileImage(e.target.value)}
+                      onKeyDown={(e) => e.key === 'Enter' && addMobileImage()}
+                      className="flex-1"
+                    />
+                    <Button onClick={addMobileImage} type="button" variant="default">Add URL</Button>
+                  </div>
+                  <p className="text-xs text-muted-foreground">
+                    Recommended: Portrait orientation (e.g. 1080x1920)
+                  </p>
+               </div>
+
+               <div className="grid grid-cols-2 md:grid-cols-4 gap-6 mt-4">
+                 {mobileHeroImages.map((img, index) => (
+                   <div key={index} className="relative group rounded-xl overflow-hidden border border-border shadow-sm hover:shadow-md transition-all">
+                     <div className="aspect-[9/16] w-full bg-muted">
+                       <img 
+                         src={img} 
+                         alt={`Mobile Hero ${index + 1}`} 
+                         className="object-cover w-full h-full"
+                         onError={(e) => {
+                           const target = e.target as HTMLImageElement;
+                           if (!target.src.includes('placehold.co')) {
+                               target.src = "https://placehold.co/400x600?text=Invalid+Mobile+URL";
+                           }
+                         }}
+                       />
+                       <div className="absolute inset-0 bg-black/0 group-hover:bg-black/10 transition-colors" />
+                     </div>
+                     
+                     <div className="absolute top-2 right-2 flex gap-2">
+                       <button
+                         onClick={() => removeMobileImage(index)}
+                         className="bg-background/80 hover:bg-destructive text-destructive hover:text-white p-2 rounded-full backdrop-blur-sm transition-all shadow-sm opacity-0 group-hover:opacity-100 translate-y-2 group-hover:translate-y-0"
+                         title="Remove Image"
+                       >
+                         <X className="h-4 w-4" />
+                       </button>
                      </div>
                    </div>
                  ))}

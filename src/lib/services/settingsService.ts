@@ -9,7 +9,10 @@ export const settingsService = {
       .single();
 
     if (error) {
-      console.warn(`Error fetching setting ${key}:`, error);
+      // Ignore "Row not found" error, just return null
+      if (error.code !== 'PGRST116') {
+          console.warn(`Error fetching setting ${key}:`, error);
+      }
       return null;
     }
 
