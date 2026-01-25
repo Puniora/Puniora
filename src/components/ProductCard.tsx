@@ -55,7 +55,7 @@ const ProductCard = ({ product, index, overrideImages }: ProductCardProps) => {
             <img
               src={getDirectUrl(product.images[0])}
               alt={`${product.name} - ${product.category}`}
-              className="w-full h-full object-cover opacity-95 group-hover:opacity-100 transition-all duration-[1.5s] ease-out group-hover:scale-105"
+              className="w-full h-full object-cover opacity-95 group-hover:opacity-100 transition-all [transition-duration:1.5s] ease-out group-hover:scale-105"
             />
           )}
 

@@ -59,7 +59,7 @@ const RevealOnScroll: React.FC<RevealOnScrollProps> = ({
   };
 
   const getBaseStyle = () => {
-    const common = `transition-all ease-[cubic-bezier(0.16,1,0.3,1)]`; // Nice smooth ease
+    const common = `transition-all [transition-timing-function:cubic-bezier(0.16,1,0.3,1)]`; // Nice smooth ease
     
     // Initial States
     switch (variant) {

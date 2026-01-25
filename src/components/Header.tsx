@@ -61,7 +61,7 @@ const Header = () => {
     <>
       <AnnouncementBanner enabled={bannerEnabled} text={bannerText} />
       <header
-        className={`fixed left-0 right-0 z-50 transition-all duration-500 ease-[cubic-bezier(0.32,0.72,0,1)] top-0 px-4 md:px-0 ${bannerEnabled && bannerText ? 'mt-8' : 'mt-0'} 
+        className={`fixed left-0 right-0 z-50 transition-all duration-500 [transition-timing-function:cubic-bezier(0.32,0.72,0,1)] top-0 px-4 md:px-0 ${bannerEnabled && bannerText ? 'mt-8' : 'mt-0'} 
         ${!isTransparent || isMobileMenuOpen
           ? "py-3 mt-4 mx-4 md:mx-8 border-orange-500/10 shadow-[0_8px_32px_-4px_rgba(0,0,0,0.3)]"
           : "bg-transparent py-6"
@@ -180,7 +180,7 @@ const Header = () => {
           
           {/* Mobile Menu Content - Nested inside Header */}
           <div 
-            className={`md:hidden overflow-hidden transition-all duration-500 ease-[cubic-bezier(0.32,0.72,0,1)] ${
+            className={`md:hidden overflow-hidden transition-all duration-500 [transition-timing-function:cubic-bezier(0.32,0.72,0,1)] ${
               isMobileMenuOpen ? "max-h-[85vh] opacity-100 mt-4 pb-8" : "max-h-0 opacity-0 mt-0 pb-0"
             }`}
           >

@@ -65,7 +65,7 @@ const FeaturedGiftSet = () => {
                     <img
                         src={getDirectUrl(displayImage)}
                         alt={productData.name}
-                        className="w-full h-full object-cover transition-transform duration-[2000ms] group-hover:scale-105"
+                        className="w-full h-full object-cover transition-transform [transition-duration:2000ms] group-hover:scale-105"
                     />
                     <div className="absolute inset-0 bg-gradient-to-r from-[#050505] via-[#050505]/60 to-transparent" />
                     <div className="absolute inset-0 bg-gradient-to-t from-[#050505] via-transparent to-transparent opacity-90" />

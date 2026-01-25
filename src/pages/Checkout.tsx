@@ -104,13 +104,13 @@ const Checkout = () => {
 
   const [paymentMethod, setPaymentMethod] = useState<"cod" | "razorpay">("razorpay");
 
-  const subTotal = totalPrice; // Sum of special prices. Now Inclusive of GST.
+  const subTotal = totalPrice; // Sum of special prices.
   
-  // Calculate GST component from the inclusive price
-  // Price = Base + GST = Base + 0.18*Base = 1.18*Base
-  // Base = Price / 1.18
-  // GST = Price - Base
-  const gstComponent = Number((subTotal - (subTotal / 1.18)).toFixed(2));
+  // New Calculation as per request: 
+  // GST = 18% of the Total Price
+  // Base Price = Total Price - GST (which is 82% of Total)
+  const gstComponent = Number((subTotal * 0.18).toFixed(2));
+  const basePrice = Number((subTotal - gstComponent).toFixed(2));
   
   // Discount is 5% of the total inclusive price
   const discountAmount = paymentMethod === 'razorpay' ? Number((subTotal * 0.05).toFixed(2)) : 0;
@@ -325,7 +325,7 @@ const Checkout = () => {
     <div className="min-h-screen bg-background flex flex-col">
       <Header />
 
-      <main className="flex-1 pt-24 md:pt-32 pb-20 overflow-x-hidden w-full">
+      <main className="flex-1 pt-24 md:pt-32 pb-20 w-full">
         <div className="container mx-auto px-4 md:px-6 max-w-6xl">
           <div className="flex items-center gap-4 mb-8 md:mb-12 animate-fade-in">
             <Button variant="ghost" size="icon" onClick={() => navigate(-1)} className="rounded-full hover:bg-gold/10">
@@ -489,7 +489,7 @@ const Checkout = () => {
                   <h2 className="text-2xl font-heading">Order Summary</h2>
                 </div>
 
-                <div className="space-y-6 max-h-[400px] overflow-y-auto pr-2 custom-scrollbar">
+                <div className="space-y-6">
                   {items.map((item) => (
                     <div key={item.product.id} className="flex gap-4 group">
                       <div className="h-20 w-16 bg-muted/30 rounded-lg overflow-hidden shrink-0 border border-border/50">
@@ -510,12 +510,12 @@ const Checkout = () => {
 
                   <div className="space-y-4">
                   <div className="flex justify-between items-center text-muted-foreground">
-                    <span className="text-sm uppercase tracking-widest font-bold opacity-70">Subtotal (Special Price)</span>
-                    <span className="font-medium">{formatPrice(subTotal)}</span>
+                    <span className="text-sm uppercase tracking-widest font-bold opacity-70">Original Price (excl. GST)</span>
+                    <span className="font-medium">{formatPrice(basePrice)}</span>
                   </div>
                   
                   <div className="flex justify-between items-center text-muted-foreground">
-                     <span className="text-sm uppercase tracking-widest font-bold opacity-70">GST (Included)</span>
+                     <span className="text-sm uppercase tracking-widest font-bold opacity-70">GST (18%)</span>
                      <span className="font-medium">{formatPrice(gstComponent)}</span>
                   </div>
 
