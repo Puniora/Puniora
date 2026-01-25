@@ -104,15 +104,19 @@ const Checkout = () => {
 
   const [paymentMethod, setPaymentMethod] = useState<"cod" | "razorpay">("razorpay");
 
-  const subTotal = totalPrice; // Sum of special prices
-  // Use 2 decimal precision for tax and discount
-  const gstAmount = Number((subTotal * 0.18).toFixed(2));
+  const subTotal = totalPrice; // Sum of special prices. Now Inclusive of GST.
   
-  // Discount is 5% of subtotal (as per previous logic retention)
+  // Calculate GST component from the inclusive price
+  // Price = Base + GST = Base + 0.18*Base = 1.18*Base
+  // Base = Price / 1.18
+  // GST = Price - Base
+  const gstComponent = Number((subTotal - (subTotal / 1.18)).toFixed(2));
+  
+  // Discount is 5% of the total inclusive price
   const discountAmount = paymentMethod === 'razorpay' ? Number((subTotal * 0.05).toFixed(2)) : 0;
   
-  const finalTotalBeforeDiscount = subTotal + gstAmount;
-  const finalTotal = Number((finalTotalBeforeDiscount - discountAmount).toFixed(2));
+  // Final total is subTotal (which includes GST) minus any discount
+  const finalTotal = Number((subTotal - discountAmount).toFixed(2));
 
   useEffect(() => {
     localStorage.setItem("checkoutFormData", JSON.stringify(formData));
@@ -511,8 +515,8 @@ const Checkout = () => {
                   </div>
                   
                   <div className="flex justify-between items-center text-muted-foreground">
-                     <span className="text-sm uppercase tracking-widest font-bold opacity-70">GST (18%)</span>
-                     <span className="font-medium">{formatPrice(gstAmount)}</span>
+                     <span className="text-sm uppercase tracking-widest font-bold opacity-70">GST (Included)</span>
+                     <span className="font-medium">{formatPrice(gstComponent)}</span>
                   </div>
 
                   <div className="flex justify-between items-center text-muted-foreground">

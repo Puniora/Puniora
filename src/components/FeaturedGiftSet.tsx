@@ -97,7 +97,7 @@ const FeaturedGiftSet = () => {
                         </div>
 
                         <div className="pt-8">
-                            <Link to={`/product/${productData.id}`}>
+                            <Link to={`/products/${productService.createSlug(productData.name)}`}>
                                 <Button size="xl" className="h-16 px-12 bg-white text-black hover:bg-gold hover:text-black rounded-none transition-all duration-300 shadow-[0_0_40px_rgba(0,0,0,0.3)] hover:shadow-[0_0_40px_rgba(212,175,55,0.3)]">
                                     <span className="text-sm font-bold uppercase tracking-[0.2em] mr-4">Get The Set</span>
                                     <ArrowRight className="w-5 h-5" />
@@ -160,7 +160,7 @@ const FeaturedGiftSet = () => {
                         </div>
 
                         <div className="flex flex-col sm:flex-row gap-6 items-center pt-4">
-                            <Link to={`/product/${productData.id}`}>
+                            <Link to={`/products/${productService.createSlug(productData.name)}`}>
                                 <Button size="xl" className="bg-white text-black hover:bg-gold hover:text-black hover:scale-105 transition-all duration-500 h-14 px-10 rounded-none border border-transparent shadow-[0_0_20px_rgba(255,255,255,0.1)] hover:shadow-[0_0_30px_rgba(212,175,55,0.4)]">
                                     <span className="text-xs font-bold uppercase tracking-[0.2em] mr-2">Get The Set</span>
                                     <ArrowRight className="h-4 w-4" />

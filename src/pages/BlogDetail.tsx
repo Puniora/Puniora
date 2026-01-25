@@ -7,7 +7,7 @@ import { Loader2, ArrowLeft, Calendar, User } from "lucide-react";
 // import ReactMarkdown from 'react-markdown'; // Assuming user might want rich text later, but simple text for now
 
 const BlogDetail = () => {
-  const { id } = useParams();
+  const { id } = useParams(); // Keep parameter name as 'id' from router, but treat as potential slug
   const [blog, setBlog] = useState<Blog | null>(null);
   const [loading, setLoading] = useState(true);
 
@@ -15,9 +15,9 @@ const BlogDetail = () => {
     if (id) fetchBlog(id);
   }, [id]);
 
-  const fetchBlog = async (id: string) => {
+  const fetchBlog = async (slug: string) => {
     try {
-      const data = await blogService.getBlogById(id);
+      const data = await blogService.getBlogBySlug(slug);
       setBlog(data);
     } catch (error) {
       console.error(error);
@@ -55,11 +55,13 @@ const BlogDetail = () => {
 
         {/* Content */}
         <article className="container mx-auto px-6 py-20 max-w-3xl">
-           <div className="prose prose-lg prose-headings:font-heading prose-a:text-gold hover:prose-a:text-gold/80">
+           <div className="prose prose-lg prose-headings:font-heading prose-a:text-gold hover:prose-a:text-gold/80 prose-invert">
               {/* Simple whitespace handling for now. Can upgrade to Markdown renderer. */}
-              {blog.content.split('\n').map((paragraph, idx) => (
-                 <p key={idx} className="mb-6 leading-relaxed text-muted-foreground">{paragraph}</p>
-              ))}
+               {/* Rich Text Rendering */}
+               <div 
+                  className="text-muted-foreground leading-relaxed [&>img]:rounded-xl [&>img]:my-8 [&>p]:mb-6"
+                  dangerouslySetInnerHTML={{ __html: blog.content.replace(/\n/g, '<br />') }} 
+               />
            </div>
         </article>
       </main>

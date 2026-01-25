@@ -1,6 +1,7 @@
 import { useState } from "react";
 import { Link } from "react-router-dom";
 import { Review, reviewService } from "@/lib/services/reviewService";
+import { productService } from "@/lib/services/productService";
 import {
   Table,
   TableBody,
@@ -88,7 +89,7 @@ const ReviewList = ({ reviews, loading, onRefresh }: ReviewListProps) => {
                 })}
               </TableCell>
               <TableCell>
-                <Link to={`/product/${review.product_id}`} className="font-medium text-sm text-foreground hover:text-gold hover:underline transition-colors w-full">
+                <Link to={`/products/${review.product_name ? productService.createSlug(review.product_name) : review.product_id}`} className="font-medium text-sm text-foreground hover:text-gold hover:underline transition-colors w-full">
                   {review.product_name || "Unknown Product"}
                 </Link>
               </TableCell>

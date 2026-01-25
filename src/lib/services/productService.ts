@@ -243,5 +243,55 @@ export const productService = {
       console.log("Database already has products, skipping seed.");
       return { success: true, message: "Database already populated. Skipping seed." };
     }
+  },
+
+  createSlug(name: string): string {
+    return name
+      .toLowerCase()
+      .replace(/[^a-z0-9]+/g, '-') // Replace non-alphanumeric chars with hyphens
+      .replace(/^-+|-+$/g, '');   // Remove leading/trailing hyphens
+  },
+
+  async getProductBySlug(slug: string): Promise<Product | null> {
+    // 1. Try to find by exact name matching the slugified version
+    // Since we don't store a slug column, we have to search. 
+    // Best effort: Search by name ILIKE with wildcards or exact match if we can reverse it somewhat.
+    // Actually, simple approach: Fetch all products and find matching slug (inefficient but safe for small catalog),
+    // OR use ILIKE on name.
+    
+    // Let's try to fetch by ID first if it looks like a UUID (backward compatibility)
+    const uuidRegex = /^[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i;
+    if (uuidRegex.test(slug)) {
+       return this.getProductById(slug);
+    }
+
+    // Name based search.
+    // We can try to reverse match: replace - with % to search. 
+    // e.g. "black-oud" -> "black%oud".
+    
+    // Search strategy:
+    // 1. Try strict match assuming name was just lowercased and spaces replaced by dashes.
+    const namePart = slug.replace(/-/g, ' ');
+    
+    const { data, error } = await supabase
+      .from(TABLE_NAME)
+      .select("*")
+      .ilike('name', namePart)
+      .limit(1); // Get the first one if multiple
+      
+    if (!error && data && data.length > 0) {
+        return mapToProduct(data[0]);
+    }
+    
+    // If strict match fails, try broader search (e.g. if slug has extra ID chars)
+    // Or just fetch all and filter in JS (good fallback for < 1000 items)
+    const { data: allData } = await supabase.from(TABLE_NAME).select("*");
+    if (allData) {
+        const found = allData.find(p => this.createSlug(p.name) === slug || slug.startsWith(this.createSlug(p.name)));
+        if (found) return mapToProduct(found);
+    }
+
+    return null;
   }
 };
+

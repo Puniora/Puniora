@@ -9,12 +9,13 @@
  * @param url - The URL to convert
  * @returns Direct view URL or original URL if not a Google Drive link
  */
-export const getDirectUrl = (url: string): string => {
+export const getDirectUrl = (url: string, width: number = 4000): string => {
     if (!url) return url;
 
     // Handle Google Drive links
     if (url.includes('drive.google.com')) {
         // If already a direct URL (uc?export or thumbnail), return as-is
+        // Note: If it's a thumbnail link, we could technically replace the sz param, but let's respect provided explicit links for now unless we parsing them too.
         if (url.includes('/uc?') || url.includes('/thumbnail?')) {
             return url;
         }
@@ -35,7 +36,7 @@ export const getDirectUrl = (url: string): string => {
 
         if (fileId) {
             // Use thumbnail API for better performance and reliability
-            return `https://drive.google.com/thumbnail?id=${fileId}&sz=w4000`;
+            return `https://drive.google.com/thumbnail?id=${fileId}&sz=w${width}`;
         }
     }
 

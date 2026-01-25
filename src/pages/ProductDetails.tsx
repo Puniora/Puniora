@@ -47,7 +47,9 @@ const ProductDetails = () => {
       if (!id) return;
       try {
         setLoading(true);
-        const data = await productService.getProductById(id);
+        // Try to fetch by slug first if it's not a UUID, or use the smart getProductBySlug which handles both
+        const data = await productService.getProductBySlug(id);
+        
         if (data && !data.isHidden) {
           setProduct(data);
           // Initialize selection from product base values
@@ -69,16 +71,12 @@ const ProductDetails = () => {
           }
 
           // Fetch rating
-          const ratingData = await reviewService.getAverageRating(id);
+          const ratingData = await reviewService.getAverageRating(data.id);
           setAverageRating(ratingData);
 
           // Fetch bundle items if this is a gift set with no images (or placeholder)
           if (data.isGiftSet && (!data.images || data.images.length === 0 || (data.images.length === 1 && !data.images[0]))) {
             if (data.bundleItems && data.bundleItems.length > 0) {
-              // We need to fetch these items. Since we don't have getProductsByIds, we'll fetch all or use getProductById in parallel
-              // Fetching all is safer for caching + simpler if count is low (<100 products), but parallel individual fetch is also fine for small bundles.
-              // Let's use getProductById in parallel for efficiency if we assume they are not already cached heavily.
-              // Actually, productService doesn't expose cache directly, so let's do parallel requests.
               const bundlePromises = data.bundleItems.map(bId => productService.getProductById(bId));
               const bundleResults = await Promise.all(bundlePromises);
               const validImages = bundleResults
@@ -129,6 +127,26 @@ const ProductDetails = () => {
     }
   };
 
+  const handleShare = async () => {
+    if (!product) return;
+    const shareData = {
+      title: product.name,
+      text: `Check out ${product.name}: ${product.description ? product.description.substring(0, 100) + '...' : ''} at Puniora!`,
+      url: window.location.href,
+    };
+
+    try {
+      if (navigator.share) {
+        await navigator.share(shareData);
+      } else {
+        await navigator.clipboard.writeText(`${shareData.text} ${shareData.url}`);
+        toast.success("Link and details copied to clipboard!");
+      }
+    } catch (error) {
+      console.error("Share failed/cancelled", error);
+    }
+  };
+
   if (loading) {
     return (
       <div className="min-h-screen flex items-center justify-center">
@@ -166,7 +184,8 @@ const ProductDetails = () => {
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 lg:gap-16 items-start">
             {/* Left Column: Image / Carousel */}
             <RevealOnScroll variant="fade-up" delay={200} className="w-full">
-            <div className="flex flex-col-reverse lg:flex-row gap-4 w-full">
+            <div className="flex flex-col-reverse lg:flex-row gap-4 w-full relative">
+              
               {/* Thumbnail strip (Images + Videos) */}
               {(product.images.length > 1 || (product.videos && product.videos.length > 0)) && (
                 <div className="flex lg:flex-col gap-4 overflow-x-auto lg:overflow-y-auto lg:w-24 shrink-0 no-scrollbar py-2 px-1 w-full lg:w-auto lg:h-[600px]">
@@ -180,7 +199,15 @@ const ProductDetails = () => {
                         }`}
                       onClick={() => { setActiveImage(index); setSelectedImage(img); }}
                     >
-                      <img src={getDirectUrl(img)} alt="" className="w-full h-full object-contain" />
+                      <img 
+                        src={getDirectUrl(img, 200)} 
+                        alt="" 
+                        className="w-full h-full object-contain"
+                        onError={(e) => {
+                          e.currentTarget.style.display = 'none'; // Hide if deeply broken, or maybe show fallback
+                          // e.currentTarget.src = "fallback_url"; 
+                        }} 
+                      />
                     </div>
                   ))}
 
@@ -223,6 +250,19 @@ const ProductDetails = () => {
 
               {/* Main Image Display */}
               <div className="flex-1 w-full bg-white rounded-3xl overflow-hidden border border-border shadow-xl shadow-gold/5 flex items-center justify-center aspect-square md:aspect-[4/3] lg:h-[600px] lg:aspect-auto relative group">
+                  {/* Share Button Overlay */}
+                  <div className="absolute top-4 right-4 z-20">
+                    <Button
+                      variant="secondary"
+                      size="icon"
+                      onClick={handleShare}
+                      className="rounded-full w-12 h-12 bg-gold text-white shadow-xl hover:bg-gold/90 transition-all duration-300 group/share z-30"
+                      title="Share this fragrance"
+                    >
+                      <Share2 className="h-5 w-5 group-hover/share:scale-110 transition-transform" />
+                    </Button>
+                  </div>
+
                 {(() => {
                   const currentMedia = selectedImage || product.images[activeImage];
                   // Helper to check for YouTube
@@ -409,7 +449,14 @@ const ProductDetails = () => {
                             >
                               <div className={`w-12 h-12 md:w-14 md:h-14 rounded-full overflow-hidden border-2 shrink-0 transition-colors ${selectedNote === note.name ? 'border-gold' : 'border-white shadow-sm'}`}>
                                 {note.image ? (
-                                  <img src={getDirectUrl(note.image)} className="w-full h-full object-cover" alt={note.name} />
+                                  <img 
+                                    src={getDirectUrl(note.image, 200)} 
+                                    className="w-full h-full object-cover" 
+                                    alt={note.name}
+                                    onError={(e) => {
+                                      e.currentTarget.style.display = 'none';
+                                    }}
+                                  />
                                 ) : (
                                   <div className="w-full h-full bg-gold/20 flex items-center justify-center text-[8px] font-bold text-muted-foreground">
                                     NOTE
@@ -580,8 +627,15 @@ const ProductDetails = () => {
                       <div className="grid grid-cols-1 md:grid-cols-3 gap-8 pt-4">
                         {product.olfactoryNotes.map((note, idx) => (
                           <div key={idx} className="flex flex-col items-center text-center space-y-4 animate-fade-in" style={{ animationDelay: `${idx * 100}ms` }}>
-                            <div className="w-32 h-32 md:w-40 md:h-40 relative">
-                              <img src={getDirectUrl(note.image)} alt={note.name} className="w-full h-full object-contain drop-shadow-md" />
+                            <div className="w-32 h-32 md:w-40 md:h-40 relative rounded-2xl overflow-hidden shadow-sm border border-gold/10 bg-white">
+                              <img 
+                                src={getDirectUrl(note.image, 400)} 
+                                alt={note.name} 
+                                className="w-full h-full object-cover"
+                                onError={(e) => {
+                                  e.currentTarget.style.display = 'none';
+                                }} 
+                              />
                             </div>
                             <div className="space-y-2">
                               <h4 className="font-heading text-lg font-bold uppercase tracking-widest text-[#5e4b35]">{note.name}</h4>

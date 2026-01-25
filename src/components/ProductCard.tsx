@@ -2,6 +2,7 @@ import React, { useRef } from "react";
 import { Link } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { Product, formatPrice } from "@/lib/products";
+import { productService } from "@/lib/services/productService";
 import { useCart } from "@/context/CartContext";
 import { Plus } from "lucide-react";
 import { useScrollReveal } from "@/hooks/useScrollReveal";
@@ -32,7 +33,7 @@ const ProductCard = ({ product, index, overrideImages }: ProductCardProps) => {
       className="group relative opacity-0 reveal bg-[#050505] rounded-[1.5rem] overflow-hidden flex flex-col h-full border border-gold/20 shadow-lg hover:shadow-[0_20px_40px_-10px_rgba(0,0,0,0.5)] hover:border-gold/50 transition-all duration-500"
       style={{ animationDelay: `${index * 0.1}s` }}
     >
-      <Link to={`/product/${product.id}`} className="block h-full relative">
+      <Link to={`/products/${productService.createSlug(product.name)}`} className="block h-full relative">
         {/* Shine Element */}
         <div className="absolute inset-0 bg-gradient-to-tr from-transparent via-white/10 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-700 pointer-events-none z-20" />
 

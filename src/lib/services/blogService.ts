@@ -70,5 +70,31 @@ export const blogService = {
       .eq('id', id);
 
     if (error) throw error;
+  },
+
+  createSlug(title: string): string {
+    return title
+      .toLowerCase()
+      .replace(/[^a-z0-9]+/g, '-') // Replace non-alphanumeric chars with hyphens
+      .replace(/^-+|-+$/g, '');   // Remove leading/trailing hyphens
+  },
+
+  async getBlogBySlug(slug: string): Promise<Blog | null> {
+      // 1. Check if it's a UUID (backward compatibility)
+      const uuidRegex = /^[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i;
+      if (uuidRegex.test(slug)) {
+          return this.getBlogById(slug);
+      }
+
+      // 2. Search by title (best effort since we don't store slugs)
+      // Standardize search
+      const { data } = await supabase.from('blogs').select('*');
+      
+      if (data) {
+          const found = data.find(b => this.createSlug(b.title) === slug);
+          if (found) return found;
+      }
+
+      return null;
   }
 };
