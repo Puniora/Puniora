@@ -35,7 +35,8 @@ const BlogManager = () => {
         toolbar: {
             container: [
                 ['bold', 'italic', 'underline', 'strike'],
-                ['image'],
+
+                ['link', 'image'],
                 ['clean']
             ],
             handlers: {
@@ -288,6 +289,7 @@ const BlogManager = () => {
                             .ql-toolbar.ql-snow { border-color: rgba(255,255,255,0.1); border-top-left-radius: 0.5rem; border-top-right-radius: 0.5rem; }
                             .ql-container.ql-snow { border-color: rgba(255,255,255,0.1); border-bottom-left-radius: 0.5rem; border-bottom-right-radius: 0.5rem; font-size: 1.125rem; flex: 1; display: flex; flex-direction: column; }
                             .ql-editor { flex: 1; min-height: 300px; font-family: serif; }
+                            .ql-editor a { color: #f97316 !important; text-decoration: underline !important; }
                             .ql-snow .ql-stroke { stroke: #a1a1aa; }
                             .ql-snow .ql-fill { fill: #a1a1aa; }
                             .ql-snow .ql-picker { color: #a1a1aa; }

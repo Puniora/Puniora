@@ -11,6 +11,7 @@ import { formatPrice } from "@/lib/products";
 import { orderService } from "@/lib/services/orderService";
 import { shiprocketService } from "@/lib/services/shiprocketService";
 import { razorpayService } from "@/lib/services/razorpayService";
+import { whatsappService } from "@/lib/services/whatsappService";
 
 import { useAuth } from "@/context/AuthContext";
 import { userService, Address } from "@/lib/services/userService";
@@ -273,6 +274,7 @@ const Checkout = () => {
         }))
       };
 
+      console.log("Submitting Order Data:", orderData);
       const order = await orderService.createOrder(orderData);
 
       // 2. Trigger Shiprocket Order Creation
@@ -302,6 +304,14 @@ const Checkout = () => {
         console.error("Shiprocket Integration Error:", srError);
       }
 
+      // 3. Trigger WhatsApp Notification
+      try {
+        console.log("Sending WhatsApp Notification...");
+        await whatsappService.sendOrderConfirmation(order);
+      } catch (waError) {
+        console.error("WhatsApp Integration Error:", waError);
+      }
+
       // Cache order ID for tracking
       localStorage.setItem("puniora_last_order", order.id);
 
@@ -313,9 +323,9 @@ const Checkout = () => {
       setShowConfirmation(true);
       clearCart();
 
-    } catch (error) {
+    } catch (error: any) {
       console.error("Order completion error:", error);
-      toast.error("Failed to finalize order. Please contact support if payment was deducted.");
+      toast.error(`Failed to finalize order: ${error.message || JSON.stringify(error)}. Please contact support if payment was deducted.`);
     } finally {
       setLoading(false);
     }

@@ -26,6 +26,7 @@ const ShippingPolicy = React.lazy(() => import("@/pages/policies/ShippingPolicy"
 const RefundPolicy = React.lazy(() => import("@/pages/policies/RefundPolicy"));
 const About = React.lazy(() => import("@/pages/About"));
 const Contact = React.lazy(() => import("@/pages/Contact"));
+const TestWhatsApp = React.lazy(() => import("@/pages/TestWhatsApp"));
 import WhatsAppButton from "@/components/WhatsAppButton";
 
 import CartDrawer from "@/components/CartDrawer";
@@ -89,6 +90,7 @@ const App = () => (
                 {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
                 <Route path="/home" element={<Navigate to="/" replace />} />
                 <Route path="*" element={<NotFound />} />
+                <Route path="/test-whatsapp" element={<TestWhatsApp />} />
               </Routes>
             </React.Suspense>
             <WhatsAppButton />

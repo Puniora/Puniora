@@ -293,4 +293,8 @@ BEGIN
     IF NOT EXISTS (SELECT 1 FROM information_schema.columns WHERE table_name = 'products' AND column_name = 'real_price') THEN 
         ALTER TABLE public.products ADD COLUMN real_price DECIMAL(10, 2); 
     END IF; 
+
+    IF NOT EXISTS (SELECT 1 FROM information_schema.columns WHERE table_name = 'orders' AND column_name = 'customer_email') THEN 
+        ALTER TABLE public.orders ADD COLUMN customer_email TEXT; 
+    END IF;
 END $$;

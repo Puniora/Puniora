@@ -77,7 +77,7 @@ export const shiprocketService = {
       const payload: ShiprocketOrderPayload = {
         order_id: order.id,
         order_date: new Date(order.created_at).toISOString().split('T')[0] + ' ' + new Date(order.created_at).toTimeString().split(' ')[0],
-        pickup_location: "Primary", // Must match Shiprocket dashboard
+        pickup_location: import.meta.env.VITE_SHIPROCKET_PICKUP_LOCATION || "Primary", // Must match Shiprocket dashboard
         billing_customer_name: order.customer_name,
         billing_last_name: "", // Assuming full name in customer_name
         billing_address: order.address_json.houseAddress,

@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { Link, Navigate, useNavigate } from "react-router-dom";
+import { Link, Navigate, useNavigate, useSearchParams } from "react-router-dom";
 import { useAuth } from "@/context/AuthContext";
 import Header from "@/components/Header";
 import Footer from "@/components/Footer";
@@ -15,8 +15,11 @@ const Auth = () => {
   const [otp, setOtp] = useState("");
   const [step, setStep] = useState<"email" | "otp">("email");
 
+  const [searchParams] = useSearchParams();
+  const redirectUrl = searchParams.get("redirect") || "/account";
+
   if (user) {
-    return <Navigate to="/account" replace />;
+    return <Navigate to={redirectUrl} replace />;
   }
 
   const handleSendOtp = async (e: React.FormEvent) => {
@@ -35,7 +38,7 @@ const Auth = () => {
     if (!otp || otp.length < 6) return;
     try {
       await verifyOtp(email, otp);
-      navigate("/account");
+      navigate(redirectUrl);
     } catch (error) {
       // Error handled in context
     }

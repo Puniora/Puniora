@@ -18,6 +18,7 @@ const BlogDetail = () => {
   const fetchBlog = async (slug: string) => {
     try {
       const data = await blogService.getBlogBySlug(slug);
+      console.log("Blog Content:", data?.content); 
       setBlog(data);
     } catch (error) {
       console.error(error);
@@ -59,7 +60,7 @@ const BlogDetail = () => {
               {/* Simple whitespace handling for now. Can upgrade to Markdown renderer. */}
                {/* Rich Text Rendering */}
                <div 
-                  className="text-muted-foreground leading-relaxed [&>img]:rounded-xl [&>img]:my-8 [&>p]:mb-6"
+                  className="text-muted-foreground leading-relaxed [&>img]:rounded-xl [&>img]:my-8 [&>p]:mb-6 [&_a]:!text-[#f97316] [&_a]:!underline [&_a]:font-medium"
                   dangerouslySetInnerHTML={{ __html: blog.content.replace(/\n/g, '<br />') }} 
                />
            </div>
