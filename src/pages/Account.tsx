@@ -91,6 +91,7 @@ const Account = () => {
     address_line1: "",
     address_line2: "",
     city: "",
+    district: "",
     state: "",
     pincode: "",
     phone: "",
@@ -175,6 +176,7 @@ const Account = () => {
       address_line1: addr.address_line1,
       address_line2: addr.address_line2 || "",
       city: addr.city,
+      district: addr.district || "",
       state: addr.state,
       pincode: addr.pincode,
       phone: addr.phone,
@@ -189,6 +191,7 @@ const Account = () => {
       address_line1: "",
       address_line2: "",
       city: "",
+      district: "",
       state: "",
       pincode: "",
       phone: "",
@@ -492,9 +495,13 @@ const Account = () => {
                           <Input required value={addressForm.city} onChange={e => setAddressForm({...addressForm, city: e.target.value})} />
                         </div>
                         <div className="space-y-2">
-                          <Label>State</Label>
-                          <Input required value={addressForm.state} onChange={e => setAddressForm({...addressForm, state: e.target.value})} />
+                          <Label>District</Label>
+                          <Input required value={addressForm.district} onChange={e => setAddressForm({...addressForm, district: e.target.value})} placeholder="e.g. Chennai" />
                         </div>
+                      </div>
+                      <div className="space-y-2">
+                        <Label>State</Label>
+                        <Input required value={addressForm.state} onChange={e => setAddressForm({...addressForm, state: e.target.value})} />
                       </div>
                       <div className="grid grid-cols-2 gap-4">
                          <div className="space-y-2">
@@ -539,7 +546,7 @@ const Account = () => {
                         <p className="text-sm text-muted-foreground leading-relaxed">
                           {addr.address_line1}<br/>
                           {addr.address_line2 && <>{addr.address_line2}<br/></>}
-                          {addr.city}, {addr.state} - {addr.pincode}<br/>
+                          {addr.city}, {addr.district && `${addr.district}, `}{addr.state} - {addr.pincode}<br/>
                           <span className="font-mono text-xs mt-2 block">Tel: {addr.phone}</span>
                         </p>
                       </div>

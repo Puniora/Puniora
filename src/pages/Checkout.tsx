@@ -86,8 +86,7 @@ const Checkout = () => {
       name: addr.full_name,
       mobile: addr.phone,
       state: addr.state,
-      district: "", // Address object from DB might not strictly split district/place the same way or it might be needed to map differently. 
-      // For now, mapping best effort. 
+      district: addr.district || "",
       place: addr.city,
       pincode: addr.pincode, // Using correct property from Address interface
       houseAddress: addr.address_line1,
