@@ -75,7 +75,7 @@ const FeaturedGiftSet = () => {
                         fetchPriority="high"
                         className="w-full h-full object-cover transition-transform [transition-duration:2000ms] group-hover:scale-105"
                     />
-                    <div className="absolute inset-0 bg-gradient-to-r from-[#050505] via-[#050505]/60 to-transparent" />
+                    <div className="absolute inset-0 bg-gradient-to-r from-[#050505] via-[#050505]/40 to-transparent" />
                     <div className="absolute inset-0 bg-gradient-to-t from-[#050505] via-transparent to-transparent opacity-90" />
                 </div>
 
@@ -83,7 +83,7 @@ const FeaturedGiftSet = () => {
                     <div className="max-w-xl space-y-8 reveal opacity-0">
                         <div className="inline-flex items-center gap-2 px-3 py-1 bg-white/10 backdrop-blur-md border border-white/10 rounded-full">
                             <span className="w-1.5 h-1.5 rounded-full bg-gold animate-pulse" />
-                            <span className="text-xs font-medium text-white/90 uppercase tracking-widest">Daily Spotlight</span>
+                            <span className="text-xs font-medium text-white/90 uppercase tracking-widest">Best Seller</span>
                         </div>
 
                         <h2 className="text-5xl md:text-7xl font-heading font-medium leading-[0.9] text-white">
@@ -155,7 +155,7 @@ const FeaturedGiftSet = () => {
                                 />
                                 <div className="absolute bottom-8 left-8 z-20 bg-white/10 backdrop-blur-md border border-white/20 px-6 py-3 rounded-full flex items-center gap-3 shadow-lg hover:bg-white/20 transition-colors cursor-default">
                                     <span className="h-2 w-2 rounded-full bg-gold animate-pulse-glow" />
-                                    <span className="text-xs font-bold uppercase tracking-widest text-white/90">Daily Spotlight</span>
+                                    <span className="text-xs font-bold uppercase tracking-widest text-white/90">Best Seller</span>
                                 </div>
                             </div>
                         </div>
@@ -164,7 +164,7 @@ const FeaturedGiftSet = () => {
                     {/* Text Content - Right */}
                     <div className="space-y-10 reveal opacity-0" style={{ animationDelay: '0.2s' }}>
                         <div className="inline-flex items-center gap-2 px-4 py-1.5 border-b border-gold/50 text-gold text-xs font-bold uppercase tracking-[0.3em]">
-                            Featured Today
+                            Best Seller
                         </div>
 
                         <div className="space-y-6">
