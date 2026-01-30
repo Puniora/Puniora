@@ -22,7 +22,12 @@ const FeaturedGiftSet = () => {
                 // Get all valid products for the spotlight
                 const validProducts = products.filter(p => !p.isHidden);
 
-                if (validProducts.length === 0) {
+                // Fallback: If no "visible" products found (e.g. mapping issue), use ANY product from DB
+                // This ensures we show something if data exists, rather than an empty section
+                const finalPool = validProducts.length > 0 ? validProducts : products;
+
+                if (finalPool.length === 0) {
+                    console.warn("Daily Spotlight: No products found in database.");
                     setGiftSet(null);
                     return;
                 }
@@ -35,8 +40,8 @@ const FeaturedGiftSet = () => {
                     seed += today.charCodeAt(i);
                 }
                 
-                const randomIndex = seed % validProducts.length;
-                const dailySpotlight = validProducts[randomIndex];
+                const randomIndex = seed % finalPool.length;
+                const dailySpotlight = finalPool[randomIndex];
 
                 setGiftSet(dailySpotlight);
             } catch (error) {
@@ -75,14 +80,12 @@ const FeaturedGiftSet = () => {
                         fetchPriority="high"
                         className="w-full h-full object-cover transition-transform [transition-duration:2000ms] group-hover:scale-105"
                     />
-                    {/* Darker overlays for better text visibility */}
-                    <div className="absolute inset-0 bg-black/40" /> 
-                    <div className="absolute inset-0 bg-gradient-to-r from-[#050505] via-[#050505]/80 to-transparent" />
-                    <div className="absolute inset-0 bg-gradient-to-t from-[#050505] via-[#050505]/60 to-transparent" />
+                    <div className="absolute inset-0 bg-gradient-to-r from-[#050505] via-[#050505]/40 to-transparent" />
+                    <div className="absolute inset-0 bg-gradient-to-t from-[#050505] via-transparent to-transparent opacity-90" />
                 </div>
 
                 <div className="relative z-10 container mx-auto px-6 h-full flex flex-col justify-center">
-                    <div className="max-w-xl space-y-8 reveal opacity-0 drop-shadow-lg">
+                    <div className="max-w-xl space-y-8 reveal opacity-0">
                         <div className="inline-flex items-center gap-2 px-3 py-1 bg-white/10 backdrop-blur-md border border-white/10 rounded-full">
                             <span className="w-1.5 h-1.5 rounded-full bg-gold animate-pulse" />
                             <span className="text-xs font-medium text-white/90 uppercase tracking-widest">Best Seller</span>
@@ -95,7 +98,7 @@ const FeaturedGiftSet = () => {
                             </span>
                         </h2>
 
-                        <p className="text-lg md:text-xl text-white/90 font-light leading-relaxed max-w-md border-l border-gold/50 pl-6 shadow-black">
+                        <p className="text-lg md:text-xl text-white/70 font-light leading-relaxed max-w-md border-l border-gold/30 pl-6">
                             "{shortDesc}"
                         </p>
 
