@@ -1,6 +1,6 @@
 import { useEffect } from 'react';
 
-export const useScrollReveal = (className = 'reveal-active', threshold = 0.1) => {
+export const useScrollReveal = (className = 'reveal-active', threshold = 0.1, trigger?: any) => {
     useEffect(() => {
         const observer = new IntersectionObserver(
             (entries) => {
@@ -17,9 +17,15 @@ export const useScrollReveal = (className = 'reveal-active', threshold = 0.1) =>
             }
         );
 
-        const elements = document.querySelectorAll('.reveal');
-        elements.forEach((el) => observer.observe(el));
+        // Small timeout to ensure DOM is updated if trigger just changed
+        const timer = setTimeout(() => {
+            const elements = document.querySelectorAll('.reveal');
+            elements.forEach((el) => observer.observe(el));
+        }, 100);
 
-        return () => observer.disconnect();
-    }, [className, threshold]);
+        return () => {
+            observer.disconnect();
+            clearTimeout(timer);
+        };
+    }, [className, threshold, trigger]);
 };

@@ -11,8 +11,8 @@ const FeaturedGiftSet = () => {
     const [giftSet, setGiftSet] = useState<Product | null>(null);
     const [loading, setLoading] = useState(true);
 
-    // Use scroll reveal for animations
-    useScrollReveal("animate-reveal");
+    // Use scroll reveal for animations - pass loading as trigger so it re-runs when content appears
+    useScrollReveal("animate-reveal", 0.1, loading);
 
     useEffect(() => {
         const fetchFeaturedSet = async () => {
@@ -106,8 +106,8 @@ const FeaturedGiftSet = () => {
                             <div>
                                 <p className="text-2xl font-heading text-white">
                                     ₹{productData.price}
-                                    {productData.compareAtPrice && (
-                                        <span className="text-base text-white/40 line-through ml-2">₹{productData.compareAtPrice}</span>
+                                    {productData.real_price && (
+                                        <span className="text-base text-white/40 line-through ml-2">₹{productData.real_price}</span>
                                     )}
                                 </p>
                                 <p className="text-[10px] uppercase tracking-wider text-white/50">Exclusive Offer</p>
