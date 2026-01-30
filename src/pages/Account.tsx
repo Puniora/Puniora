@@ -483,8 +483,8 @@ const Account = () => {
                         <Input required value={addressForm.address_line1} onChange={e => setAddressForm({...addressForm, address_line1: e.target.value})} placeholder="Flat 4B, Sky Towers" />
                       </div>
                       <div className="space-y-2">
-                        <Label>Road / Area</Label>
-                        <Input required value={addressForm.address_line2} onChange={e => setAddressForm({...addressForm, address_line2: e.target.value})} placeholder="MG Road, Indiranagar" />
+                        <Label>Landmark</Label>
+                        <Input required value={addressForm.address_line2} onChange={e => setAddressForm({...addressForm, address_line2: e.target.value})} placeholder="Near Park, Opposite Bank" />
                       </div>
                       <div className="grid grid-cols-2 gap-4">
                         <div className="space-y-2">

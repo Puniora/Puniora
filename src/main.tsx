@@ -8,6 +8,16 @@ import { HelmetProvider } from 'react-helmet-async';
 const supabaseUrl = import.meta.env.VITE_SUPABASE_URL;
 const supabaseAnonKey = import.meta.env.VITE_SUPABASE_ANON_KEY;
 
+// Global Chunk Load Error Handler
+window.addEventListener('error', (e) => {
+  // Check specifically for Vite/Rollup chunk load errors
+  if (/Loading chunk [\d]+ failed/.test(e.message) || /Failed to fetch dynamically imported module/.test(e.message)) {
+    e.preventDefault();
+    console.warn("Chunk load failed, reloading page...");
+    window.location.reload();
+  }
+});
+
 if (!supabaseUrl || !supabaseAnonKey) {
   createRoot(document.getElementById("root")!).render(
     <div style={{ display: 'flex', justifyContent: 'center', alignItems: 'center', height: '100vh', fontFamily: 'system-ui, sans-serif', backgroundColor: '#f9f9f9', padding: '20px' }}>
