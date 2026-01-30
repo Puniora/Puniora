@@ -536,7 +536,7 @@ const Account = () => {
              ) : (
                <div className="grid md:grid-cols-2 gap-4">
                  {addresses.map((addr) => (
-                   <div key={addr.id} className={`p-6 rounded-2xl border transition-all hover:border-gold/50 relative group ${addr.is_default ? 'bg-gold/5 border-gold/30' : 'bg-white'}`}>
+                   <div key={addr.id} className={`p-6 rounded-2xl border transition-all hover:border-gold/50 relative group ${addr.is_default ? 'bg-gold/5 border-gold/30' : 'bg-white/5 border-white/10'}`}>
                       {addr.is_default && (
                         <span className="absolute top-4 right-4 text-[10px] font-bold uppercase tracking-widest text-gold bg-gold/10 px-2 py-1 rounded-full">Default</span>
                       )}
