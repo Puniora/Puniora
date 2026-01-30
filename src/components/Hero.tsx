@@ -4,11 +4,17 @@ import heroBanner from "@/assets/hero-banner.jpg";
 import { useEffect, useState } from "react";
 import { settingsService } from "@/lib/services/settingsService";
 import { getDirectUrl } from "@/lib/utils/imageUtils";
+import { Link } from "react-router-dom";
+
+interface HeroImage {
+  url: string;
+  link?: string;
+}
 
 const Hero = () => {
   const [scrollY, setScrollY] = useState(0);
-  const [desktopImages, setDesktopImages] = useState<string[]>([]);
-  const [mobileImages, setMobileImages] = useState<string[]>([]);
+  const [desktopImages, setDesktopImages] = useState<HeroImage[]>([]);
+  const [mobileImages, setMobileImages] = useState<HeroImage[]>([]);
   const [currentIndex, setCurrentIndex] = useState(0);
   const [isMobile, setIsMobile] = useState(false);
 
@@ -29,16 +35,16 @@ const Hero = () => {
     const fetchHeroImages = async () => {
       try {
         const [dImages, mImages] = await Promise.all([
-             settingsService.getJsonSetting<string[]>("hero_images", []),
-             settingsService.getJsonSetting<string[]>("hero_images_mobile", [])
+             settingsService.getJsonSetting<any[]>("hero_images", []),
+             settingsService.getJsonSetting<any[]>("hero_images_mobile", [])
         ]);
 
         if (dImages && dImages.length > 0) {
-          setDesktopImages(dImages);
+          setDesktopImages(dImages.map(img => typeof img === 'string' ? { url: img } : img));
         }
         
         if (mImages && mImages.length > 0) {
-            setMobileImages(mImages);
+            setMobileImages(mImages.map(img => typeof img === 'string' ? { url: img } : img));
         }
 
       } catch (error) {
@@ -72,26 +78,44 @@ const Hero = () => {
     <section className="relative min-h-[75vh] md:min-h-[85vh] flex items-center justify-center overflow-hidden pt-20 pb-24">
       {/* Background with Parallax */}
       <div className="absolute inset-0 overflow-hidden">
-        {heroImages.map((img, index) => (
-          <div
-            key={`${img}-${index}`} // Unique key for transition
-            className={`absolute inset-0 z-0 h-[120%] transition-opacity duration-1000 ease-in-out ${index === currentIndex ? "opacity-100" : "opacity-0"
-              }`}
-            style={{
-              transform: `translateY(${scrollY * 0.5}px)`,
-              zIndex: index === currentIndex ? 1 : 0
-            }}
-          >
+        {heroImages.map((img, index) => {
+          const Content = () => (
             <img
-              src={getDirectUrl(img)}
+              src={getDirectUrl(img.url)}
               alt="Puniora Luxury Perfume Collection"
-              className={`w-full h-full object-cover animate-scale-in ${isMobile ? 'object-[center_top]' : 'object-center'}`}
+              className={`w-full h-full object-cover animate-scale-in ${isMobile ? 'object-[center_top]' : 'object-center'} ${img.link ? 'cursor-pointer hover:scale-105 transition-transform duration-700' : ''}`}
               onError={(e) => {
-                console.error("Hero image failed to load:", img);
+                console.error("Hero image failed to load:", img.url);
               }}
             />
-          </div>
-        ))}
+          );
+
+          return (
+            <div
+              key={`${img.url}-${index}`} // Unique key for transition
+              className={`absolute inset-0 z-0 h-[120%] transition-opacity duration-1000 ease-in-out ${index === currentIndex ? "opacity-100" : "opacity-0"
+                }`}
+              style={{
+                transform: `translateY(${scrollY * 0.5}px)`,
+                zIndex: index === currentIndex ? 1 : 0
+              }}
+            >
+              {img.link ? (
+                 img.link.startsWith('http') ? (
+                   <a href={img.link} target="_blank" rel="noopener noreferrer" className="block w-full h-full">
+                     <Content />
+                   </a>
+                 ) : (
+                   <Link to={img.link} className="block w-full h-full">
+                     <Content />
+                   </Link>
+                 )
+              ) : (
+                <Content />
+              )}
+            </div>
+          )
+        })}
       </div>
 
       {/* Carousel Indicators */}

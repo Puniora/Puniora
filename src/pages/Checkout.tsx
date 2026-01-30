@@ -39,6 +39,8 @@ const Checkout = () => {
   const [showConfirmation, setShowConfirmation] = useState(false);
   const [confirmedOrderId, setConfirmedOrderId] = useState("");
   const [razorpayError, setRazorpayError] = useState<string | null>(null);
+  const [isServiceable, setIsServiceable] = useState<boolean | null>(null);
+  const [checkingServiceability, setCheckingServiceability] = useState(false);
 
   const [formData, setFormData] = useState(() => {
     const saved = localStorage.getItem("checkoutFormData");
@@ -49,6 +51,7 @@ const Checkout = () => {
       state: "",
       district: "",
       place: "",
+      pincode: "",
       houseAddress: "",
       landmark: ""
     };
@@ -86,6 +89,7 @@ const Checkout = () => {
       district: "", // Address object from DB might not strictly split district/place the same way or it might be needed to map differently. 
       // For now, mapping best effort. 
       place: addr.city,
+      pincode: addr.pincode, // Using correct property from Address interface
       houseAddress: addr.address_line1,
       landmark: addr.address_line2 || "" // Using address_line2 as landmark/area for simplicity
     });
@@ -95,7 +99,7 @@ const Checkout = () => {
     setSelectedAddressId(value);
     if (value === "new") {
       setFormData({
-        name: "", mobile: "", state: "", district: "", place: "", houseAddress: "", landmark: ""
+        name: "", mobile: "", state: "", district: "", place: "", pincode: "", houseAddress: "", landmark: ""
       });
     } else {
       const addr = savedAddresses.find(a => a.id === value);
@@ -126,6 +130,30 @@ const Checkout = () => {
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const { id, value } = e.target;
     setFormData((prev: any) => ({ ...prev, [id]: value }));
+    
+    if (id === 'pincode') {
+        setIsServiceable(null); // Reset verification on change
+        if (value.length === 6) {
+            checkPincodeServiceability(value);
+        }
+    }
+  };
+
+  const checkPincodeServiceability = async (pincode: string) => {
+      setCheckingServiceability(true);
+      try {
+          const res = await shiprocketService.checkServiceability(pincode);
+          setIsServiceable(res.isServiceable);
+          if (!res.isServiceable) {
+              toast.error("Sorry, delivery not available to this pincode.");
+          } else {
+              toast.success("Delivery available!");
+          }
+      } catch (error) {
+          console.error(error);
+      } finally {
+          setCheckingServiceability(false);
+      }
   };
 
   const handleGetLocation = () => {
@@ -152,6 +180,7 @@ const Checkout = () => {
               state: addr.state || "",
               district: addr.state_district || addr.city_district || "",
               place: addr.city || addr.town || addr.village || "",
+              pincode: addr.postcode || "",
               landmark: addr.suburb || addr.neighbourhood || ""
             }));
             toast.success("Location updated!");
@@ -175,9 +204,14 @@ const Checkout = () => {
     e.preventDefault();
 
     // Validations (Native required props usually handle this, but good to be safe)
-    if (!formData.name || !formData.mobile || !formData.place) {
+    if (!formData.name || !formData.mobile || !formData.place || !formData.pincode) {
       toast.error("Please fill in all required shipping details.");
       return;
+    }
+    
+    if (isServiceable === false) {
+        toast.error("We cannot deliver to this address. Please change pincode.");
+        return;
     }
 
     setLoading(true);
@@ -255,6 +289,7 @@ const Checkout = () => {
           state: formData.state,
           district: formData.district,
           place: formData.place,
+          pincode: formData.pincode,
           houseAddress: formData.houseAddress,
           landmark: formData.landmark
         },
@@ -428,6 +463,24 @@ const Checkout = () => {
                     <div className="space-y-1.5">
                       <Input id="landmark" placeholder="Landmark" className="h-10 border-border/50 focus:border-gold rounded-xl text-sm" value={formData.landmark} onChange={handleInputChange} />
                     </div>
+                  </div>
+
+                  <div className="space-y-1.5 relative">
+                      <Input 
+                        id="pincode" 
+                        required 
+                        placeholder="Pincode" 
+                        maxLength={6} 
+                        className={`h-10 border-border/50 focus:border-gold rounded-xl text-sm ${
+                            isServiceable === true ? 'border-green-500 focus:border-green-500' : 
+                            isServiceable === false ? 'border-red-500 focus:border-red-500' : ''
+                        }`} 
+                        value={formData.pincode} 
+                        onChange={handleInputChange} 
+                      />
+                      {checkingServiceability && <Loader2 className="absolute right-3 top-2.5 h-4 w-4 animate-spin text-gold" />}
+                      {isServiceable === true && <span className="absolute right-3 top-3 h-2 w-2 bg-green-500 rounded-full" />}
+                      {isServiceable === false && <span className="absolute right-3 top-3 h-2 w-2 bg-red-500 rounded-full" />}
                   </div>
 
                   <div className="space-y-1.5">

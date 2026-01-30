@@ -349,10 +349,15 @@ const Account = () => {
 
                          {/* Courier Info */}
                          {selectedOrder.awb_code && (
-                           <div className="mt-4 bg-black/40 p-4 rounded-xl border border-dashed border-white/20">
-                             <p className="text-[10px] uppercase font-bold text-muted-foreground mb-1 tracking-widest">Courier AWB</p>
-                             <p className="font-mono text-white tracking-wider">{selectedOrder.awb_code}</p>
-                           </div>
+                             <div className="mt-4 bg-black/40 p-4 rounded-xl border border-dashed border-white/20">
+                               <p className="text-[10px] uppercase font-bold text-muted-foreground mb-1 tracking-widest">Courier AWB</p>
+                               <div className="flex items-center justify-between">
+                                  <p className="font-mono text-white tracking-wider">{selectedOrder.awb_code}</p>
+                                  <Button variant="link" size="sm" className="text-gold h-auto p-0" onClick={() => window.open(`https://shiprocket.co/tracking/${selectedOrder.awb_code}`, '_blank')}>
+                                      Track Order <ArrowRight className="ml-1 h-3 w-3" />
+                                  </Button>
+                               </div>
+                             </div>
                          )}
                       </div>
 
@@ -397,7 +402,18 @@ const Account = () => {
              ) : (
                <div className="grid gap-4">
                   {orders.map((order) => (
-                    <div key={order.id} onClick={() => setSelectedOrder(order)} className="glass p-6 rounded-2xl hover:bg-white/5 transition-all duration-300 group cursor-pointer border-l-4 border-l-transparent hover:border-l-gold relative overflow-hidden">
+                    <div 
+                         key={order.id} 
+                         onClick={async () => {
+                              setSelectedOrder(order);
+                              // Sync Status on Click
+                              if (order.awb_code && !['Delivered', 'Cancelled'].includes(order.tracking_status)) {
+                                  const updated = await orderService.syncOrderStatus(order.id, order.awb_code);
+                                  if (updated) setSelectedOrder(updated);
+                              }
+                         }}
+                         className="glass p-6 rounded-2xl hover:bg-white/5 transition-all duration-300 group cursor-pointer border-l-4 border-l-transparent hover:border-l-gold relative overflow-hidden"
+                    >
                        <div className="absolute inset-0 bg-gradient-to-r from-gold/5 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-500" />
                        
                        <div className="flex flex-col md:flex-row justify-between gap-6 mb-6 relative">
@@ -444,7 +460,6 @@ const Account = () => {
                </div>
              )}
           </TabsContent>
-
           <TabsContent value="addresses" className="space-y-6 animate-fade-in">
              <div className="flex justify-between items-center">
                <h3 className="text-xl font-heading">Saved Addresses</h3>

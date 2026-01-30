@@ -1,4 +1,5 @@
 import { supabase } from "../supabase";
+import { shiprocketService } from "./shiprocketService";
 
 export interface Address {
   state: string;
@@ -51,6 +52,26 @@ export const orderService = {
       console.error('Error creating order:', error);
       throw error;
     }
+
+    // --- Shiprocket Integration ---
+    if (data) {
+        try {
+            const shiprocketResponse = await shiprocketService.createOrder(data);
+            if (shiprocketResponse && shiprocketResponse.order_id) {
+                 await this.updateShiprocketDetails(data.id, {
+                     shiprocket_order_id: shiprocketResponse.order_id,
+                     shiprocket_shipment_id: shiprocketResponse.shipment_id,
+                     awb_code: shiprocketResponse.awb_code || ""
+                 });
+                 console.log("Shiprocket Order Created:", shiprocketResponse.order_id);
+            }
+        } catch (srError) {
+            console.error("Failed to sync with Shiprocket:", srError);
+            // We do not throw here, as the order is already created in our system.
+        }
+    }
+    // ------------------------------
+
     return data;
   },
 
@@ -201,5 +222,33 @@ export const orderService = {
        throw error;
     }
     return data || [];
+  },
+  // Sync Order Status from Shiprocket
+  async syncOrderStatus(orderId: string, awbCode: string) {
+      if (!awbCode) return null;
+
+      try {
+          const trackingData = await shiprocketService.getTracking(awbCode);
+          if (trackingData && trackingData.tracking_data && trackingData.tracking_data.track_status === 1) {
+              const currentStatus = trackingData.tracking_data.shipment_track[0].current_status;
+              const mappedStatus = shiprocketService.mapShiprocketStatus(currentStatus);
+              
+              console.log(`Syncing Order ${orderId}: Shiprocket says '${currentStatus}' -> We set '${mappedStatus}'`);
+
+              // Update in DB
+              const { data, error } = await supabase
+                  .from('orders')
+                  .update({ tracking_status: mappedStatus })
+                  .eq('id', orderId)
+                  .select()
+                  .single();
+              
+              if (error) throw error;
+              return data; // Return updated order
+          }
+      } catch (error) {
+          console.error(`Failed to sync order ${orderId}:`, error);
+      }
+      return null;
   }
 };

@@ -5,6 +5,7 @@ import { TooltipProvider } from "@/components/ui/tooltip";
 import InitialLoader from "@/components/ui/InitialLoader";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom";
+import { AnalyticsLoader } from "@/components/AnalyticsLoader";
 import { CartProvider } from "@/context/CartContext";
 import { AuthProvider } from "@/context/AuthContext";
 const Index = React.lazy(() => import("@/pages/Index"));
@@ -17,7 +18,6 @@ const BlogList = React.lazy(() => import("@/pages/BlogList"));
 const BlogDetail = React.lazy(() => import("@/pages/BlogDetail"));
 const ProductDetails = React.lazy(() => import("@/pages/ProductDetails"));
 const Checkout = React.lazy(() => import("@/pages/Checkout"));
-const TrackOrder = React.lazy(() => import("@/pages/TrackOrder"));
 const PaymentGateway = React.lazy(() => import("@/pages/PaymentGateway"));
 const NotFound = React.lazy(() => import("@/pages/NotFound"));
 const PrivacyPolicy = React.lazy(() => import("@/pages/policies/PrivacyPolicy"));
@@ -50,6 +50,7 @@ const App = () => (
           <Sonner />
           <InitialLoader />
           <BrowserRouter future={{ v7_startTransition: true, v7_relativeSplatPath: true }}>
+            <AnalyticsLoader />
             <React.Suspense fallback={<div className="min-h-screen flex items-center justify-center"><div className="w-16 h-16 border-4 border-gold border-t-transparent rounded-full animate-spin"></div></div>}>
               <Routes>
                 <Route path="/" element={<Index />} />
@@ -77,7 +78,8 @@ const App = () => (
                   }
                 />
                 <Route path="/checkout" element={<Checkout />} />
-                <Route path="/track" element={<TrackOrder />} />
+                <Route path="/checkout" element={<Checkout />} />
+                <Route path="/secure-payment" element={<PaymentGateway />} />
                 <Route path="/secure-payment" element={<PaymentGateway />} />
                 {/* Policy Pages - For Razorpay Compliance */}
                 <Route path="/privacy-policy" element={<PrivacyPolicy />} />

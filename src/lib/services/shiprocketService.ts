@@ -42,13 +42,14 @@ export const shiprocketService = {
   // NOTE: In a production app, credentials should NOT be hardcoded on client side.
   // This should ideally be an edge function. For now, we put it here as requested.
   // User must provide these env vars or replace values here.
-  email: import.meta.env.VITE_SHIPROCKET_EMAIL || "YOUR_EMAIL",
-  password: import.meta.env.VITE_SHIPROCKET_PASSWORD || "YOUR_PASSWORD",
+  email: import.meta.env.VITE_SHIPROCKET_EMAIL || "Induilaya040@gmail.com",
+  password: import.meta.env.VITE_SHIPROCKET_PASSWORD || "y#aOSRRUM!$%Pzd3#q$sn6N1CgcmnMCN",
   token: localStorage.getItem('shiprocket_token') || "",
 
   async login() {
     try {
-      if(this.token) return this.token; // Cached token
+      // Basic token expiry check could be added here
+      if(this.token) return this.token; 
 
       const response = await fetch('https://apiv2.shiprocket.in/v1/external/auth/login', {
         method: 'POST',
@@ -70,6 +71,35 @@ export const shiprocketService = {
     }
   },
 
+  async checkServiceability(pincode: string) {
+      try {
+          const token = await this.login();
+          // Pickup pincode is required. Assuming a default or env var.
+          const pickupPincode = import.meta.env.VITE_SHIPROCKET_PICKUP_PINCODE || "600122"; // Replace with actual pickup pincode
+          
+          const url = `https://apiv2.shiprocket.in/v1/external/courier/serviceability?pickup_postcode=${pickupPincode}&delivery_postcode=${pincode}&weight=0.5&cod=1`;
+          
+          const response = await fetch(url, {
+              method: 'GET',
+              headers: {
+                  'Content-Type': 'application/json',
+                  'Authorization': `Bearer ${token}`
+              }
+          });
+
+          const data = await response.json();
+          // status 200 means serviceable usually, but check data.status
+          return {
+              isServiceable: data.status === 200,
+              data: data
+          };
+
+      } catch (error) {
+          console.error("Serviceability Check Error:", error);
+          return { isServiceable: false, error };
+      }
+  },
+
   async createOrder(order: any) {
     try {
       const token = await this.login();
@@ -77,7 +107,7 @@ export const shiprocketService = {
       const payload: ShiprocketOrderPayload = {
         order_id: order.id,
         order_date: new Date(order.created_at).toISOString().split('T')[0] + ' ' + new Date(order.created_at).toTimeString().split(' ')[0],
-        pickup_location: import.meta.env.VITE_SHIPROCKET_PICKUP_LOCATION || "Primary", // Must match Shiprocket dashboard
+        pickup_location: import.meta.env.VITE_SHIPROCKET_PICKUP_LOCATION || "Home", // Must match Shiprocket dashboard
         billing_customer_name: order.customer_name,
         billing_last_name: "", // Assuming full name in customer_name
         billing_address: order.address_json.houseAddress,
@@ -122,15 +152,32 @@ export const shiprocketService = {
   },
 
   async getTracking(awbOrOrderId: string) {
-    // For simple implementation, assuming we track using AWB
     try {
-      const token = await this.login();
-      // Implementation depends on what ID we have. 
-      // If AWB: /courier/track/awb/{awb_code}
-      return null; 
-    } catch (e) {
-      return null;
+        const token = await this.login();
+        const response = await fetch(`https://apiv2.shiprocket.in/v1/external/courier/track/awb/${awbOrOrderId}`, {
+            headers: {
+                'Authorization': `Bearer ${token}`
+            }
+        });
+        const data = await response.json();
+        return data; // Returns tracking data
+    } catch (error) {
+        console.error("Tracking error:", error);
+        return null;
     }
+  },
+
+  // Helper to map Shiprocket Status to App Status
+  mapShiprocketStatus(srStatus: string): 'Order Placed' | 'Packed' | 'Shipped' | 'Out for Delivery' | 'Delivered' | 'Cancelled' {
+      const status = srStatus.toUpperCase();
+      
+      if (status.includes("DELIVERED")) return 'Delivered';
+      if (status.includes("OUT FOR DELIVERY")) return 'Out for Delivery';
+      if (status.includes("SHIPPED") || status.includes("IN TRANSIT") || status.includes("PICKED UP") || status.includes("RTO")) return 'Shipped';
+      if (status.includes("PACKED") || status.includes("PICKUP SCHEDULED") || status.includes("NEW")) return 'Packed';
+      if (status.includes("CANCELED") || status.includes("CANCELLED")) return 'Cancelled';
+      
+      return 'Order Placed'; // Default fallback
   },
 
   async cancelOrder(shiprocketOrderId: string) {

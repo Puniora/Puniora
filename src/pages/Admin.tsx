@@ -16,6 +16,7 @@ import { MessageSquare, Gift } from "lucide-react";
 import GiftSetBuilder from "@/components/admin/GiftSetBuilder";
 import SettingsTab from "@/components/admin/SettingsTab";
 import BlogManager from "@/components/admin/BlogManager";
+import AnalyticsTab from "@/components/admin/AnalyticsTab";
 import { BookOpen } from "lucide-react";
 import NewOrderForm from "@/components/admin/NewOrderForm";
 
@@ -180,12 +181,13 @@ const Admin = () => {
         </div>
 
         <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
-          <TabsList className="grid w-full grid-cols-6 max-w-[900px]">
+          <TabsList className="grid w-full grid-cols-7 max-w-[1000px]">
             <TabsTrigger value="products">Products</TabsTrigger>
             <TabsTrigger value="gift-sets">Gift Sets</TabsTrigger>
             <TabsTrigger value="orders">Orders</TabsTrigger>
             <TabsTrigger value="reviews">Reviews</TabsTrigger>
             <TabsTrigger value="blog">Journal</TabsTrigger>
+            <TabsTrigger value="analytics">Analytics</TabsTrigger>
             <TabsTrigger value="settings">Settings</TabsTrigger>
           </TabsList>
           <TabsContent value="products" className="mt-6">
@@ -231,6 +233,9 @@ const Admin = () => {
           </TabsContent>
           <TabsContent value="blog" className="mt-6">
             <BlogManager />
+          </TabsContent>
+          <TabsContent value="analytics" className="mt-6">
+            <AnalyticsTab />
           </TabsContent>
           <TabsContent value="settings" className="mt-6">
             <SettingsTab />

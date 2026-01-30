@@ -126,10 +126,10 @@ const FeaturedGiftSet = () => {
 
                 <div className="grid lg:grid-cols-2 gap-24 items-center">
                     {/* Image Content - Left */}
-                    <div className="relative group perspective-1000 reveal opacity-0">
+                    <div className="relative group reveal opacity-0">
                         <div className="absolute inset-0 bg-gold/20 blur-3xl transform scale-90 opacity-0 group-hover:opacity-100 transition-opacity duration-1000 rounded-full" />
-                        <div className="relative z-10 transform transition-transform duration-700 ease-out group-hover:rotate-1 group-hover:scale-[1.02]">
-                            <div className="absolute inset-0 border border-white/10 rounded-t-[150px] rounded-b-[20px] translate-x-4 translate-y-4 trantision-transform duration-700 group-hover:translate-x-6 group-hover:translate-y-6" />
+                        <div className="relative z-10">
+                            <div className="absolute inset-0 border border-white/10 rounded-t-[150px] rounded-b-[20px] translate-x-4 translate-y-4 transition-transform duration-700 group-hover:translate-x-6 group-hover:translate-y-6" />
                             <div className="relative rounded-t-[150px] rounded-b-[20px] overflow-hidden shadow-2xl shadow-black/50 aspect-[4/5] max-w-md mx-auto">
                                 <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-transparent opacity-60 z-10" />
                                 <img
@@ -139,7 +139,7 @@ const FeaturedGiftSet = () => {
                                     height="625"
                                     loading="eager"
                                     fetchPriority="high"
-                                    className="w-full h-full object-cover transform transition-transform duration-1000 group-hover:scale-110"
+                                    className="w-full h-full object-cover transform transition-transform duration-1000 group-hover:scale-105"
                                 />
                                 <div className="absolute bottom-8 left-8 z-20 bg-white/10 backdrop-blur-md border border-white/20 px-6 py-3 rounded-full flex items-center gap-3 shadow-lg hover:bg-white/20 transition-colors cursor-default">
                                     <span className="h-2 w-2 rounded-full bg-gold animate-pulse-glow" />
