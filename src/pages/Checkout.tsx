@@ -312,32 +312,8 @@ const Checkout = () => {
       console.log("Submitting Order Data:", orderData);
       const order = await orderService.createOrder(orderData);
 
-      // 2. Trigger Shiprocket Order Creation
-      try {
-        console.log("Creating Shiprocket Order...");
-        // Only create shiprocket order if COD or Paid. (Pending online orders shouldn't ship yet)
-        // Since we only reach here if Paid (Online) or Pending (COD), we are good.
-
-        const shiprocketRes = await shiprocketService.createOrder(order);
-
-        if (shiprocketRes && shiprocketRes.order_id) {
-          console.log("Shiprocket Order Created:", shiprocketRes.order_id);
-
-          await orderService.updateShiprocketDetails(order.id, {
-            shiprocket_order_id: shiprocketRes.order_id.toString(),
-            shiprocket_shipment_id: shiprocketRes.shipment_id.toString(),
-            awb_code: shiprocketRes.awb_code || ""
-          });
-
-          await orderService.updateTracking(
-            order.id,
-            'Order Placed',
-            shiprocketRes.shipment_id ? shiprocketRes.shipment_id.toString() : undefined
-          );
-        }
-      } catch (srError) {
-        console.error("Shiprocket Integration Error:", srError);
-      }
+      // 2. Shiprocket Order Creation is handled internally by orderService.createOrder
+      // This prevents duplicate creation and ensures consistency.
 
       // 3. Trigger WhatsApp Notification
       try {
