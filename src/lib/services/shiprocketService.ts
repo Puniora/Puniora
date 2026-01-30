@@ -45,13 +45,16 @@ export const shiprocketService = {
   email: import.meta.env.VITE_SHIPROCKET_EMAIL || "Induilaya040@gmail.com",
   password: import.meta.env.VITE_SHIPROCKET_PASSWORD || "y#aOSRRUM!$%Pzd3#q$sn6N1CgcmnMCN",
   token: localStorage.getItem('shiprocket_token') || "",
+  
+  // Use Vercel Proxy in production to bypass CORS
+  baseUrl: window.location.hostname.includes('localhost') ? 'https://apiv2.shiprocket.in' : '/api/shiprocket',
 
   async login() {
     try {
       // Basic token expiry check could be added here
       if(this.token) return this.token; 
 
-      const response = await fetch('https://apiv2.shiprocket.in/v1/external/auth/login', {
+      const response = await fetch(`${this.baseUrl}/v1/external/auth/login`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ email: this.email, password: this.password })
@@ -77,7 +80,7 @@ export const shiprocketService = {
           // Pickup pincode is required. Assuming a default or env var.
           const pickupPincode = import.meta.env.VITE_SHIPROCKET_PICKUP_PINCODE || "600122"; // Replace with actual pickup pincode
           
-          const url = `https://apiv2.shiprocket.in/v1/external/courier/serviceability?pickup_postcode=${pickupPincode}&delivery_postcode=${pincode}&weight=0.5&cod=1`;
+          const url = `${this.baseUrl}/v1/external/courier/serviceability?pickup_postcode=${pickupPincode}&delivery_postcode=${pincode}&weight=0.5&cod=1`;
           
           const response = await fetch(url, {
               method: 'GET',
@@ -111,7 +114,7 @@ export const shiprocketService = {
         billing_customer_name: order.customer_name,
         billing_last_name: "", // Assuming full name in customer_name
         billing_address: order.address_json.houseAddress,
-        billing_address_2: order.address_json.landmark || "",
+        billing_address_2: `${order.address_json.landmark || ""}${order.address_json.district ? `, ${order.address_json.district}` : ""}`,
         billing_city: order.address_json.place,
         billing_pincode: order.address_json.pincode || "000000", // Need pincode in order
         billing_state: order.address_json.state,
@@ -133,7 +136,7 @@ export const shiprocketService = {
         weight: 0.5
       };
 
-      const response = await fetch('https://apiv2.shiprocket.in/v1/external/orders/create/adhoc', {
+      const response = await fetch(`${this.baseUrl}/v1/external/orders/create/adhoc`, {
         method: 'POST',
         headers: { 
           'Content-Type': 'application/json',
@@ -154,7 +157,7 @@ export const shiprocketService = {
   async getTracking(awbOrOrderId: string) {
     try {
         const token = await this.login();
-        const response = await fetch(`https://apiv2.shiprocket.in/v1/external/courier/track/awb/${awbOrOrderId}`, {
+        const response = await fetch(`${this.baseUrl}/v1/external/courier/track/awb/${awbOrOrderId}`, {
             headers: {
                 'Authorization': `Bearer ${token}`
             }
@@ -183,7 +186,7 @@ export const shiprocketService = {
   async cancelOrder(shiprocketOrderId: string) {
     try {
       const token = await this.login();
-      const response = await fetch('https://apiv2.shiprocket.in/v1/external/orders/cancel', {
+      const response = await fetch(`${this.baseUrl}/v1/external/orders/cancel`, {
         method: 'POST',
         headers: { 
           'Content-Type': 'application/json',
