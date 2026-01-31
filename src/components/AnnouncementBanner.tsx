@@ -40,12 +40,12 @@ const AnnouncementBanner = ({ enabled, text }: AnnouncementBannerProps) => {
       {/* CSS for marquee animation if not in global css */}
       <style>{`
         @keyframes marquee {
-          0% { transform: translateX(100%); }
+          0% { transform: translateX(100vw); }
           100% { transform: translateX(-100%); }
         }
         .animate-marquee {
           display: inline-block;
-          animation: marquee 20s linear infinite;
+          animation: marquee 45s linear infinite;
         }
       `}</style>
     </div>

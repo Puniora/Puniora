@@ -6,8 +6,11 @@ import { componentTagger } from "lovable-tagger";
 // https://vitejs.dev/config/
 export default defineConfig(({ mode }) => ({
   server: {
-    host: "::",
+    host: "0.0.0.0",
     port: 8080,
+    hmr: {
+        clientPort: 8080
+    },
     proxy: {
       '/api/shiprocket': {
         target: 'https://apiv2.shiprocket.in',
@@ -23,7 +26,7 @@ export default defineConfig(({ mode }) => ({
       }
     }
   },
-  plugins: [react(), mode === "development" && componentTagger()].filter(Boolean),
+  plugins: [react()].filter(Boolean),
   resolve: {
     alias: {
       "@": path.resolve(__dirname, "./src"),
