@@ -18,6 +18,7 @@ import { Loader2, Package, MapPin, LogOut, Plus, Trash2, Edit2, Search, ArrowRig
 import { formatPrice } from "@/lib/products";
 import { toast } from "sonner";
 import { Badge } from "@/components/ui/badge";
+import { CountryCodeSelect } from "@/components/ui/CountryCodeSelect";
 
 const Account = () => {
   const { user, logout, loading: authLoading } = useAuth();
@@ -86,6 +87,11 @@ const Account = () => {
   // Address Form State
   const [isAddressOpen, setIsAddressOpen] = useState(false);
   const [editingAddress, setEditingAddress] = useState<Address | null>(null);
+  
+  // State for split mobile number in address form
+  const [addressCountryCode, setAddressCountryCode] = useState("+91");
+  const [addressLocalMobile, setAddressLocalMobile] = useState("");
+
   const [addressForm, setAddressForm] = useState({
     full_name: "",
     address_line1: "",
@@ -94,7 +100,7 @@ const Account = () => {
     district: "",
     state: "",
     pincode: "",
-    phone: "",
+    // phone will be constructed from addressCountryCode + addressLocalMobile
     is_default: false
   });
 
@@ -135,11 +141,13 @@ const Account = () => {
     if (!user) return;
     
     try {
+      const fullPhone = `${addressCountryCode} ${addressLocalMobile}`;
+      
       if (editingAddress) {
-        await userService.updateAddress(editingAddress.id, addressForm);
+        await userService.updateAddress(editingAddress.id, { ...addressForm, phone: fullPhone });
         toast.success("Address updated");
       } else {
-        await userService.addAddress({ ...addressForm, user_id: user.id });
+        await userService.addAddress({ ...addressForm, phone: fullPhone, user_id: user.id });
         toast.success("Address added");
       }
       setIsAddressOpen(false);
@@ -171,6 +179,19 @@ const Account = () => {
 
   const openEditAddress = (addr: Address) => {
     setEditingAddress(addr);
+    // Parse existing phone
+    let cCode = "+91";
+    let lMobile = addr.phone;
+    if (addr.phone.includes(" ")) {
+        const parts = addr.phone.split(" ");
+        if (parts[0].startsWith("+")) {
+             cCode = parts[0];
+             lMobile = parts.slice(1).join("");
+        }
+    }
+    setAddressCountryCode(cCode);
+    setAddressLocalMobile(lMobile);
+
     setAddressForm({
       full_name: addr.full_name,
       address_line1: addr.address_line1,
@@ -179,13 +200,14 @@ const Account = () => {
       district: addr.district || "",
       state: addr.state,
       pincode: addr.pincode,
-      phone: addr.phone,
       is_default: addr.is_default
     });
     setIsAddressOpen(true);
   };
 
   const resetAddressForm = () => {
+    setAddressCountryCode("+91");
+    setAddressLocalMobile("");
     setAddressForm({
       full_name: "",
       address_line1: "",
@@ -194,7 +216,6 @@ const Account = () => {
       district: "",
       state: "",
       pincode: "",
-      phone: "",
       is_default: false
     });
   };
@@ -510,7 +531,20 @@ const Account = () => {
                         </div>
                         <div className="space-y-2">
                           <Label>Phone</Label>
-                          <Input required value={addressForm.phone} onChange={e => setAddressForm({...addressForm, phone: e.target.value})} />
+                          <div className="flex gap-2">
+                            <CountryCodeSelect 
+                                value={addressCountryCode} 
+                                onChange={setAddressCountryCode} 
+                                className="h-10 border-border/50 focus:border-gold rounded-xl bg-background"
+                            />
+                            <Input 
+                                required 
+                                value={addressLocalMobile} 
+                                onChange={e => setAddressLocalMobile(e.target.value)} 
+                                className="flex-1"
+                                placeholder="Mobile Number"
+                            />
+                          </div>
                         </div>
                       </div>
                       <div className="flex items-center gap-2 pt-2">

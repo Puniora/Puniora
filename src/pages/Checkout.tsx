@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useMemo } from "react";
 import { useNavigate } from "react-router-dom";
 import { useCart } from "@/context/CartContext";
 import { Button } from "@/components/ui/button";
@@ -26,6 +26,7 @@ import { toast } from "sonner";
 import Header from "@/components/Header";
 import Footer from "@/components/Footer";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from "@/components/ui/dialog";
+import { CountryCodeSelect } from "@/components/ui/CountryCodeSelect";
 
 
 const Checkout = () => {
@@ -58,6 +59,39 @@ const Checkout = () => {
     };
   });
 
+  // State for split mobile number
+  const [countryCode, setCountryCode] = useState("+91");
+  const [localMobile, setLocalMobile] = useState("");
+
+  // Initialize split state from saved formData
+  useEffect(() => {
+      if (formData.mobile) {
+          // Simple heuristic: check if it starts with one of our known codes
+          // For now, default to +91 if no "+" or just assume rest is number
+          if (formData.mobile.startsWith("+")) {
+               // Try to extract code (space separated is best, but we handle joined too)
+               const parts = formData.mobile.split(" ");
+               if (parts.length > 1) {
+                   setCountryCode(parts[0]);
+                   setLocalMobile(parts.slice(1).join(""));
+               } else {
+                   // Fallback logic, maybe slice first 3 chars
+                   setLocalMobile(formData.mobile); // Leave as is if format unclear
+               }
+          } else {
+              setLocalMobile(formData.mobile);
+          }
+      }
+  }, []);
+
+  // Sync back to formData whenever split state changes
+  useEffect(() => {
+      // Avoid overwriting if empty
+      if (localMobile || countryCode) {
+          setFormData(prev => ({ ...prev, mobile: `${countryCode} ${localMobile}` }));
+      }
+  }, [countryCode, localMobile]);
+
   useEffect(() => {
     // Check for payment success from Mock Gateway
     const params = new URLSearchParams(window.location.search);
@@ -83,6 +117,21 @@ const Checkout = () => {
   }, [user]);
 
   const fillAddress = (addr: Address) => {
+    // Parse mobile for fill
+    let cCode = "+91";
+    let lMobile = addr.phone;
+    
+    if (addr.phone.includes(" ")) {
+        const parts = addr.phone.split(" ");
+        if (parts[0].startsWith("+")) {
+            cCode = parts[0];
+            lMobile = parts.slice(1).join("");
+        }
+    }
+    
+    setCountryCode(cCode);
+    setLocalMobile(lMobile);
+
     setFormData({
       name: addr.full_name,
       mobile: addr.phone,
@@ -106,6 +155,8 @@ const Checkout = () => {
       setFormData({
         name: "", mobile: "", state: "", district: "", place: "", pincode: "", houseAddress: "", landmark: ""
       });
+      setCountryCode("+91");
+      setLocalMobile("");
     } else {
       const addr = savedAddresses.find(a => a.id === value);
       if (addr) fillAddress(addr);
@@ -420,7 +471,22 @@ const Checkout = () => {
                     
                     <div className="space-y-1.5">
                       <Label htmlFor="mobile" className="text-[10px] uppercase tracking-widest font-bold text-muted-foreground">Mobile</Label>
-                      <Input id="mobile" required type="tel" placeholder="+91..." className="h-10 border-border/50 focus:border-gold rounded-xl text-sm" value={formData.mobile} onChange={handleInputChange} />
+                      <div className="flex gap-2">
+                        <CountryCodeSelect 
+                            value={countryCode} 
+                            onChange={setCountryCode} 
+                            className="h-10 border-border/50 focus:border-gold rounded-xl bg-background"
+                        />
+                        <Input 
+                            id="mobile" 
+                            required 
+                            type="tel" 
+                            placeholder="Mobile Number" 
+                            className="h-10 border-border/50 focus:border-gold rounded-xl text-sm flex-1" 
+                            value={localMobile} 
+                            onChange={(e) => setLocalMobile(e.target.value)} 
+                        />
+                      </div>
                     </div>
                   </div>
 
