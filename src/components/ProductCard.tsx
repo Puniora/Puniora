@@ -74,12 +74,22 @@ const ProductCard = ({ product, index, overrideImages }: ProductCardProps) => {
           {/* Quick Add Button (Floating) */}
           <div className="hidden md:block absolute bottom-6 left-1/2 -translate-x-1/2 translate-y-8 opacity-0 group-hover:opacity-100 group-hover:translate-y-0 transition-all duration-500 z-20 w-[85%]">
             <Button
-              className="w-full bg-white text-black hover:bg-gold hover:text-black font-body tracking-[0.2em] text-[10px] uppercase h-10 rounded-full shadow-lg"
+              className="w-full bg-white text-black hover:bg-gold hover:text-black font-body tracking-[0.2em] text-[10px] uppercase h-10 rounded-full shadow-lg disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:bg-white"
               onClick={handleAddToCart}
+              disabled={product.is_sold_out}
             >
-              Add to Cart
+              {product.is_sold_out ? "Sold Out" : "Add to Cart"}
             </Button>
           </div>
+
+          {/* Out of Stock Overlay Badge */}
+          {product.is_sold_out && (
+            <div className="absolute inset-0 z-30 flex items-center justify-center bg-black/60 backdrop-blur-[2px]">
+              <span className="px-4 py-2 bg-destructive/90 text-white text-xs font-bold uppercase tracking-widest border border-white/10 rounded-lg shadow-xl transform -rotate-12">
+                Out of Stock
+              </span>
+            </div>
+          )}
 
           {/* Category Badge */}
           <div className="absolute top-4 left-4 bg-black/40 backdrop-blur-sm px-3 py-1 rounded-full border border-white/10">

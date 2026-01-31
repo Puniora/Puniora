@@ -12,6 +12,7 @@ const mapToProduct = (data: any): Product => ({
   gallery: data.gallery || [],
   isHidden: data.isHidden || false,
   real_price: data.real_price,
+  is_sold_out: data.is_sold_out || false,
 });
 
 const mapToDb = (product: any) => {

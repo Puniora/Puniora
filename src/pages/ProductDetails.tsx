@@ -393,6 +393,11 @@ const ProductDetails = () => {
                         <span className="px-2 py-1 bg-gradient-to-r from-gold via-yellow-500 to-gold text-white text-[10px] font-bold uppercase tracking-wider rounded-md shadow-md shadow-gold/20 animate-pulse-slow">
                           Offer Price
                         </span>
+                        {product.is_sold_out && (
+                           <span className="px-3 py-1 bg-destructive/10 text-destructive text-xs font-bold uppercase tracking-widest border border-destructive/20 rounded-md">
+                             Out of Stock
+                           </span>
+                        )}
                       </div>
                     </div>
                   </div>
@@ -516,19 +521,21 @@ const ProductDetails = () => {
                   <Button
                     variant="gold"
                     size="xl"
-                    className="flex-1 h-14 shadow-xl shadow-gold/20 hover:scale-[1.02] transition-transform"
+                    disabled={product.is_sold_out}
+                    className="flex-1 h-14 shadow-xl shadow-gold/20 hover:scale-[1.02] transition-transform disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:scale-100"
                     onClick={() => addToCart({ ...product, price: selectedPrice, size: selectedSize, selectedNote: selectedNote, images: [selectedImage, ...product.images.filter(i => i !== selectedImage)] })}
                   >
                     <ShoppingCart className="mr-3 h-5 w-5" />
-                    ADD TO CART
+                    {product.is_sold_out ? "SOLD OUT" : "ADD TO CART"}
                   </Button>
                   <Button
                     variant="luxuryOutline"
                     size="xl"
-                    className="flex-1 h-14 border-2"
+                    disabled={product.is_sold_out}
+                    className="flex-1 h-14 border-2 disabled:opacity-50 disabled:cursor-not-allowed"
                     onClick={handleBuyNow}
                   >
-                    BUY NOW
+                    {product.is_sold_out ? "UNAVAILABLE" : "BUY NOW"}
                   </Button>
                 </div>
 
@@ -539,17 +546,19 @@ const ProductDetails = () => {
                     size="xl"
                     className="w-full h-14 shadow-xl shadow-gold/20"
                     onClick={() => addToCart({ ...product, price: selectedPrice, size: selectedSize, selectedNote: selectedNote, images: [selectedImage, ...product.images.filter(i => i !== selectedImage)] })}
+                    disabled={product.is_sold_out}
                   >
                     <ShoppingCart className="mr-3 h-5 w-5" />
-                    ADD TO CART
+                    {product.is_sold_out ? "SOLD OUT" : "ADD TO CART"}
                   </Button>
                   <Button
                     variant="luxuryOutline"
                     size="xl"
                     className="w-full h-14"
                     onClick={handleBuyNow}
+                    disabled={product.is_sold_out}
                   >
-                    BUY NOW
+                    {product.is_sold_out ? "UNAVAILABLE" : "BUY NOW"}
                   </Button>
                 </div>
 
@@ -603,10 +612,11 @@ const ProductDetails = () => {
             </div>
             <Button
               variant="gold"
-              className="flex-1 h-12 rounded-full shadow-lg shadow-gold/20 font-bold uppercase tracking-[0.2em] text-[10px] bg-gradient-to-r from-gold to-yellow-600 hover:from-yellow-600 hover:to-gold text-white border-none"
+              className="flex-1 h-12 rounded-full shadow-lg shadow-gold/20 font-bold uppercase tracking-[0.2em] text-[10px] bg-gradient-to-r from-gold to-yellow-600 hover:from-yellow-600 hover:to-gold text-white border-none disabled:opacity-50 disabled:cursor-not-allowed"
               onClick={() => addToCart({ ...product, price: selectedPrice, size: selectedSize, selectedNote: selectedNote, images: [selectedImage, ...product.images.filter(i => i !== selectedImage)] })}
+              disabled={product.is_sold_out}
             >
-              Add to Cart
+              {product.is_sold_out ? "SOLD OUT" : "Add to Cart"}
             </Button>
           </div>
         </div>

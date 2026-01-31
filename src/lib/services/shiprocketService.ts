@@ -45,6 +45,7 @@ export const shiprocketService = {
   email: import.meta.env.VITE_SHIPROCKET_EMAIL || "Induilaya040@gmail.com",
   password: import.meta.env.VITE_SHIPROCKET_PASSWORD || "y#aOSRRUM!$%Pzd3#q$sn6N1CgcmnMCN",
   token: localStorage.getItem('shiprocket_token') || "",
+  tokenTimestamp: localStorage.getItem('shiprocket_token_time') || "",
   
   // Use Vercel Proxy in production or Vite Proxy in development
   baseUrl: window.location.hostname.includes('localhost') ? '/api/shiprocket' : '/api/shiprocket',
@@ -52,8 +53,19 @@ export const shiprocketService = {
   // Fixed Login: Allows forcing refresh
   async login(forceRefresh = false) {
     try {
-      if(!forceRefresh && this.token) return this.token;
+      // 1. Check if we have a cached token and it is valid (less than 9 days old)
+      if (!forceRefresh && this.token && this.tokenTimestamp) {
+          const now = Date.now();
+          const tokenTime = parseInt(this.tokenTimestamp);
+          const nineDaysInMs = 9 * 24 * 60 * 60 * 1000;
+          
+          if (now - tokenTime < nineDaysInMs) {
+              console.log("Using Cached Shiprocket Token (Valid for 9 days)");
+              return this.token;
+          }
+      }
 
+      console.log("Fetching New Shiprocket Token...");
       const response = await fetch(`${this.baseUrl}/v1/external/auth/login`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
@@ -67,8 +79,13 @@ export const shiprocketService = {
       }
 
       const data: ShiprocketAuthResponse = await response.json();
+      
       this.token = data.token;
+      this.tokenTimestamp = Date.now().toString();
+      
       localStorage.setItem('shiprocket_token', data.token);
+      localStorage.setItem('shiprocket_token_time', this.tokenTimestamp);
+      
       return data.token;
     } catch (error) {
        console.error("Shiprocket Login Error:", error);

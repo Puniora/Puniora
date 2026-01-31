@@ -38,6 +38,7 @@ export interface Product {
   olfactoryNotes?: OlfactoryNote[];
   isHidden?: boolean;
   is_featured?: boolean;
+  is_sold_out?: boolean;
 }
 
 // This list is only used for INITIAL SEEDING to the database.

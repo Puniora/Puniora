@@ -78,7 +78,7 @@ const FeaturedGiftSet = () => {
         <section className="bg-[#050505] relative overflow-hidden text-white">
 
             {/* MOBILE LAYOUT: Cinematic (Block on Mobile, Hidden on LG Screens) */}
-            <div className="lg:hidden relative w-full h-[85vh] min-h-[600px] overflow-hidden group">
+            <div className="lg:hidden relative w-full h-[80vh] min-h-[600px] overflow-hidden group">
                 <div className="absolute inset-0">
                     <img
                         src={getDirectUrl(displayImage, 1200)}
@@ -86,56 +86,58 @@ const FeaturedGiftSet = () => {
                         width="800"
                         height="1200"
                         loading="eager"
+                        // @ts-ignore
                         fetchpriority="high"
                         className="w-full h-full object-cover transition-transform [transition-duration:2000ms] group-hover:scale-105"
                     />
-                    <div className="absolute inset-0 bg-gradient-to-r from-[#050505] via-[#050505]/40 to-transparent" />
-                    <div className="absolute inset-0 bg-gradient-to-t from-[#050505] via-transparent to-transparent opacity-90" />
+                    {/* Stronger readable gradient at bottom */}
+                    <div className="absolute inset-0 bg-gradient-to-t from-[#050505] via-[#050505]/60 to-transparent opacity-90" />
                 </div>
 
-                <div className="relative z-10 container mx-auto px-6 h-full flex flex-col justify-center">
-                    <div className="max-w-xl space-y-8 reveal opacity-0">
-                        <div className="inline-flex items-center gap-2 px-3 py-1 bg-white/10 backdrop-blur-md border border-white/10 rounded-full">
+                <div className="relative z-10 container mx-auto px-6 h-full flex flex-col justify-end pb-20">
+                    <div className="max-w-xl space-y-4 reveal opacity-0">
+                        <div className="inline-flex items-center gap-2 px-3 py-1 bg-white/10 backdrop-blur-md border border-white/10 rounded-full mb-2">
                             <span className="w-1.5 h-1.5 rounded-full bg-gold animate-pulse" />
-                            <span className="text-xs font-medium text-white/90 uppercase tracking-widest">Best Seller</span>
+                            <span className="text-[10px] font-medium text-white/90 uppercase tracking-widest">Best Seller</span>
                         </div>
 
-                        <h2 className="text-5xl md:text-7xl font-heading font-medium leading-[0.9] text-white">
+                        <h2 className="text-4xl font-heading font-medium leading-[0.9] text-white">
                             Experience <br />
                             <span className="text-transparent bg-clip-text bg-gradient-gold italic font-light">
                                 {productData.name.split(' ')[0]}
                             </span>
                         </h2>
 
-                        <p className="text-lg md:text-xl text-white/70 font-light leading-relaxed max-w-md border-l border-gold/30 pl-6">
+                        <p className="text-sm text-white/80 font-light leading-relaxed max-w-xs border-l border-gold/30 pl-4">
                             "{shortDesc}"
                         </p>
 
-                        <div className="flex gap-8 pt-4">
+                        <div className="flex gap-8 pt-2">
                             <div>
-                                <p className="text-2xl font-heading text-white">
+                                <p className="text-xl font-heading text-white">
                                     ₹{productData.price}
                                     {productData.real_price && (
-                                        <span className="text-base text-white/40 line-through ml-2">₹{productData.real_price}</span>
+                                        <span className="text-sm text-white/40 line-through ml-2">₹{productData.real_price}</span>
                                     )}
                                 </p>
-                                <p className="text-[10px] uppercase tracking-wider text-white/50">Exclusive Offer</p>
                             </div>
                         </div>
 
-                        <div className="pt-8">
+                        <div className="pt-4">
                             <Link to={`/products/${productService.createSlug(productData.name)}`}>
-                                <Button size="xl" className="h-16 px-12 bg-white text-black hover:bg-gold hover:text-black rounded-none transition-all duration-300 shadow-[0_0_40px_rgba(0,0,0,0.3)] hover:shadow-[0_0_40px_rgba(212,175,55,0.3)]">
-                                    <span className="text-sm font-bold uppercase tracking-[0.2em] mr-4">Shop Now</span>
-                                    <ArrowRight className="w-5 h-5" />
+                                <Button size="lg" disabled={productData.is_sold_out} className="w-full h-12 bg-white text-black hover:bg-gold hover:text-black transition-all duration-300 shadow-[0_0_20px_rgba(0,0,0,0.3)] disabled:opacity-50 disabled:cursor-not-allowed">
+                                    <span className="text-xs font-bold uppercase tracking-[0.2em] mr-2">
+                                        {productData.is_sold_out ? "Sold Out" : "Shop Now"}
+                                    </span>
+                                    {!productData.is_sold_out && <ArrowRight className="w-4 h-4" />}
                                 </Button>
                             </Link>
                         </div>
                     </div>
                 </div>
 
-                <div className="absolute bottom-10 left-1/2 -translate-x-1/2 text-white/20 animate-bounce">
-                    <div className="w-px h-12 bg-gradient-to-b from-transparent via-white/20 to-transparent" />
+                <div className="absolute bottom-4 left-1/2 -translate-x-1/2 text-white/20 animate-bounce">
+                    <div className="w-px h-8 bg-gradient-to-b from-transparent via-white/20 to-transparent" />
                 </div>
             </div>
 
@@ -164,6 +166,7 @@ const FeaturedGiftSet = () => {
                                     width="500"
                                     height="625"
                                     loading="eager"
+                                    // @ts-ignore
                                     fetchpriority="high"
                                     className="w-full h-full object-cover transform transition-transform duration-1000 group-hover:scale-105 will-change-transform"
                                 />
@@ -195,9 +198,11 @@ const FeaturedGiftSet = () => {
 
                         <div className="flex flex-col sm:flex-row gap-6 items-center pt-4">
                             <Link to={`/products/${productService.createSlug(productData.name)}`}>
-                                <Button size="xl" className="bg-white text-black hover:bg-gold hover:text-black hover:scale-105 transition-all duration-500 h-14 px-10 rounded-none border border-transparent shadow-[0_0_20px_rgba(255,255,255,0.1)] hover:shadow-[0_0_30px_rgba(212,175,55,0.4)]">
-                                    <span className="text-xs font-bold uppercase tracking-[0.2em] mr-2">Shop Now</span>
-                                    <ArrowRight className="h-4 w-4" />
+                                <Button size="xl" disabled={productData.is_sold_out} className="bg-white text-black hover:bg-gold hover:text-black hover:scale-105 transition-all duration-500 h-14 px-10 rounded-none border border-transparent shadow-[0_0_20px_rgba(255,255,255,0.1)] hover:shadow-[0_0_30px_rgba(212,175,55,0.4)] disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:scale-100">
+                                    <span className="text-xs font-bold uppercase tracking-[0.2em] mr-2">
+                                        {productData.is_sold_out ? "Sold Out" : "Shop Now"}
+                                    </span>
+                                    {!productData.is_sold_out && <ArrowRight className="h-4 w-4" />}
                                 </Button>
                             </Link>
                         </div>

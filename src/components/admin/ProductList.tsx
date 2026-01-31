@@ -8,7 +8,7 @@ import {
   TableRow 
 } from "@/components/ui/table";
 import { Button } from "@/components/ui/button";
-import { Plus, Edit, Trash2, MoreHorizontal, Eye, EyeOff, Star } from "lucide-react";
+import { Plus, Edit, Trash2, MoreHorizontal, Eye, EyeOff, Star, Package, PackageX } from "lucide-react";
 import { Product, formatPrice } from "@/lib/products";
 import { productService } from "@/lib/services/productService";
 import { Switch } from "@/components/ui/switch";
@@ -76,6 +76,20 @@ const ProductList = ({ products, loading, onRefresh }: ProductListProps) => {
     }
   };
 
+  const handleToggleStock = async (product: Product) => {
+    try {
+      const newIsSoldOut = !product.is_sold_out; // Toggle sold out status
+      // If newIsSoldOut is true, it means product is now SOLD OUT
+      // If newIsSoldOut is false, it means product is now IN STOCK
+      
+      await productService.updateProduct(product.id, { is_sold_out: newIsSoldOut });
+      onRefresh();
+      toast.success(newIsSoldOut ? "Product marked as Out of Stock" : "Product marked as In Stock");
+    } catch (error) {
+      toast.error("Failed to update stock status");
+    }
+  };
+
   const handleEdit = (product: Product) => {
     setEditingProduct(product);
     setIsFormOpen(true);
@@ -108,6 +122,7 @@ const ProductList = ({ products, loading, onRefresh }: ProductListProps) => {
               <TableHead>Price</TableHead>
               <TableHead>Size</TableHead>
 
+              <TableHead>Stock</TableHead>
               <TableHead>Visible</TableHead>
               <TableHead>Featured</TableHead>
               <TableHead className="text-right">Actions</TableHead>
@@ -134,6 +149,18 @@ const ProductList = ({ products, loading, onRefresh }: ProductListProps) => {
                   <TableCell>{product.category}</TableCell>
                   <TableCell>{formatPrice(product.price)}</TableCell>
                   <TableCell>{product.size}</TableCell>
+                  <TableCell>
+                     <div className="flex items-center gap-2">
+                       <Switch 
+                         checked={!product.is_sold_out} 
+                         onCheckedChange={() => handleToggleStock(product)}
+                         className="data-[state=checked]:bg-green-600 data-[state=unchecked]:bg-destructive"
+                       />
+                       <span className={`text-xs ${product.is_sold_out ? 'text-destructive font-medium' : 'text-green-600'}`}>
+                         {product.is_sold_out ? "Sold Out" : "In Stock"}
+                       </span>
+                     </div>
+                  </TableCell>
                   <TableCell>
                     <div className="flex items-center gap-2">
                        <Switch 
