@@ -32,6 +32,15 @@ const FeaturedGiftSet = () => {
                     return;
                 }
 
+                // Priority 1: Check for explicitly featured product
+                const featuredProduct = finalPool.find(p => p.is_featured);
+
+                if (featuredProduct) {
+                    setGiftSet(featuredProduct);
+                    return;
+                }
+
+                // Priority 2: Fallback to Date-based rotation if no featured product set
                 // Simple pseudo-random selection based on the current date (YYYY-MM-DD)
                 // This ensures the same product is shown for everyone on the same day
                 const today = new Date().toISOString().split('T')[0];
@@ -77,7 +86,7 @@ const FeaturedGiftSet = () => {
                         width="800"
                         height="1200"
                         loading="eager"
-                        fetchPriority="high"
+                        fetchpriority="high"
                         className="w-full h-full object-cover transition-transform [transition-duration:2000ms] group-hover:scale-105"
                     />
                     <div className="absolute inset-0 bg-gradient-to-r from-[#050505] via-[#050505]/40 to-transparent" />
@@ -155,7 +164,7 @@ const FeaturedGiftSet = () => {
                                     width="500"
                                     height="625"
                                     loading="eager"
-                                    fetchPriority="high"
+                                    fetchpriority="high"
                                     className="w-full h-full object-cover transform transition-transform duration-1000 group-hover:scale-105 will-change-transform"
                                 />
                                 <div className="absolute bottom-8 left-8 z-20 bg-white/10 backdrop-blur-md border border-white/20 px-6 py-3 rounded-full flex items-center gap-3 shadow-lg hover:bg-white/20 transition-colors cursor-default">

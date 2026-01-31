@@ -8,7 +8,7 @@ import {
   TableRow 
 } from "@/components/ui/table";
 import { Button } from "@/components/ui/button";
-import { Plus, Edit, Trash2, MoreHorizontal, Eye, EyeOff } from "lucide-react";
+import { Plus, Edit, Trash2, MoreHorizontal, Eye, EyeOff, Star } from "lucide-react";
 import { Product, formatPrice } from "@/lib/products";
 import { productService } from "@/lib/services/productService";
 import { Switch } from "@/components/ui/switch";
@@ -64,6 +64,18 @@ const ProductList = ({ products, loading, onRefresh }: ProductListProps) => {
     }
   };
 
+
+  const handleToggleFeatured = async (product: Product) => {
+    try {
+      const newStatus = !product.is_featured;
+      await productService.updateProduct(product.id, { is_featured: newStatus });
+      onRefresh();
+      toast.success(newStatus ? "Product marked as featured" : "Product removed from featured");
+    } catch (error) {
+      toast.error("Failed to update featured status");
+    }
+  };
+
   const handleEdit = (product: Product) => {
     setEditingProduct(product);
     setIsFormOpen(true);
@@ -95,7 +107,9 @@ const ProductList = ({ products, loading, onRefresh }: ProductListProps) => {
               <TableHead>Category</TableHead>
               <TableHead>Price</TableHead>
               <TableHead>Size</TableHead>
+
               <TableHead>Visible</TableHead>
+              <TableHead>Featured</TableHead>
               <TableHead className="text-right">Actions</TableHead>
             </TableRow>
           </TableHeader>
@@ -131,6 +145,16 @@ const ProductList = ({ products, loading, onRefresh }: ProductListProps) => {
                          {product.isHidden ? <EyeOff className="h-3 w-3" /> : <Eye className="h-3 w-3" />}
                        </span>
                     </div>
+                  </TableCell>
+                  <TableCell>
+                    <Button
+                      variant="ghost" 
+                      size="sm"
+                      onClick={() => handleToggleFeatured(product)}
+                      className={product.is_featured ? "text-gold hover:text-gold/80" : "text-muted-foreground hover:text-gold/50"}
+                    >
+                      <Star className={`h-4 w-4 ${product.is_featured ? "fill-current" : ""}`} />
+                    </Button>
                   </TableCell>
                   <TableCell className="text-right">
                     <DropdownMenu>

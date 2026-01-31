@@ -8,6 +8,20 @@ export default defineConfig(({ mode }) => ({
   server: {
     host: "::",
     port: 8080,
+    proxy: {
+      '/api/shiprocket': {
+        target: 'https://apiv2.shiprocket.in',
+        changeOrigin: true,
+        rewrite: (path) => path.replace(/^\/api\/shiprocket/, ''),
+        secure: false,
+      },
+      '/api/whatsapp': {
+          target: 'https://graph.facebook.com',
+          changeOrigin: true,
+          rewrite: (path) => path.replace(/^\/api\/whatsapp/, ''),
+          secure: true,
+      }
+    }
   },
   plugins: [react(), mode === "development" && componentTagger()].filter(Boolean),
   resolve: {

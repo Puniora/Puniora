@@ -1,5 +1,6 @@
 import { supabase } from "../supabase";
 import { shiprocketService } from "./shiprocketService";
+import { toast } from "sonner";
 
 export interface Address {
   state: string;
@@ -65,8 +66,9 @@ export const orderService = {
                  });
                  console.log("Shiprocket Order Created:", shiprocketResponse.order_id);
             }
-        } catch (srError) {
+        } catch (srError: any) {
             console.error("Failed to sync with Shiprocket:", srError);
+            toast.error(`Shiprocket Sync Failed: ${srError.message || "Unknown error"}. Check console.`);
             // We do not throw here, as the order is already created in our system.
         }
     }

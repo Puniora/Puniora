@@ -34,8 +34,10 @@ export interface Product {
   selectedNote?: string;
   bundleItems?: string[]; // Array of Product IDs that make up this bundle
   extraSections?: ProductSection[];
+
   olfactoryNotes?: OlfactoryNote[];
   isHidden?: boolean;
+  is_featured?: boolean;
 }
 
 // This list is only used for INITIAL SEEDING to the database.

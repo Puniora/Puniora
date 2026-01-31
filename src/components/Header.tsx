@@ -67,19 +67,19 @@ const Header = () => {
           : "bg-transparent py-6"
         } 
         ${isMobileMenuOpen 
-          ? "bg-black/85 backdrop-blur-3xl rounded-[32px]" 
-          : (!isTransparent ? "glass rounded-[32px]" : "bg-gradient-to-b from-black/70 to-transparent py-6")
+          ? "bg-black/95 backdrop-blur-3xl rounded-[32px] border border-white/10" 
+          : (!isTransparent ? "glass rounded-[32px]" : "bg-gradient-to-b from-black/90 via-black/50 to-transparent pt-8 pb-12")
         }`}
       >
         <div className="container mx-auto px-6">
           <div className="flex items-center justify-between h-16 md:h-20">
             {/* Logo */}
-            <a href="/" className="flex flex-col items-start group">
+            <a href="/" className="flex flex-col items-start group drop-shadow-[0_2px_10px_rgba(0,0,0,0.8)]">
               <span className={`font-heading text-2xl md:text-3xl tracking-wide transition-colors duration-300 ${!isTransparent || isMobileMenuOpen ? 'text-white' : 'text-white'} group-hover:text-gold`}>
                 Puniora
                 <sup className="text-[10px] ml-0.5">™</sup>
               </span>
-              <span className={`text-[8px] md:text-[10px] tracking-[0.3em] uppercase transition-colors duration-500 -mt-1 group-hover:tracking-[0.4em] ${!isTransparent || isMobileMenuOpen ? 'text-white/60' : 'text-white/80'}`}>
+              <span className={`text-[8px] md:text-[10px] tracking-[0.3em] uppercase transition-colors duration-500 -mt-1 group-hover:tracking-[0.4em] ${!isTransparent || isMobileMenuOpen ? 'text-white/60' : 'text-white/90 font-medium'}`}>
                 Luxury in every breath
               </span>
             </a>
@@ -90,10 +90,10 @@ const Header = () => {
                 <a
                   key={link.label}
                   href={link.href}
-                  className={`text-xs uppercase tracking-[0.2em] transition-colors duration-300 relative group ${!isTransparent ? 'text-white' : 'text-white'} hover:text-gold`}
+                  className={`text-xs uppercase tracking-[0.2em] transition-colors duration-300 relative group drop-shadow-[0_2px_4px_rgba(0,0,0,0.8)] ${!isTransparent ? 'text-white' : 'text-white'} hover:text-gold`}
                 >
                   {link.label}
-                  <span className="absolute -bottom-1 left-0 w-0 h-px bg-gold transition-all duration-300 group-hover:w-full"></span>
+                  <span className="absolute -bottom-1 left-0 w-0 h-px bg-gold transition-all duration-300 group-hover:w-full box-shadow-[0_0_8px_rgba(247,107,28,0.8)]"></span>
                 </a>
               ))}
 

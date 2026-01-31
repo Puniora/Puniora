@@ -5,7 +5,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Separator } from "@/components/ui/separator";
-import { MapPin, ArrowLeft, Loader2, ShieldCheck, CreditCard, Wallet, CheckCircle2, Package } from "lucide-react";
+import { MapPin, Truck, CreditCard, ChevronLeft, Loader2, Locate, MapPinned, Sparkles, ArrowLeft, ShieldCheck, Wallet, CheckCircle2, Package } from "lucide-react";
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 import { formatPrice } from "@/lib/products";
 import { orderService } from "@/lib/services/orderService";
@@ -34,6 +34,7 @@ const Checkout = () => {
   const { user } = useAuth();
   const [loading, setLoading] = useState(false);
   const [geoLoading, setGeoLoading] = useState(false);
+  
   const [savedAddresses, setSavedAddresses] = useState<Address[]>([]);
   const [selectedAddressId, setSelectedAddressId] = useState("new");
   const [showConfirmation, setShowConfirmation] = useState(false);
@@ -355,6 +356,8 @@ const Checkout = () => {
     }
   };
 
+
+
   return (
     <div className="min-h-screen bg-background flex flex-col">
       <Header />
@@ -425,17 +428,7 @@ const Checkout = () => {
 
                   <div className="flex items-center justify-between">
                     <Label className="text-[10px] uppercase tracking-widest font-bold text-muted-foreground">Address</Label>
-                    <Button
-                      type="button"
-                      variant="ghost"
-                      size="sm"
-                      onClick={handleGetLocation}
-                      disabled={geoLoading}
-                      className="text-gold hover:text-gold hover:bg-gold/10 gap-2 h-7 px-2.5 rounded-full border border-gold/20 text-[10px]"
-                    >
-                      {geoLoading ? <Loader2 className="h-3 w-3 animate-spin" /> : <MapPin className="h-3 w-3" />}
-                      {geoLoading ? "Locating..." : "Use GPS"}
-                    </Button>
+
                   </div>
 
                   {/* Address Grid - Compact */}

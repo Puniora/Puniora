@@ -73,7 +73,7 @@ export default {
         },
         gold: { 
           DEFAULT: "#F76B1C", // Remapped to Ember Orange
-          light: "#FF995C",   
+          light: "#FFB085",   // Lighter for better contrast on black
           dark: "#CC4400",    
         },
       },
@@ -83,7 +83,7 @@ export default {
         sm: "calc(var(--radius) - 4px)",
       },
       backgroundImage: {
-        'gradient-gold': 'linear-gradient(135deg, hsl(var(--gold-light)) 0%, hsl(var(--gold)) 100%)',
+        'gradient-gold': 'linear-gradient(135deg, #FFB085 0%, #F76B1C 100%)',
         'gradient-dark': 'linear-gradient(to bottom, #050505 0%, #000000 100%)',
         'gradient-card': 'linear-gradient(180deg, rgba(255,255,255,0.03) 0%, rgba(255,255,255,0) 100%)',
         'shimmer-overlay': 'linear-gradient(to right, transparent 0%, rgba(255,255,255,0.05) 50%, transparent 100%)',

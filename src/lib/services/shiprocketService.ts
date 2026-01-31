@@ -46,13 +46,13 @@ export const shiprocketService = {
   password: import.meta.env.VITE_SHIPROCKET_PASSWORD || "y#aOSRRUM!$%Pzd3#q$sn6N1CgcmnMCN",
   token: localStorage.getItem('shiprocket_token') || "",
   
-  // Use Vercel Proxy in production to bypass CORS
-  baseUrl: window.location.hostname.includes('localhost') ? 'https://apiv2.shiprocket.in' : '/api/shiprocket',
+  // Use Vercel Proxy in production or Vite Proxy in development
+  baseUrl: window.location.hostname.includes('localhost') ? '/api/shiprocket' : '/api/shiprocket',
 
-  async login() {
+  // Fixed Login: Allows forcing refresh
+  async login(forceRefresh = false) {
     try {
-      // Basic token expiry check could be added here
-      if(this.token) return this.token; 
+      if(!forceRefresh && this.token) return this.token;
 
       const response = await fetch(`${this.baseUrl}/v1/external/auth/login`, {
         method: 'POST',
@@ -61,7 +61,9 @@ export const shiprocketService = {
       });
 
       if (!response.ok) {
-        throw new Error('Shiprocket Login Failed');
+        const errorText = await response.text();
+        console.error("Shiprocket Login Failed Details:", response.status, errorText);
+        throw new Error(`Shiprocket Login Failed: ${response.status} ${response.statusText} - ${errorText}`);
       }
 
       const data: ShiprocketAuthResponse = await response.json();
@@ -77,25 +79,27 @@ export const shiprocketService = {
   async checkServiceability(pincode: string) {
       try {
           const token = await this.login();
-          // Pickup pincode is required. Assuming a default or env var.
-          const pickupPincode = import.meta.env.VITE_SHIPROCKET_PICKUP_PINCODE || "600122"; // Replace with actual pickup pincode
+          const pickupPincode = import.meta.env.VITE_SHIPROCKET_PICKUP_PINCODE || "600122";
           
           const url = `${this.baseUrl}/v1/external/courier/serviceability?pickup_postcode=${pickupPincode}&delivery_postcode=${pincode}&weight=0.5&cod=1`;
           
-          const response = await fetch(url, {
+          let response = await fetch(url, {
               method: 'GET',
-              headers: {
-                  'Content-Type': 'application/json',
-                  'Authorization': `Bearer ${token}`
-              }
+              headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${token}` }
           });
 
+          // Auto-Retry on 401 (Unauthorized)
+          if (response.status === 401) {
+              console.warn("Shiprocket Token Expired. Refreshing...");
+              const newToken = await this.login(true); // Force refresh
+              response = await fetch(url, {
+                  method: 'GET',
+                  headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${newToken}` }
+              });
+          }
+
           const data = await response.json();
-          // status 200 means serviceable usually, but check data.status
-          return {
-              isServiceable: data.status === 200,
-              data: data
-          };
+          return { isServiceable: data.status === 200, data: data };
 
       } catch (error) {
           console.error("Serviceability Check Error:", error);
@@ -110,16 +114,16 @@ export const shiprocketService = {
       const payload: ShiprocketOrderPayload = {
         order_id: order.id,
         order_date: new Date(order.created_at).toISOString().split('T')[0] + ' ' + new Date(order.created_at).toTimeString().split(' ')[0],
-        pickup_location: import.meta.env.VITE_SHIPROCKET_PICKUP_LOCATION || "Home", // Must match Shiprocket dashboard
+        pickup_location: import.meta.env.VITE_SHIPROCKET_PICKUP_LOCATION || "Home",
         billing_customer_name: order.customer_name,
-        billing_last_name: "", // Assuming full name in customer_name
+        billing_last_name: "",
         billing_address: order.address_json.houseAddress,
         billing_address_2: `${order.address_json.landmark || ""}${order.address_json.district ? `, ${order.address_json.district}` : ""}`,
         billing_city: order.address_json.place,
-        billing_pincode: order.address_json.pincode || "000000", // Need pincode in order
+        billing_pincode: order.address_json.pincode,
         billing_state: order.address_json.state,
         billing_country: "India",
-        billing_email: "contact@puniora.com", // Fallback if user email not captured in order
+        billing_email: "contact@puniora.com",
         billing_phone: order.customer_mobile,
         shipping_is_billing: true,
         order_items: order.items.map((item: any) => ({
@@ -130,27 +134,37 @@ export const shiprocketService = {
         })),
         payment_method: order.payment_status === 'paid' ? 'Prepaid' : 'COD',
         sub_total: order.total_amount,
-        length: 10,
-        breadth: 10,
-        height: 10,
-        weight: 0.5
+        length: 10, breadth: 10, height: 10, weight: 0.5
       };
 
-      const response = await fetch(`${this.baseUrl}/v1/external/orders/create/adhoc`, {
+      let response = await fetch(`${this.baseUrl}/v1/external/orders/create/adhoc`, {
         method: 'POST',
-        headers: { 
-          'Content-Type': 'application/json',
-          'Authorization': `Bearer ${token}`
-        },
+        headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${token}` },
         body: JSON.stringify(payload)
       });
 
+      // Auto-Retry on 401
+      if (response.status === 401) {
+          console.warn("Shiprocket CreateOrder 401. Refreshing Token...");
+          const newToken = await this.login(true);
+          response = await fetch(`${this.baseUrl}/v1/external/orders/create/adhoc`, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${newToken}` },
+            body: JSON.stringify(payload)
+          });
+      }
+
       const data = await response.json();
+      
+      // Check for logical errors even if 200 OK (Shiprocket sometimes returns 200 with error inside)
+      if (data.status_code === 404 || data.message === "Invalid token detected") {
+           throw new Error(data.message || "Shiprocket Error");
+      }
+      
       return data;
-    } catch (error) {
+    } catch (error: any) {
       console.error("Shiprocket Create Order Error:", error);
-      // Don't block whole flow if shipping fails, just log it
-      return null;
+      throw error; // Propagate to show toast
     }
   },
 
@@ -158,12 +172,10 @@ export const shiprocketService = {
     try {
         const token = await this.login();
         const response = await fetch(`${this.baseUrl}/v1/external/courier/track/awb/${awbOrOrderId}`, {
-            headers: {
-                'Authorization': `Bearer ${token}`
-            }
+            headers: { 'Authorization': `Bearer ${token}` }
         });
         const data = await response.json();
-        return data; // Returns tracking data
+        return data; 
     } catch (error) {
         console.error("Tracking error:", error);
         return null;
@@ -188,10 +200,7 @@ export const shiprocketService = {
       const token = await this.login();
       const response = await fetch(`${this.baseUrl}/v1/external/orders/cancel`, {
         method: 'POST',
-        headers: { 
-          'Content-Type': 'application/json',
-          'Authorization': `Bearer ${token}`
-        },
+        headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${token}` },
         body: JSON.stringify({ ids: [shiprocketOrderId] })
       });
       
