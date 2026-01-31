@@ -141,7 +141,7 @@ export const shiprocketService = {
         billing_state: order.address_json.state,
         billing_country: "India",
         billing_email: "contact@puniora.com",
-        billing_phone: order.customer_mobile,
+        billing_phone: order.customer_mobile.replace(/\s/g, ''), // Remove spaces for Shiprocket validation
         shipping_is_billing: true,
         order_items: order.items.map((item: any) => ({
            name: item.name,
