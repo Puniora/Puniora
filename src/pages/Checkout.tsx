@@ -92,6 +92,11 @@ const Checkout = () => {
       houseAddress: addr.address_line1,
       landmark: addr.address_line2 || "" // Using address_line2 as landmark/area for simplicity
     });
+    
+    // Automatically verify pincode for saved addresses
+    if (addr.pincode) {
+        setIsServiceable(true);
+    }
   };
 
   const handleAddressSelect = (value: string) => {
@@ -141,15 +146,17 @@ const Checkout = () => {
   const checkPincodeServiceability = async (pincode: string) => {
       setCheckingServiceability(true);
       try {
-          const res = await shiprocketService.checkServiceability(pincode);
-          setIsServiceable(res.isServiceable);
-          if (!res.isServiceable) {
-              toast.error("Sorry, delivery not available to this pincode.");
-          } else {
-              toast.success("Delivery available!");
-          }
+          // Bypass Shiprocket check - Enable delivery everywhere
+          // const res = await shiprocketService.checkServiceability(pincode);
+          // setIsServiceable(res.isServiceable);
+          
+          setIsServiceable(true);
+          toast.success("Delivery available!");
+          
       } catch (error) {
           console.error(error);
+          // Fallback to true even on error
+          setIsServiceable(true);
       } finally {
           setCheckingServiceability(false);
       }
@@ -166,9 +173,9 @@ const Checkout = () => {
       async (position) => {
         try {
           const { latitude, longitude } = position.coords;
-          // Reverse geocoding using a public API (OpenStreetMap Nominatim)
+          // Reverse geocoding using a public API (OpenStreetMap Nominatim) - Force English
           const response = await fetch(
-            `https://nominatim.openstreetmap.org/reverse?format=json&lat=${latitude}&lon=${longitude}`
+            `https://nominatim.openstreetmap.org/reverse?format=json&lat=${latitude}&lon=${longitude}&accept-language=en`
           );
           const data = await response.json();
 
@@ -182,6 +189,13 @@ const Checkout = () => {
               pincode: addr.postcode || "",
               landmark: addr.suburb || addr.neighbourhood || ""
             }));
+
+            
+            // Automatically verify pincode since we are enabling delivery everywhere
+            if (addr.postcode) {
+                setIsServiceable(true);
+            }
+            
             toast.success("Location updated!");
           }
         } catch (error) {
