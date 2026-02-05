@@ -8,6 +8,7 @@ export interface Address {
   place: string;
   houseAddress: string;
   landmark: string;
+  pincode: string;
 }
 
 export interface OrderItem {
@@ -39,6 +40,7 @@ export interface Order {
   shiprocket_shipment_id?: string;
   awb_code?: string;
   cancellation_reason?: string;
+  order_number?: number;
 }
 
 export const orderService = {
@@ -109,11 +111,15 @@ export const orderService = {
     return data;
   },
 
-  async getOrders() {
-    const { data, error } = await supabase
+  async getOrders(page: number = 1, limit: number = 30) {
+    const from = (page - 1) * limit;
+    const to = from + limit - 1;
+
+    const { data, error, count } = await supabase
       .from('orders')
-      .select('*')
-      .order('created_at', { ascending: false });
+      .select('*', { count: 'exact' })
+      .order('created_at', { ascending: false })
+      .range(from, to);
 
     if (error) {
       console.error('Error fetching orders:', error);

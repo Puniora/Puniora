@@ -12,6 +12,7 @@ import { orderService } from "@/lib/services/orderService";
 import { shiprocketService } from "@/lib/services/shiprocketService";
 import { razorpayService } from "@/lib/services/razorpayService";
 import { whatsappService } from "@/lib/services/whatsappService";
+import { emailService } from "@/lib/services/emailService";
 
 import { useAuth } from "@/context/AuthContext";
 import { userService, Address } from "@/lib/services/userService";
@@ -388,14 +389,26 @@ const Checkout = () => {
         console.error("WhatsApp Integration Error:", waError);
       }
 
+      // 4. Trigger Email Notification
+      try {
+        console.log("Sending Email Notification...");
+        await emailService.sendOrderConfirmation(order);
+      } catch (emailError) {
+         console.error("Email Integration Error:", emailError);
+      }
+
       // Cache order ID for tracking
       localStorage.setItem("puniora_last_order", order.id);
 
       // Clear form data on successful order
       localStorage.removeItem("checkoutFormData");
 
-      // Show confirmation dialog
-      setConfirmedOrderId(order.id);
+      // Show confirmation dialog with Formatted ID if available
+      const displayId = order.order_number 
+        ? `PF${String(order.order_number).padStart(2, '0')}` 
+        : order.id.slice(0, 8).toUpperCase();
+
+      setConfirmedOrderId(displayId);
       setShowConfirmation(true);
       clearCart();
 

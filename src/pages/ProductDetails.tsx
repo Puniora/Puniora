@@ -171,7 +171,7 @@ const ProductDetails = () => {
     <div className="min-h-screen bg-background">
       <Header />
 
-      <main className="pt-24 md:pt-40 pb-24 overflow-x-hidden w-full">
+      <main className="pt-24 md:pt-40 pb-24 overflow-x-clip w-full">
         <div className="container mx-auto px-4 md:px-6">
           {/* Breadcrumb / Back button */}
           <RevealOnScroll variant="fade-in" delay={100}>
@@ -182,9 +182,7 @@ const ProductDetails = () => {
           </RevealOnScroll>
 
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 lg:gap-16 items-start">
-            {/* Left Column: Image / Carousel */}
-            <RevealOnScroll variant="fade-up" delay={200} className="w-full">
-            <div className="flex flex-col-reverse lg:flex-row gap-4 w-full relative">
+            <div className="flex flex-col-reverse lg:flex-row gap-4 w-full relative sm:sticky sm:top-24 lg:sticky lg:top-36 lg:z-10 lg:self-start h-fit">
               
               {/* Thumbnail strip (Images + Videos) */}
               {(product.images.length > 1 || (product.videos && product.videos.length > 0)) && (
@@ -345,10 +343,9 @@ const ProductDetails = () => {
                 })()}
               </div>
             </div>
-            </RevealOnScroll>
 
-            {/* Right Column: Details (Sticky on Desktop) */}
-            <div className="lg:sticky lg:top-36 space-y-6 lg:space-y-8 flex flex-col h-full">
+            {/* Right Column: Details (Scrollable) */}
+            <div className="space-y-6 lg:space-y-8 flex flex-col h-full">
               <RevealOnScroll variant="slide-left" delay={300}>
               <div className="space-y-6">
                 <div className="flex items-center gap-6">
@@ -489,32 +486,7 @@ const ProductDetails = () => {
                     </div>
                   </div>
 
-                {/* Share Button */}
-                <div className="flex justify-start pt-2">
-                  <Button
-                    variant="outline"
-                    size="sm"
-                    type="button"
-                    className="rounded-full border-gold/20 hover:border-gold/60 text-muted-foreground hover:text-gold hover:bg-gold/5 transition-all duration-500 gap-2 px-6 h-9 tracking-wider text-[10px] font-bold uppercase shadow-sm"
-                    onClick={async () => {
-                      try {
-                        if (navigator.share) {
-                          await navigator.share({
-                            title: product.name,
-                            url: window.location.href,
-                          });
-                        } else {
-                          await navigator.clipboard.writeText(window.location.href);
-                          toast.success("Link copied to clipboard!");
-                        }
-                      } catch (error) {
-                         console.error("Share failed/cancelled", error);
-                      }
-                    }}
-                  >
-                    <Share2 className="h-3 w-3" /> Share this fragrance
-                  </Button>
-                </div>
+
 
                 {/* Desktop Action Buttons */}
                 <div className="hidden lg:flex flex-col sm:flex-row gap-4 pt-4">

@@ -26,6 +26,9 @@ const Admin = () => {
   const [reviews, setReviews] = useState<(Review & { product_name?: string })[]>([]);
   const [loading, setLoading] = useState(true);
   const [isSeeding, setIsSeeding] = useState(false);
+  const [page, setPage] = useState(1);
+  const [totalOrders, setTotalOrders] = useState(0);
+  const ORDERS_PER_PAGE = 30;
 
   const fetchData = async () => {
     try {
@@ -33,7 +36,7 @@ const Admin = () => {
 
       const [productsResult, ordersResult, reviewsResult] = await Promise.allSettled([
         productService.getProducts(),
-        orderService.getOrders(),
+        orderService.getOrders(page, ORDERS_PER_PAGE), // Pass page and limit
         reviewService.getAllReviews()
       ]);
 
@@ -65,7 +68,16 @@ const Admin = () => {
 
       // Handle Orders
       if (ordersResult.status === "fulfilled") {
-        setOrders(ordersResult.value);
+        const result = ordersResult.value as unknown as { data: Order[], total: number } | Order[];
+        if (result && typeof result === 'object' && 'data' in result) {
+            setOrders(result.data);
+            setTotalOrders(result.total);
+        } else {
+            // Fallback for old return type (just array)
+            const arr = result as Order[];
+            setOrders(arr);
+            setTotalOrders(arr.length);
+        }
       } else {
         console.error("Failed to fetch orders:", ordersResult.reason);
         toast.error("Failed to load orders.");
@@ -89,7 +101,7 @@ const Admin = () => {
 
   useEffect(() => {
     fetchData();
-  }, []);
+  }, [page]); // Re-fetch when page changes
 
   const handleSeed = async () => {
     try {
@@ -217,6 +229,31 @@ const Admin = () => {
               </CardHeader>
               <CardContent>
                 <OrderList orders={orders} loading={loading} onRefresh={fetchData} />
+                
+                {/* Pagination Controls */}
+                <div className="flex items-center justify-between p-4 border-t">
+                    <div className="text-sm text-muted-foreground">
+                        Page {page} of {Math.ceil(totalOrders / ORDERS_PER_PAGE)}
+                    </div>
+                    <div className="flex gap-2">
+                        <Button 
+                            variant="outline" 
+                            size="sm" 
+                            onClick={() => setPage(p => Math.max(1, p - 1))}
+                            disabled={page === 1 || loading}
+                        >
+                            Previous
+                        </Button>
+                        <Button 
+                            variant="outline" 
+                            size="sm" 
+                            onClick={() => setPage(p => p + 1)}
+                            disabled={page * ORDERS_PER_PAGE >= totalOrders || loading}
+                        >
+                            Next
+                        </Button>
+                    </div>
+                </div>
               </CardContent>
             </Card>
           </TabsContent>

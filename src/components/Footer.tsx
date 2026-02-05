@@ -35,8 +35,7 @@ const Footer = () => {
             <nav className="space-y-4">
               {[
                 { label: "Collection", href: "#collection" },
-                { label: "About Us", href: "#about" },
-                { label: "Track Order", href: "/track" },
+                { label: "About Us", href: "/about" },
                 { label: "Shipping Policy", href: "/shipping-policy" },
                 { label: "Refund Policy", href: "/refund-policy" }
               ].map((link) => (

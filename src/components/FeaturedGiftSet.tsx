@@ -11,6 +11,8 @@ const FeaturedGiftSet = () => {
     const [giftSet, setGiftSet] = useState<Product | null>(null);
     const [loading, setLoading] = useState(true);
 
+    const [bundleImages, setBundleImages] = useState<string[]>([]);
+
     // Use scroll reveal for animations - pass loading as trigger so it re-runs when content appears
     useScrollReveal("animate-reveal", 0.1, loading);
 
@@ -37,22 +39,19 @@ const FeaturedGiftSet = () => {
 
                 if (featuredProduct) {
                     setGiftSet(featuredProduct);
-                    return;
+                } else {
+                    // Priority 2: Fallback to Date-based rotation if no featured product set
+                    const today = new Date().toISOString().split('T')[0];
+                    let seed = 0;
+                    for (let i = 0; i < today.length; i++) {
+                        seed += today.charCodeAt(i);
+                    }
+                    
+                    const randomIndex = seed % finalPool.length;
+                    const dailySpotlight = finalPool[randomIndex];
+                    setGiftSet(dailySpotlight);
                 }
 
-                // Priority 2: Fallback to Date-based rotation if no featured product set
-                // Simple pseudo-random selection based on the current date (YYYY-MM-DD)
-                // This ensures the same product is shown for everyone on the same day
-                const today = new Date().toISOString().split('T')[0];
-                let seed = 0;
-                for (let i = 0; i < today.length; i++) {
-                    seed += today.charCodeAt(i);
-                }
-                
-                const randomIndex = seed % finalPool.length;
-                const dailySpotlight = finalPool[randomIndex];
-
-                setGiftSet(dailySpotlight);
             } catch (error) {
                 console.error("Failed to fetch featured product", error);
                 setGiftSet(null);
@@ -64,10 +63,40 @@ const FeaturedGiftSet = () => {
         fetchFeaturedSet();
     }, []);
 
+    // Fetch bundle images effect (separate to avoid deep nesting issues)
+    useEffect(() => {
+        if (!giftSet) return;
+        
+        const fetchBundleImages = async () => {
+             // Only fetch if it's a gift set, has no main images (or just 1 placeholder/empty), and has bundle items to show
+            if (giftSet.isGiftSet && (!giftSet.images || giftSet.images.length === 0 || (giftSet.images.length === 1 && !giftSet.images[0]))) {
+                if (giftSet.bundleItems && giftSet.bundleItems.length > 0) {
+                    try {
+                        const bundlePromises = giftSet.bundleItems.map(bId => productService.getProductById(bId));
+                        const bundleResults = await Promise.all(bundlePromises);
+                        const validImages = bundleResults
+                        .filter(p => p !== null)
+                        .map(p => p!.images[0])
+                        .filter(Boolean);
+                        
+                        if (validImages.length > 0) {
+                            setBundleImages(validImages);
+                        }
+                    } catch (err) {
+                        console.error("Failed to fetch bundle images for featured set", err);
+                    }
+                }
+            }
+        };
+        fetchBundleImages();
+    }, [giftSet]);
+
     if (loading || !giftSet) return null;
 
     const productData = giftSet;
-    const displayImage = (productData.images && productData.images.length > 0) ? productData.images[0] : "https://placehold.co/800x600/1a1a1a/e2b16e?text=No+Image";
+    const hasMainImage = productData.images && productData.images.length > 0 && productData.images[0];
+    const displayImage = hasMainImage ? productData.images[0] : "https://placehold.co/800x600/1a1a1a/e2b16e?text=No+Image";
+    const showBundleGrid = !hasMainImage && bundleImages.length > 0;
     
     // Create a truncated description if none exists or it's too long
     const shortDesc = productData.description 
@@ -80,16 +109,35 @@ const FeaturedGiftSet = () => {
             {/* MOBILE LAYOUT: Cinematic (Block on Mobile, Hidden on LG Screens) */}
             <div className="lg:hidden relative w-full h-[80vh] min-h-[600px] overflow-hidden group">
                 <div className="absolute inset-0">
-                    <img
-                        src={getDirectUrl(displayImage, 1200)}
-                        alt={productData.name}
-                        width="800"
-                        height="1200"
-                        loading="eager"
-                        // @ts-ignore
-                        fetchpriority="high"
-                        className="w-full h-full object-cover transition-transform [transition-duration:2000ms] group-hover:scale-105"
-                    />
+                    {showBundleGrid ? (
+                        <div className={`w-full h-full grid ${bundleImages.length === 2 ? 'grid-cols-2' : 'grid-cols-2 grid-rows-2'}`}>
+                            {bundleImages.slice(0, 4).map((img, idx) => (
+                                <img
+                                    key={idx}
+                                    src={getDirectUrl(img, 1200)}
+                                    alt=""
+                                    className={`w-full h-full object-cover opacity-90 transition-transform duration-[2000ms] group-hover:scale-105
+                                      ${bundleImages.length === 2 && idx === 0 ? 'border-r border-white/10' : ''}
+                                      ${bundleImages.length > 2 && idx === 0 ? 'border-r border-b border-white/10' : ''}
+                                      ${bundleImages.length > 2 && idx === 1 ? 'border-b border-white/10' : ''}
+                                      ${bundleImages.length > 2 && idx === 2 ? 'border-r border-white/10' : ''}
+                                      ${bundleImages.length === 3 && idx === 2 ? 'col-span-2 border-r-0' : ''} 
+                                    `}
+                                />
+                            ))}
+                        </div>
+                    ) : (
+                        <img
+                            src={getDirectUrl(displayImage, 1200)}
+                            alt={productData.name}
+                            width="800"
+                            height="1200"
+                            loading="eager"
+                            // @ts-ignore
+                            fetchpriority="high"
+                            className="w-full h-full object-cover transition-transform [transition-duration:2000ms] group-hover:scale-105"
+                        />
+                    )}
                     {/* Stronger readable gradient at bottom */}
                     <div className="absolute inset-0 bg-gradient-to-t from-[#050505] via-[#050505]/60 to-transparent opacity-90" />
                 </div>
@@ -103,8 +151,8 @@ const FeaturedGiftSet = () => {
 
                         <h2 className="text-4xl font-heading font-medium leading-[0.9] text-white">
                             Experience <br />
-                            <span className="text-transparent bg-clip-text bg-gradient-gold italic font-light">
-                                {productData.name.split(' ')[0]}
+                            <span className="text-transparent bg-clip-text bg-gradient-gold italic font-light block mt-2 text-3xl">
+                                {productData.name}
                             </span>
                         </h2>
 
@@ -160,16 +208,37 @@ const FeaturedGiftSet = () => {
                                 style={{ transform: 'translateZ(0)', WebkitMaskImage: '-webkit-radial-gradient(white, black)' }}
                             >
                                 <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-transparent opacity-60 z-10" />
-                                <img
-                                    src={getDirectUrl(displayImage, 1200)}
-                                    alt={productData.name}
-                                    width="500"
-                                    height="625"
-                                    loading="eager"
-                                    // @ts-ignore
-                                    fetchpriority="high"
-                                    className="w-full h-full object-cover transform transition-transform duration-1000 group-hover:scale-105 will-change-transform"
-                                />
+                                
+                                {showBundleGrid ? (
+                                    <div className={`w-full h-full grid ${bundleImages.length === 2 ? 'grid-cols-2' : 'grid-cols-2 grid-rows-2'}`}>
+                                        {bundleImages.slice(0, 4).map((img, idx) => (
+                                            <img
+                                                key={idx}
+                                                src={getDirectUrl(img, 1200)}
+                                                alt=""
+                                                className={`w-full h-full object-cover transition-transform duration-1000 group-hover:scale-105 will-change-transform
+                                                  ${bundleImages.length === 2 && idx === 0 ? 'border-r border-white/10' : ''}
+                                                  ${bundleImages.length > 2 && idx === 0 ? 'border-r border-b border-white/10' : ''}
+                                                  ${bundleImages.length > 2 && idx === 1 ? 'border-b border-white/10' : ''}
+                                                  ${bundleImages.length > 2 && idx === 2 ? 'border-r border-white/10' : ''}
+                                                  ${bundleImages.length === 3 && idx === 2 ? 'col-span-2 border-r-0' : ''} 
+                                                `}
+                                            />
+                                        ))}
+                                    </div>
+                                ) : (
+                                    <img
+                                        src={getDirectUrl(displayImage, 1200)}
+                                        alt={productData.name}
+                                        width="500"
+                                        height="625"
+                                        loading="eager"
+                                        // @ts-ignore
+                                        fetchpriority="high"
+                                        className="w-full h-full object-cover transform transition-transform duration-1000 group-hover:scale-105 will-change-transform"
+                                    />
+                                )}
+
                                 <div className="absolute bottom-8 left-8 z-20 bg-white/10 backdrop-blur-md border border-white/20 px-6 py-3 rounded-full flex items-center gap-3 shadow-lg hover:bg-white/20 transition-colors cursor-default">
                                     <span className="h-2 w-2 rounded-full bg-gold animate-pulse-glow" />
                                     <span className="text-xs font-bold uppercase tracking-widest text-white/90">Best Seller</span>
@@ -209,12 +278,12 @@ const FeaturedGiftSet = () => {
 
                         <div className="grid grid-cols-2 gap-6 pt-8 border-t border-white/5">
                             <div className="space-y-1">
-                                <h4 className="text-gold font-heading text-lg">₹{productData.price}</h4>
-                                <p className="text-xs text-white/40 uppercase tracking-wider">Limited Time</p>
+                                <h4 className="text-gold font-heading text-4xl lg:text-5xl drop-shadow-[0_0_15px_rgba(212,175,55,0.3)]">₹{productData.price}</h4>
+                                <p className="text-xs text-white/40 uppercase tracking-wider font-bold mt-1">Limited Time</p>
                             </div>
                              <div className="space-y-1">
-                                <h4 className="text-white font-heading text-lg">{productData.category}</h4>
-                                <p className="text-xs text-white/40 uppercase tracking-wider">Category</p>
+                                <h4 className="text-white font-heading text-4xl lg:text-5xl drop-shadow-[0_0_15px_rgba(255,255,255,0.3)]">{productData.category}</h4>
+                                <p className="text-xs text-white/40 uppercase tracking-wider font-bold mt-1">Category</p>
                             </div>
                         </div>
                     </div>

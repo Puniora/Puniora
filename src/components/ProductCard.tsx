@@ -27,6 +27,38 @@ const ProductCard = ({ product, index, overrideImages }: ProductCardProps) => {
     addToCart(product);
   };
 
+  const [bundleImages, setBundleImages] = React.useState<string[]>([]);
+
+  React.useEffect(() => {
+    const fetchBundleImages = async () => {
+      // Only fetch if it's a gift set, has no main images (or just 1 placeholder/empty), and has bundle items to show
+      if (product.isGiftSet && (!product.images || product.images.length === 0 || (product.images.length === 1 && !product.images[0]))) {
+        if (product.bundleItems && product.bundleItems.length > 0) {
+          try {
+            const bundlePromises = product.bundleItems.map(bId => productService.getProductById(bId));
+            const bundleResults = await Promise.all(bundlePromises);
+            const validImages = bundleResults
+              .filter(p => p !== null)
+              .map(p => p!.images[0])
+              .filter(Boolean);
+            
+            if (validImages.length > 0) {
+              setBundleImages(validImages);
+            }
+          } catch (err) {
+            console.error("Failed to fetch bundle images", err);
+          }
+        }
+      }
+    };
+    
+    fetchBundleImages();
+  }, [product]);
+
+  // Determine what to show: Override > Bundle Grid > Main Image
+  const showBundleGrid = bundleImages.length > 0 && (!product.images || product.images.length === 0);
+  const imagesToShow = showBundleGrid ? bundleImages : (overrideImages && overrideImages.length > 0 ? overrideImages : null);
+
   return (
     <article
       ref={cardRef}
@@ -40,20 +72,26 @@ const ProductCard = ({ product, index, overrideImages }: ProductCardProps) => {
         {/* Image Container - Black background to merge with dark product images */}
         <div className="relative aspect-[4/5] bg-[#050505] overflow-hidden">
 
-          {overrideImages && overrideImages.length > 0 ? (
-            <div className={`w-full h-full grid ${overrideImages.length === 2 ? 'grid-cols-2' : 'grid-cols-2 grid-rows-2'}`}>
-              {overrideImages.slice(0, 4).map((img, idx) => (
+          {imagesToShow && imagesToShow.length > 0 ? (
+            <div className={`w-full h-full grid ${imagesToShow.length === 2 ? 'grid-cols-2' : 'grid-cols-2 grid-rows-2'}`}>
+              {imagesToShow.slice(0, 4).map((img, idx) => (
                 <img
                   key={idx}
                   src={getDirectUrl(img, 600)}
                   alt=""
-                  className={`w-full h-full object-cover opacity-90 group-hover:opacity-100 transition-opacity duration-500`}
+                  className={`w-full h-full object-cover opacity-90 group-hover:opacity-100 transition-opacity duration-500
+                    ${imagesToShow.length === 2 && idx === 0 ? 'border-r border-white/10' : ''}
+                    ${imagesToShow.length > 2 && idx === 0 ? 'border-r border-b border-white/10' : ''}
+                    ${imagesToShow.length > 2 && idx === 1 ? 'border-b border-white/10' : ''}
+                    ${imagesToShow.length > 2 && idx === 2 ? 'border-r border-white/10' : ''}
+                    ${imagesToShow.length === 3 && idx === 2 ? 'col-span-2 border-r-0' : ''} 
+                  `}
                 />
               ))}
             </div>
           ) : (
             <img
-              src={getDirectUrl(product.images[0], 600)}
+              src={product.images && product.images.length > 0 ? getDirectUrl(product.images[0], 600) : "https://placehold.co/600x800/101010/FFF?text=No+Image"}
               alt={`${product.name} - ${product.category}`}
               loading="lazy"
               decoding="async"

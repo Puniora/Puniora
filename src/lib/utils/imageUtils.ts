@@ -10,24 +10,19 @@
  * @returns Direct view URL or original URL if not a Google Drive link
  */
 export const getDirectUrl = (url: string, width: number = 800): string => {
-    if (!url) return url;
+    if (!url) return "";
 
     // Handle Google Drive links
     if (url.includes('drive.google.com')) {
         // If already a direct URL (uc?export or thumbnail), return as-is
-        // Note: If it's a thumbnail link, we could technically replace the sz param, but let's respect provided explicit links for now unless we parsing them too.
         if (url.includes('/uc?') || url.includes('/thumbnail?')) {
             return url;
         }
 
         // Extract file ID from various formats
         let fileId = '';
-
-        // Format: /file/d/FILE_ID/view or /file/d/FILE_ID/edit
         const match1 = url.match(/\/file\/d\/([a-zA-Z0-9_-]+)/);
-        // Format: /open?id=FILE_ID
         const match2 = url.match(/[?&]id=([a-zA-Z0-9_-]+)/);
-        // Format: /d/FILE_ID (short format)
         const match3 = url.match(/\/d\/([a-zA-Z0-9_-]+)/);
 
         if (match1) fileId = match1[1];
@@ -35,12 +30,27 @@ export const getDirectUrl = (url: string, width: number = 800): string => {
         else if (match3) fileId = match3[1];
 
         if (fileId) {
-            // Use thumbnail API for better performance and reliability
             return `https://drive.google.com/thumbnail?id=${fileId}&sz=w${width}`;
         }
     }
+    
+    // Basic validation for other URLs
+    // Filter out obviously bad URLs like ":7070/..." or those without protocol that aren't assets
+    // valid: https://..., http://..., /assets/..., data:image/...
+    if (url.startsWith('http://') || url.startsWith('https://') || url.startsWith('data:image') || url.startsWith('/')) {
+        return url;
+    }
 
-    return url;
+    // Attempt to salvage if it looks like a domain but missing protocol
+    if (url.match(/^[a-zA-Z0-9][a-zA-Z0-9-]{1,61}[a-zA-Z0-9]\.[a-zA-Z]{2,}/)) {
+         return `https://${url}`;
+    }
+
+    // Default Fallback - return standard placeholder or the url if we can't determine (but usually invalid)
+    // For the specific error case ":7070/..." this will fall through.
+    // If it's garbage, let's return a safe placeholder to stop console errors.
+    console.warn("Filtered invalid image URL:", url);
+    return "https://placehold.co/600x400?text=Invalid+Image";
 };
 
 /**

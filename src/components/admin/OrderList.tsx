@@ -309,7 +309,7 @@ const OrderList = ({ orders, loading, onRefresh }: OrderListProps) => {
                                   <Label className="text-[10px] uppercase tracking-widest font-bold opacity-70">Tracking ID / Courier ID</Label>
                                   <div className="flex gap-2">
                                     <Input
-                                      defaultValue={order.tracking_id}
+                                      defaultValue={order.tracking_id || order.awb_code}
                                       placeholder="AWB / Shipping ID"
                                       className="h-11 rounded-xl bg-black/40 border-white/10 text-white focus:ring-puniora-orange-500/20 italic placeholder:text-white/20"
                                       onBlur={(e) => handleUpdateTracking(order.id, order.tracking_status, e.target.value)}

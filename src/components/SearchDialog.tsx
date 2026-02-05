@@ -49,6 +49,27 @@ const SearchDialog = ({ open, onOpenChange }: SearchDialogProps) => {
 
   const filteredProducts = products.filter((product) => {
     const searchLower = query.toLowerCase();
+    
+    // Smart Gender-based Search Logic
+    // If user types "women" or "men", we want to show:
+    // 1. Exact category match (Women/Men)
+    // 2. "Unisex" products (since they apply to both)
+    // 3. Gift Sets (which might contain relevant items)
+    // 4. Any product with the keyword in title/desc
+    
+    if (searchLower === "women" || searchLower === "woman" || searchLower === "for women") {
+       const isCategoryMatch = product.category.toLowerCase() === "women" || product.category.toLowerCase() === "unisex";
+       const isKeywordMatch = product.name.toLowerCase().includes("women") || product.description.toLowerCase().includes("women");
+       return isCategoryMatch || isKeywordMatch;
+    }
+    
+    if (searchLower === "men" || searchLower === "man" || searchLower === "for men") {
+       const isCategoryMatch = product.category.toLowerCase() === "men" || product.category.toLowerCase() === "unisex";
+       const isKeywordMatch = product.name.toLowerCase().includes("men") || product.description.toLowerCase().includes("men");
+       return isCategoryMatch || isKeywordMatch;
+    }
+
+    // Default Search Logic for other queries
     return (
       product.name.toLowerCase().includes(searchLower) ||
       product.category.toLowerCase().includes(searchLower) ||

@@ -34,6 +34,7 @@ export interface Product {
   selectedNote?: string;
   bundleItems?: string[]; // Array of Product IDs that make up this bundle
   extraSections?: ProductSection[];
+  created_at?: string; // Timestamp for creation
 
   olfactoryNotes?: OlfactoryNote[];
   isHidden?: boolean;

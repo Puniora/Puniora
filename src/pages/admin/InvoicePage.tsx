@@ -82,10 +82,15 @@ const InvoicePage = () => {
               <h3 className="text-xs font-bold uppercase tracking-widest text-gray-400 border-b border-gray-100 pb-2">Bill To</h3>
               <div className="text-sm leading-relaxed">
                  <p className="font-bold text-lg mb-1">{order.customer_name}</p>
-                 <p>{order.address_json.houseAddress}</p>
-                 <p>{order.address_json.place}, {order.address_json.district}</p>
-                 <p>{order.address_json.state}</p>
-                 <p className="mt-2 text-gray-600">Tel: {order.customer_mobile}</p>
+                 <div className="space-y-1 mt-2">
+                    <p><span className="font-semibold text-gray-500 text-xs uppercase tracking-wider w-24 inline-block">House:</span> {order.address_json.houseAddress}</p>
+                    <p><span className="font-semibold text-gray-500 text-xs uppercase tracking-wider w-24 inline-block">City:</span> {order.address_json.place}</p>
+                    <p><span className="font-semibold text-gray-500 text-xs uppercase tracking-wider w-24 inline-block">District:</span> {order.address_json.district}</p>
+                    {order.address_json.landmark && <p><span className="font-semibold text-gray-500 text-xs uppercase tracking-wider w-24 inline-block">Landmark:</span> {order.address_json.landmark}</p>}
+                    <p><span className="font-semibold text-gray-500 text-xs uppercase tracking-wider w-24 inline-block">State:</span> {order.address_json.state}</p>
+                    <p><span className="font-semibold text-gray-500 text-xs uppercase tracking-wider w-24 inline-block">Pincode:</span> {order.address_json.pincode}</p>
+                    <p><span className="font-semibold text-gray-500 text-xs uppercase tracking-wider w-24 inline-block">Mobile:</span> {order.customer_mobile}</p>
+                 </div>
               </div>
            </div>
         </div>

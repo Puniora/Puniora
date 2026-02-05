@@ -203,210 +203,179 @@ const GiftSetBuilder = ({ products, onRefresh }: GiftSetBuilderProps) => {
     return (
         <div className="space-y-8 animate-fade-in">
 
-            {/* Builder Section - Only show if no gift set exists OR we are editing one */}
-            {(existingGiftSets.length === 0 || editingId) ? (
-                <div className="grid lg:grid-cols-3 gap-8">
+            {/* Builder Section - Always Available */}
+            <div className="grid lg:grid-cols-3 gap-8">
 
-                    {/* Left: Product Selection */}
-                    <Card className="lg:col-span-1 border-border shadow-md">
-                        <CardHeader className="bg-muted/10 pb-4">
-                            <CardTitle className="text-lg flex items-center gap-2">
-                                <Plus className="w-5 h-5 text-gold" /> Select Items
-                            </CardTitle>
-                            <CardDescription>
-                                Choose perfumes to include in this bundle.
-                            </CardDescription>
-                        </CardHeader>
-                        <CardContent className="p-0 max-h-[500px] overflow-y-auto">
-                            <div className="divide-y divide-border">
-                                {availableProducts.map(product => (
-                                    <div
-                                        key={product.id}
-                                        className={`flex items-center p-4 hover:bg-muted/20 cursor-pointer transition-colors ${selectedItems.includes(product.id) ? 'bg-gold/5' : ''}`}
-                                        onClick={() => toggleItem(product.id)}
-                                    >
-                                        <Checkbox
-                                            checked={selectedItems.includes(product.id)}
-                                            onCheckedChange={() => toggleItem(product.id)}
-                                            className="mr-4"
-                                        />
-                                        <div className="h-10 w-10 rounded bg-muted overflow-hidden flex-shrink-0 mr-3">
-                                            <img src={getDirectUrl(product.images[0])} alt={product.name} className="w-full h-full object-cover" />
-                                        </div>
-                                        <div className="flex-1">
-                                            <p className="font-medium text-sm">{product.name}</p>
-                                            <p className="text-xs text-muted-foreground">₹{product.price}</p>
-                                        </div>
+                {/* Left: Product Selection */}
+                <Card className="lg:col-span-1 border-border shadow-md">
+                    <CardHeader className="bg-muted/10 pb-4">
+                        <CardTitle className="text-lg flex items-center gap-2">
+                            <Plus className="w-5 h-5 text-gold" /> Select Items
+                        </CardTitle>
+                        <CardDescription>
+                            Choose perfumes to include in this bundle.
+                        </CardDescription>
+                    </CardHeader>
+                    <CardContent className="p-0 max-h-[500px] overflow-y-auto">
+                        <div className="divide-y divide-border">
+                            {availableProducts.map(product => (
+                                <div
+                                    key={product.id}
+                                    className={`flex items-center p-4 hover:bg-muted/20 cursor-pointer transition-colors ${selectedItems.includes(product.id) ? 'bg-gold/5' : ''}`}
+                                    onClick={() => toggleItem(product.id)}
+                                >
+                                    <Checkbox
+                                        checked={selectedItems.includes(product.id)}
+                                        onCheckedChange={() => toggleItem(product.id)}
+                                        className="mr-4"
+                                    />
+                                    <div className="h-10 w-10 rounded bg-muted overflow-hidden flex-shrink-0 mr-3">
+                                        <img src={getDirectUrl(product.images[0])} alt={product.name} className="w-full h-full object-cover" />
                                     </div>
-                                ))}
-                                {availableProducts.length === 0 && (
-                                    <div className="p-8 text-center text-muted-foreground text-sm">
-                                        No regular products found to bundle.
-                                    </div>
-                                )}
-                            </div>
-                        </CardContent>
-                    </Card>
-
-                    {/* Center/Right: Configuration & Preview */}
-                    <Card className="lg:col-span-2 border-gold/20 shadow-lg relative overflow-hidden">
-                        <div className="absolute top-0 right-0 p-3 opacity-10">
-                            <Gift className="w-40 h-40 text-gold" />
-                        </div>
-
-                        <CardHeader className="pb-6">
-                            <CardTitle className="text-2xl font-heading">
-                                {editingId ? "Edit Gift Set" : "Configure Your Bundle"}
-                            </CardTitle>
-                            <CardDescription>Set the price and details for your new Gift Set.</CardDescription>
-                        </CardHeader>
-
-                        <CardContent className="space-y-6 relative z-10">
-                            {/* ... (Existing form content kept implicitly by not replacing inner logic, just wrapping) ... */}
-                            {/* Wait, replace_file_content needs full block replacement. I must include the inner content or use multi_replace. */}
-                            {/* Since the block is huge, I will use the StartLine/EndLine carefully to wrap it. */}
-                            {/* Actually, the tool call above has the full content of the builder section in the 'ReplacementContent' variable? No, I need to provide it. */}
-                            {/* Re-reading the tool definition: 'ReplacementContent' must be the complete new text. */}
-                            {/* Using the previous view_file output, lines 206-355 covers the grid. */}
-                            {/* I will paste the logic back in. */}
-                            <div className="grid md:grid-cols-2 gap-6">
-                                <div className="space-y-4">
-                                    <div className="space-y-2">
-                                        <Label>Bundle Name</Label>
-                                        <Input
-                                            value={bundleName}
-                                            onChange={(e) => setBundleName(e.target.value)}
-                                            placeholder="e.g., The Holiday Collection"
-                                            className="font-medium"
-                                        />
-                                    </div>
-                                    <div className="space-y-2">
-                                        <Label>Image URL <span className="text-xs text-muted-foreground font-normal">(Optional)</span></Label>
-                                        <Input
-                                            value={imageUrl}
-                                            onChange={(e) => setImageUrl(getDirectUrl(e.target.value))}
-                                            placeholder="Paste link (ImgBB, etc)..."
-                                        />
-                                    </div>
-                                    <div className="space-y-2">
-                                        <Label>Description <span className="text-xs text-muted-foreground font-normal">(Optional)</span></Label>
-                                        <Textarea
-                                            value={description}
-                                            onChange={(e) => setDescription(e.target.value)}
-                                            placeholder="Describe this amazing collection..."
-                                            className="min-h-[100px]"
-                                        />
+                                    <div className="flex-1">
+                                        <p className="font-medium text-sm">{product.name}</p>
+                                        <p className="text-xs text-muted-foreground">₹{product.price}</p>
                                     </div>
                                 </div>
+                            ))}
+                            {availableProducts.length === 0 && (
+                                <div className="p-8 text-center text-muted-foreground text-sm">
+                                    No regular products found to bundle.
+                                </div>
+                            )}
+                        </div>
+                    </CardContent>
+                </Card>
 
-                                <div className="space-y-4">
-                                    <div className="bg-muted/30 p-6 rounded-xl border border-border space-y-4">
+                {/* Center/Right: Configuration & Preview */}
+                <Card className="lg:col-span-2 border-gold/20 shadow-lg relative overflow-hidden">
+                    <div className="absolute top-0 right-0 p-3 opacity-10">
+                        <Gift className="w-40 h-40 text-gold" />
+                    </div>
 
-                                        <div className="flex justify-between items-center text-sm">
-                                            <span className="text-muted-foreground">Selected Items:</span>
-                                            <span className="font-bold text-gold">{selectedProducts.length}</span>
-                                        </div>
+                    <CardHeader className="pb-6">
+                        <CardTitle className="text-2xl font-heading">
+                            {editingId ? "Edit Gift Set" : "Configure Your Bundle"}
+                        </CardTitle>
+                        <CardDescription>Set the price and details for your new Gift Set.</CardDescription>
+                    </CardHeader>
 
-                                        {/* Selected Items Visual List - New Addition */}
-                                        {selectedProducts.length > 0 && (
-                                            <div className="flex gap-2 overflow-x-auto pb-2 custom-scrollbar snap-x">
-                                                {selectedProducts.map(p => (
-                                                    <div key={p.id} className="relative flex-shrink-0 w-16 h-16 rounded-lg overflow-hidden border border-border group snap-start">
-                                                        <img src={getDirectUrl(p.images[0])} alt={p.name} className="w-full h-full object-cover" />
-                                                        <div 
-                                                            className="absolute inset-0 bg-black/60 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity cursor-pointer"
-                                                            onClick={() => toggleItem(p.id)}
-                                                        >
-                                                            <X className="w-4 h-4 text-white" />
-                                                        </div>
-                                                    </div>
-                                                ))}
-                                            </div>
-                                        )}
+                    <CardContent className="space-y-6 relative z-10">
+                        <div className="grid md:grid-cols-2 gap-6">
+                            <div className="space-y-4">
+                                <div className="space-y-2">
+                                    <Label>Bundle Name</Label>
+                                    <Input
+                                        value={bundleName}
+                                        onChange={(e) => setBundleName(e.target.value)}
+                                        placeholder="e.g., The Holiday Collection"
+                                        className="font-medium"
+                                    />
+                                </div>
+                                <div className="space-y-2">
+                                    <Label>Image URL <span className="text-xs text-muted-foreground font-normal">(Optional)</span></Label>
+                                    <Input
+                                        value={imageUrl}
+                                        onChange={(e) => setImageUrl(getDirectUrl(e.target.value))}
+                                        placeholder="Paste link (ImgBB, etc)..."
+                                    />
+                                </div>
+                                <div className="space-y-2">
+                                    <Label>Description <span className="text-xs text-muted-foreground font-normal">(Optional)</span></Label>
+                                    <Textarea
+                                        value={description}
+                                        onChange={(e) => setDescription(e.target.value)}
+                                        placeholder="Describe this amazing collection..."
+                                        className="min-h-[100px]"
+                                    />
+                                </div>
+                            </div>
 
-                                        <div className="pt-4 border-t border-border">
-                                            <Label className="text-gold font-bold mb-1.5 block">Bundle Price (₹)</Label>
-                                            <div className="relative">
-                                                <span className="absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground">₹</span>
-                                                <Input
-                                                    type="number"
-                                                    value={offerPrice}
-                                                    onChange={(e) => setOfferPrice(e.target.value)}
-                                                    className="pl-7 font-bold text-lg h-12 border-gold/30 focus:border-gold"
-                                                    placeholder="2499"
-                                                />
-                                            </div>
-                                        </div>
+                            <div className="space-y-4">
+                                <div className="bg-muted/30 p-6 rounded-xl border border-border space-y-4">
+
+                                    <div className="flex justify-between items-center text-sm">
+                                        <span className="text-muted-foreground">Selected Items:</span>
+                                        <span className="font-bold text-gold">{selectedProducts.length}</span>
                                     </div>
 
-                                    {/* Image Preview */}
-                                    {imageUrl && (
-                                        <div className="relative aspect-video rounded-lg overflow-hidden border border-border bg-muted">
-                                            <img src={getDirectUrl(imageUrl)} alt="Preview" className="w-full h-full object-cover" />
-                                            <div className="absolute inset-0 bg-black/40 flex items-center justify-center opacity-0 hover:opacity-100 transition-opacity">
-                                                <span className="text-white text-xs font-bold">Image Preview</span>
-                                            </div>
+                                    {/* Selected Items Visual List - New Addition */}
+                                    {selectedProducts.length > 0 && (
+                                        <div className="flex gap-2 overflow-x-auto pb-2 custom-scrollbar snap-x">
+                                            {selectedProducts.map(p => (
+                                                <div key={p.id} className="relative flex-shrink-0 w-16 h-16 rounded-lg overflow-hidden border border-border group snap-start">
+                                                    <img src={getDirectUrl(p.images[0])} alt={p.name} className="w-full h-full object-cover" />
+                                                    <div 
+                                                        className="absolute inset-0 bg-black/60 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity cursor-pointer"
+                                                        onClick={() => toggleItem(p.id)}
+                                                    >
+                                                        <X className="w-4 h-4 text-white" />
+                                                    </div>
+                                                </div>
+                                            ))}
                                         </div>
                                     )}
+
+                                    <div className="pt-4 border-t border-border">
+                                        <Label className="text-gold font-bold mb-1.5 block">Bundle Price (₹)</Label>
+                                        <div className="relative">
+                                            <span className="absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground">₹</span>
+                                            <Input
+                                                type="number"
+                                                value={offerPrice}
+                                                onChange={(e) => setOfferPrice(e.target.value)}
+                                                className="pl-7 font-bold text-lg h-12 border-gold/30 focus:border-gold"
+                                                placeholder="2499"
+                                            />
+                                        </div>
+                                    </div>
                                 </div>
+
+                                {/* Image Preview */}
+                                {imageUrl && (
+                                    <div className="relative aspect-video rounded-lg overflow-hidden border border-border bg-muted">
+                                        <img src={getDirectUrl(imageUrl)} alt="Preview" className="w-full h-full object-cover" />
+                                        <div className="absolute inset-0 bg-black/40 flex items-center justify-center opacity-0 hover:opacity-100 transition-opacity">
+                                            <span className="text-white text-xs font-bold">Image Preview</span>
+                                        </div>
+                                    </div>
+                                )}
                             </div>
+                        </div>
 
-                            {/* Advanced Settings Accordion */}
-                            <Accordion type="single" collapsible className="w-full border rounded-lg bg-muted/10">
+                        {/* Advanced Settings Accordion */}
+                        <Accordion type="single" collapsible className="w-full border rounded-lg bg-muted/10">
 
-                                {/* Reviews Manager (Only for existing) */}
-                                {editingId && (
-                                    <AccordionItem value="reviews">
-                                        <AccordionTrigger className="px-4">Reviews Manager</AccordionTrigger>
-                                        <AccordionContent className="px-4 pb-4">
-                                            <AdminReviewManager productId={editingId} />
-                                        </AccordionContent>
-                                    </AccordionItem>
-                                )}
-                            </Accordion>
+                            {/* Reviews Manager (Only for existing) */}
+                            {editingId && (
+                                <AccordionItem value="reviews">
+                                    <AccordionTrigger className="px-4">Reviews Manager</AccordionTrigger>
+                                    <AccordionContent className="px-4 pb-4">
+                                        <AdminReviewManager productId={editingId} />
+                                    </AccordionContent>
+                                </AccordionItem>
+                            )}
+                        </Accordion>
 
-                            <div className="pt-4 flex justify-end gap-4">
-                                {editingId && (
-                                    <Button variant="outline" onClick={handleCancelEdit}>
-                                        Cancel
-                                    </Button>
-                                )}
-                                <Button
-                                    size="lg"
-                                    className="bg-gold hover:bg-gold/90 text-white w-full md:w-auto min-w-[200px]"
-                                    onClick={handlePublish}
-                                    disabled={loading || selectedItems.length === 0}
-                                >
-                                    {loading ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : <Sparkles className="mr-2 h-4 w-4" />}
-                                    {editingId ? "Update Gift Set" : "Publish Gift Set"}
+                        <div className="pt-4 flex justify-end gap-4">
+                            {editingId && (
+                                <Button variant="outline" onClick={handleCancelEdit}>
+                                    Cancel
                                 </Button>
-                            </div>
-                        </CardContent>
-                    </Card>
-                </div>
-            ) : (
-                <div className="relative overflow-hidden bg-black/40 border border-gold/20 rounded-2xl p-8 text-center animate-fade-in">
-                    {/* Background Glow */}
-                    <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-64 h-64 bg-gold/5 blur-[100px] rounded-full pointer-events-none" />
-                    
-                    <div className="relative z-10 flex flex-col items-center">
-                        <div className="bg-gradient-to-br from-gold/20 to-gold/5 w-16 h-16 rounded-full flex items-center justify-center mb-4 border border-gold/30 shadow-[0_0_15px_rgba(212,175,55,0.1)]">
-                            <Gift className="w-8 h-8 text-gold" />
+                            )}
+                            <Button
+                                size="lg"
+                                className="bg-gold hover:bg-gold/90 text-white w-full md:w-auto min-w-[200px]"
+                                onClick={handlePublish}
+                                disabled={loading || selectedItems.length === 0}
+                            >
+                                {loading ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : <Sparkles className="mr-2 h-4 w-4" />}
+                                {editingId ? "Update Gift Set" : "Publish Gift Set"}
+                            </Button>
                         </div>
-                        <h3 className="text-2xl font-heading mb-3 text-foreground">Gift Set Limit Reached</h3>
-                        <p className="text-muted-foreground max-w-md mx-auto mb-6 text-sm leading-relaxed">
-                            You currently have <span className="text-gold font-bold">{existingGiftSets.length}</span> active gift sets. 
-                            To create a new one, please edit an existing set or delete one to make space.
-                        </p>
-                        
-                        <div className="flex gap-2 items-center text-xs text-gold/60 uppercase tracking-widest font-bold">
-                            <Sparkles className="w-3 h-3" />
-                            Premium Feature
-                            <Sparkles className="w-3 h-3" />
-                        </div>
-                    </div>
-                </div>
-            )}
+                    </CardContent>
+                </Card>
+            </div>
 
             {/* Existing Gift Sets List */}
             <div className="pt-8 border-t border-border">
